@@ -1,10 +1,11 @@
-// 云函数 init — 表结构健康检查（PG 版）
-// 表由数据库迁移创建；本函数只报告就绪状态，不再创建集合。
+// 云函数 init — 表结构健康检查（HTTP 版，无需鉴权）
 const { query } = require('./fitdb');
+const { parseEvent } = require('./fitauth');
 
 const TABLES = ['fit_users', 'fit_diet_records', 'fit_exercise_records', 'fit_body_records', 'fit_coach_chats', 'fit_foods'];
 
-exports.main = async (event, context) => {
+exports.main = async (event) => {
+  parseEvent(event); // 兼容网关事件
   try {
     const rows = await query(
       `SELECT table_name FROM information_schema.tables WHERE table_schema='public' AND table_name LIKE 'fit_%'`

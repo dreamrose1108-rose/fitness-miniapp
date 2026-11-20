@@ -1,236 +1,256 @@
-// 云函数 aiCoach — AI 教练对话（流式增强版，PG 版）
-// 安全与合规要点：
-//  1. 密钥只存云函数环境变量，绝不下发前端、绝不写死在代码里
-//  2. 用户输入与模型输出均经过内容安全检查（msgSecCheck）
-//     ——即使流式模式，也是在服务端收齐全文、检查通过后才返回给前端，合规不打折
-//  3. 系统提示词内置免责声明：非医疗建议，不替代专业医师/营养师诊断
-//  4. 大模型 API 地址/格式为占位模板，须按你实际选用的服务商官方文档核实后替换
-//     ——若你的服务商不支持 stream:true，设环境变量 LLM_STREAM=off，自动退回非流式
-const cloud = require('wx-server-sdk');
+// 云函数 aiCoach — AI 教练 Agent（HTTP 版）
+// 升级为 Agent 架构：模型通过 function calling 自主查询用户真实数据
+// （今日汇总/近期记录/体重趋势/食物库），多轮工具调用后生成个性化回答
+// 安全与合规：
+//  1. 密钥只存云函数环境变量
+//  2. 输入与最终输出均过内容安全检查（msgSecCheck REST）
+//  3. 工具全部只读、强制 openid 隔离，AI 无法读写他人数据或篡改记录
 const https = require('https');
-const { one, str, jsonb, newId } = require('./fitdb');
-cloud.init({ env: 'everyday-rose-d0gihszbt1940f4d1' });
+const { one, query, str, jsonb, newId } = require('./fitdb');
+const { parseEvent, getOpenid, msgSecCheck } = require('./fitauth');
 
-// 环境变量（在云开发控制台 → 云函数 → aiCoach → 配置 中设置）
-// 默认已适配智谱 GLM Coding Plan（专属端点 + 套餐内模型，2026-11-17 实测通过）
-// 注意：Coding Plan Key 必须走 /api/coding/paas/v4 端点和套餐内模型（glm-4.6/glm-4.5-air/glm-4.5），
-//       用普通端点或 glm-4-flash 会报 1309/1113（以智谱官方文档为准）
 const LLM_API_HOST = process.env.LLM_API_HOST || 'open.bigmodel.cn';
 const LLM_API_PATH = process.env.LLM_API_PATH || '/api/coding/paas/v4/chat/completions';
-const LLM_API_KEY = process.env.LLM_API_KEY;        // 智谱 API Key（必填，控制台环境变量注入）
-const LLM_MODEL = process.env.LLM_MODEL || 'glm-4.5-air'; // 套餐内轻量模型；可换 glm-4.6
-const LLM_STREAM = process.env.LLM_STREAM !== 'off'; // 默认开启流式
+const LLM_API_KEY = process.env.LLM_API_KEY;
+const LLM_MODEL = process.env.LLM_MODEL || 'glm-4.5-air';
+const MAX_TOOL_ROUNDS = 4;
 
 const SYSTEM_PROMPT = [
-  '你是一名专业的健身与营养顾问，帮助用户制定科学的饮食和运动计划。',
-  '回答要求：简洁、可执行、用中文、分点说明。',
-  '重要：你提供的建议仅为一般性健康参考，不构成医疗诊断或治疗建议。',
-  '如用户描述疼痛、疾病或特殊身体状况，请建议其咨询专业医师或注册营养师。',
-  '不要推荐任何药物、保健品品牌或极端节食方案。'
+  '你是"卡路喵"小程序的 AI 健身教练，帮用户管理饮食和运动。',
+  '回答前，主动使用工具查询用户的真实数据（今日热量、近期记录、体重趋势、食物库），',
+  '基于数据给出个性化建议，不要凭空假设用户的摄入或体重。',
+  '回答要求：简洁、可执行、用中文、适当分点；涉及具体数字时引用查询到的真实数据。',
+  '排版规则：不要使用任何 Markdown 语法（#标题、**加粗**、|表格、-列表等），用 emoji 做小标题、用「1. 2. 3.」或「·」分点，纯文本即可。',
+  '重要：建议仅为一般性健康参考，不构成医疗诊断；用户描述疾病或疼痛时建议就医。',
+  '不要推荐药物、保健品品牌或极端节食。'
 ].join('');
 
-// 内容安全检查（结果需以官方 msgSecCheck 返回为准）
-async function checkText(content, openid) {
-  try {
-    const res = await cloud.openapi.security.msgSecCheck({
-      content, version: 2, scene: 2, openid
-    });
-    return res.result && res.result.suggest === 'pass';
-  } catch (err) {
-    console.error('msgSecCheck error:', err);
-    // 检查服务异常时保守拦截，避免违规内容外泄
-    return false;
+// ===== 工具定义（只读，全部 openid 隔离）=====
+const TOOLS = [
+  {
+    type: 'function',
+    function: {
+      name: 'get_today_summary',
+      description: '获取用户某天的热量摄入、运动消耗、餐数和最新体重。不传 date 默认今天。',
+      parameters: { type: 'object', properties: { date: { type: 'string', description: 'YYYY-MM-DD' } }, required: [] }
+    }
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'get_recent_records',
+      description: '获取用户最近 N 天的饮食或运动记录明细（含食物名、热量、时间）。',
+      parameters: {
+        type: 'object',
+        properties: {
+          kind: { type: 'string', enum: ['diet', 'exercise'], description: 'diet=饮食 exercise=运动' },
+          days: { type: 'number', description: '查询最近几天，默认 7' }
+        },
+        required: ['kind']
+      }
+    }
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'get_weight_trend',
+      description: '获取用户近 30 天的体重记录，用于分析趋势。',
+      parameters: { type: 'object', properties: {}, required: [] }
+    }
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'search_food',
+      description: '按关键词搜索食物热量库（kcal/100g 或 100ml），用于解答"XX多少热量"。',
+      parameters: { type: 'object', properties: { keyword: { type: 'string' } }, required: ['keyword'] }
+    }
+  },
+  {
+    type: 'function',
+    function: {
+      name: 'get_user_profile',
+      description: '获取用户档案：身高、目标体重、每日热量目标、性别。',
+      parameters: { type: 'object', properties: {}, required: [] }
+    }
+  }
+];
+
+// ===== 工具执行器（复用 record/foodLib 的 SQL 模式）=====
+function pad(n) { return n < 10 ? '0' + n : '' + n; }
+function todayStr() {
+  const now = new Date();
+  return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}`;
+}
+function daysAgo(n) {
+  const d = new Date(); d.setDate(d.getDate() - n);
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
+async function execTool(name, args, openid) {
+  const owner = `data->>'openid'=${str(openid)}`;
+  switch (name) {
+    case 'get_today_summary': {
+      const date = /^\d{4}-\d{2}-\d{2}$/.test(args.date || '') ? args.date : todayStr();
+      const [ds, es, bw] = await Promise.all([
+        one(`SELECT COALESCE(sum((data->>'kcal')::numeric),0), count(*)::int FROM public.fit_diet_records WHERE ${owner} AND data->>'date'=${str(date)}`),
+        one(`SELECT COALESCE(sum((data->>'kcalBurned')::numeric),0), count(*)::int FROM public.fit_exercise_records WHERE ${owner} AND data->>'date'=${str(date)}`),
+        one(`SELECT data->>'weight', data->>'date' FROM public.fit_body_records WHERE ${owner} ORDER BY data->>'date' DESC LIMIT 1`)
+      ]);
+      return { date, intakeKcal: Number(ds[0]), dietCount: Number(ds[1]), burnedKcal: Number(es[0]), exerciseCount: Number(es[1]), latestWeight: bw && bw[0] !== null ? Number(bw[0]) : null, latestWeightDate: bw ? bw[1] : null };
+    }
+    case 'get_recent_records': {
+      const kind = args.kind === 'exercise' ? 'exercise' : 'diet';
+      const days = Math.min(Math.max(Number(args.days) || 7, 1), 30);
+      const start = daysAgo(days - 1), end = todayStr();
+      const table = kind === 'exercise' ? 'fit_exercise_records' : 'fit_diet_records';
+      const rows = await query(
+        `SELECT data->>'date', data FROM public."${table}" WHERE ${owner} AND data->>'date' BETWEEN ${str(start)} AND ${str(end)} ORDER BY data->>'date' DESC, (data->>'createdAt')::bigint DESC LIMIT 100`
+      );
+      return {
+        kind, range: [start, end], count: rows.length,
+        records: rows.map(r => {
+          const d = JSON.parse(r[1]);
+          delete d.openid;
+          return d;
+        })
+      };
+    }
+    case 'get_weight_trend': {
+      const rows = await query(
+        `SELECT data->>'date', data->>'weight' FROM public.fit_body_records WHERE ${owner} AND data->>'date' >= ${str(daysAgo(29))} ORDER BY data->>'date' ASC`
+      );
+      return { weights: rows.map(r => ({ date: r[0], weight: Number(r[1]) })) };
+    }
+    case 'search_food': {
+      const kw = String(args.keyword || '').slice(0, 30).replace(/[\\%_]/g, m => '\\' + m);
+      const row = await one(
+        `SELECT COALESCE(jsonb_agg(jsonb_build_object('name', data->>'name', 'cat', data->>'cat', 'kcal', (data->>'kcal')::int, 'unit', data->>'unit')), '[]'::jsonb)::text
+         FROM (SELECT data FROM public.fit_foods WHERE data->>'source'='official' AND data->>'name' ILIKE ${str('%' + kw + '%')} LIMIT 8) t`
+      );
+      return { foods: row ? JSON.parse(row[0]) : [] };
+    }
+    case 'get_user_profile': {
+      const row = await one(`SELECT data::text FROM public.fit_users WHERE ${owner} LIMIT 1`);
+      if (!row) return { profile: null };
+      const d = JSON.parse(row[0]);
+      return { profile: { gender: d.gender, height: d.height, targetWeight: d.targetWeight, dailyCalorieTarget: d.dailyCalorieTarget, nickname: d.nickname } };
+    }
+    default:
+      return { error: 'unknown tool' };
   }
 }
 
-// 非流式调用（兜底路径）
-function callLLM(messages) {
+// ===== LLM 调用（带 tools，非流式：工具循环需要完整响应）=====
+function callLLM(messages, tools) {
   return new Promise((resolve, reject) => {
-    if (!LLM_API_HOST || !LLM_API_KEY) {
-      return reject(new Error('大模型服务未配置，请在云函数环境变量设置 LLM_API_HOST / LLM_API_KEY'));
-    }
-    const body = JSON.stringify({
-      model: LLM_MODEL,
-      messages,
-      temperature: 0.7,
-      max_tokens: 800
-    });
+    if (!LLM_API_KEY) return reject(new Error('大模型服务未配置'));
+    const body = JSON.stringify(Object.assign(
+      { model: LLM_MODEL, messages, temperature: 0.6, max_tokens: 900 },
+      tools && tools.length ? { tools, tool_choice: 'auto' } : {}
+    ));
     const req = https.request({
-      hostname: LLM_API_HOST,
-      path: LLM_API_PATH,
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${LLM_API_KEY}`,
-        'Content-Length': Buffer.byteLength(body)
-      }
+      hostname: LLM_API_HOST, path: LLM_API_PATH, method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${LLM_API_KEY}`, 'Content-Length': Buffer.byteLength(body) }
     }, (res) => {
       let data = '';
-      res.on('data', chunk => { data += chunk; });
+      res.on('data', c => { data += c; });
       res.on('end', () => {
-        try {
-          const json = JSON.parse(data);
-          const content = json.choices && json.choices[0] && json.choices[0].message.content;
-          resolve({ full: content || '', chunks: content ? [content] : [] });
-        } catch (e) {
-          reject(new Error('模型返回解析失败'));
-        }
+        try { resolve(JSON.parse(data)); }
+        catch (e) { reject(new Error('模型返回解析失败')); }
       });
     });
     req.on('error', reject);
-    req.setTimeout(20000, () => { req.destroy(new Error('模型请求超时')); });
-    req.write(body);
-    req.end();
+    req.setTimeout(25000, () => req.destroy(new Error('模型请求超时')));
+    req.write(body); req.end();
   });
 }
 
-// 流式调用：请求 stream:true，服务端解析 SSE，收齐后返回 {full, chunks}
-// chunk 粒度：直接按模型分片返回，前端按片渲染即为打字机效果
-function callLLMStream(messages) {
-  return new Promise((resolve, reject) => {
-    if (!LLM_API_HOST || !LLM_API_KEY) {
-      return reject(new Error('大模型服务未配置，请在云函数环境变量设置 LLM_API_HOST / LLM_API_KEY'));
+// ===== Agent 主循环 =====
+async function agentRun(messages, openid) {
+  let answer = '';
+  const toolLog = [];
+  for (let round = 0; round < MAX_TOOL_ROUNDS; round++) {
+    const resp = await callLLM(messages, TOOLS);
+    const choice = resp.choices && resp.choices[0];
+    if (!choice) throw new Error('模型无响应' + (resp.error ? ':' + JSON.stringify(resp.error).slice(0, 100) : ''));
+    const msg = choice.message;
+    if (msg.tool_calls && msg.tool_calls.length) {
+      messages.push({ role: 'assistant', content: msg.content || '', tool_calls: msg.tool_calls });
+      for (const tc of msg.tool_calls) {
+        let args = {};
+        try { args = JSON.parse(tc.function.arguments || '{}'); } catch (e) { /* 空参数 */ }
+        let result;
+        try { result = await execTool(tc.function.name, args, openid); }
+        catch (e) { result = { error: '工具执行失败:' + e.message.slice(0, 80) }; }
+        toolLog.push(tc.function.name);
+        messages.push({ role: 'tool', tool_call_id: tc.id, content: JSON.stringify(result).slice(0, 6000) });
+      }
+      continue; // 下一轮
     }
-    const body = JSON.stringify({
-      model: LLM_MODEL,
-      messages,
-      temperature: 0.7,
-      max_tokens: 800,
-      stream: true
-    });
-    const req = https.request({
-      hostname: LLM_API_HOST,
-      path: LLM_API_PATH,
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'text/event-stream',
-        'Authorization': `Bearer ${LLM_API_KEY}`,
-        'Content-Length': Buffer.byteLength(body)
-      }
-    }, (res) => {
-      // 非 200 或非 SSE：降级走非流式解析
-      if (res.statusCode !== 200) {
-        let errData = '';
-        res.on('data', c => { errData += c; });
-        res.on('end', () => reject(new Error('模型服务返回 ' + res.statusCode)));
-        return;
-      }
-
-      let buffer = '';      // SSE 半包缓冲
-      const chunks = [];
-      let full = '';
-
-      res.on('data', (chunk) => {
-        buffer += chunk;
-        // SSE 事件以空行分隔
-        let idx;
-        while ((idx = buffer.indexOf('\n\n')) >= 0) {
-          const rawEvent = buffer.slice(0, idx);
-          buffer = buffer.slice(idx + 2);
-          // 解析 data: 行
-          const dataLines = rawEvent.split('\n')
-            .filter(l => l.startsWith('data:'))
-            .map(l => l.slice(5).trim());
-          if (!dataLines.length) continue;
-          const payload = dataLines.join('');
-          if (payload === '[DONE]') continue;
-          try {
-            const json = JSON.parse(payload);
-            // OpenAI 兼容流式结构：choices[0].delta.content（字段名需按服务商核实）
-            const delta = json.choices && json.choices[0] &&
-              (json.choices[0].delta || {}) && json.choices[0].delta.content;
-            if (delta) {
-              full += delta;
-              chunks.push(delta);
-            }
-          } catch (e) { /* 忽略无法解析的行 */ }
-        }
-      });
-
-      res.on('end', () => {
-        if (full) resolve({ full, chunks });
-        else reject(new Error('模型未返回内容'));
-      });
-      res.on('error', reject);
-    });
-    req.on('error', reject);
-    req.setTimeout(30000, () => { req.destroy(new Error('模型请求超时')); });
-    req.write(body);
-    req.end();
-  });
+    answer = msg.content || '';
+    break;
+  }
+  if (!answer) answer = '抱歉，我暂时没能整理出建议，请换个问法试试。';
+  return { answer, toolLog };
 }
 
-// 统一入口：优先流式，异常自动降级非流式
-async function callModel(messages) {
-  if (LLM_STREAM) {
-    try {
-      return await callLLMStream(messages);
-    } catch (err) {
-      console.warn('流式调用失败，降级非流式:', err.message);
-    }
-  }
-  return await callLLM(messages);
-}
+exports.main = async (event) => {
+  const params = parseEvent(event);
+  const openid = getOpenid(params);
+  if (!openid) return { code: -1, msg: '登录态缺失或已过期，请重启小程序' };
+  const { question } = params;
 
-exports.main = async (event, context) => {
-  const { question } = event;
-  const openid = cloud.getWXContext().OPENID;
-  if (!openid) return { code: -1, msg: '登录态缺失，请从小程序内调用' };
-
-  if (!question || !question.trim()) {
-    return { code: -1, msg: '问题不能为空' };
-  }
-  if (question.length > 500) {
-    return { code: -1, msg: '问题过长，请控制在500字内' };
-  }
+  if (!question || !question.trim()) return { code: -1, msg: '问题不能为空' };
+  if (question.length > 500) return { code: -1, msg: '问题过长，请控制在500字内' };
 
   try {
     // 1. 输入安全检查
-    const inputSafe = await checkText(question, openid);
-    if (!inputSafe) {
-      return { code: -1, msg: '内容包含不适宜信息，请修改后重试' };
-    }
+    const inputSafe = await msgSecCheck(question, openid);
+    if (!inputSafe) return { code: -1, msg: '内容包含不适宜信息，请修改后重试' };
 
-    // 2. 读取最近 10 条对话作为上下文（PG）
+    // 2. 历史 + 预注入档案（省一轮工具调用）
+    const profileRow = await one(`SELECT data::text FROM public.fit_users WHERE data->>'openid'=${str(openid)} LIMIT 1`);
+    let profileHint = '';
+    if (profileRow) {
+      const p = JSON.parse(profileRow[0]);
+      profileHint = `\n[用户档案] 身高${p.height}cm，目标体重${p.targetWeight}kg，每日热量目标${p.dailyCalorieTarget}kcal。`;
+    }
     const historyRow = await one(
       `SELECT COALESCE(jsonb_agg(jsonb_build_object('role', data->>'role', 'content', data->>'content') ORDER BY (data->>'createdAt')::bigint ASC), '[]'::jsonb)::text
        FROM (SELECT data FROM public.fit_coach_chats WHERE data->>'openid'=${str(openid)}
              ORDER BY (data->>'createdAt')::bigint DESC LIMIT 10) t`
     );
-    const contextMessages = historyRow ? JSON.parse(historyRow[0]) : [];
+    const history = historyRow ? JSON.parse(historyRow[0]) : [];
 
     const messages = [
-      { role: 'system', content: SYSTEM_PROMPT },
-      ...contextMessages,
+      { role: 'system', content: SYSTEM_PROMPT + profileHint },
+      ...history,
       { role: 'user', content: question }
     ];
 
-    // 3. 调用大模型（流式优先，服务端收齐全文）
-    const { full, chunks } = await callModel(messages);
-    if (!full) throw new Error('模型未返回内容');
+    // 3. Agent 循环（工具查询 + 生成）
+    const { answer, toolLog } = await agentRun(messages, openid);
 
-    // 4. 输出安全检查（全文检查通过才下发）
-    const outputSafe = await checkText(full, openid);
-    let answer = full;
-    if (!outputSafe) {
-      answer = '抱歉，该问题我暂时无法回答。如有健康方面的疑虑，建议咨询专业医师或营养师。';
-    }
+    // 4. 输出安全检查
+    const outputSafe = await msgSecCheck(answer, openid);
+    const finalAnswer = outputSafe ? answer : '抱歉，该问题我暂时无法回答。如有健康方面的疑虑，建议咨询专业医师或营养师。';
 
-    // 5. 对话落库（PG）
+    // 5. 对话落库
     const now = Date.now();
     await one(
       `INSERT INTO public.fit_coach_chats (id, data) VALUES
         (${str(newId('c'))}, ${jsonb({ openid, role: 'user', content: question, createdAt: now })}),
-        (${str(newId('c'))}, ${jsonb({ openid, role: 'assistant', content: answer, createdAt: now + 1 })})`
+        (${str(newId('c'))}, ${jsonb({ openid, role: 'assistant', content: finalAnswer, createdAt: now + 1 })})`
     );
 
-    // 6. 返回：answer 全文（兜底）+ chunks 分片（打字机用）
+    // 6. 返回（Agent 版整体返回；客户端打字机自动降级为整段显示）
     return {
       code: 0,
       data: {
-        answer,
-        chunks: outputSafe ? chunks : [answer],
+        answer: finalAnswer,
+        chunks: [finalAnswer],
+        toolsUsed: toolLog,
         disclaimer: '以上建议仅供参考，不构成医疗诊断'
       },
       msg: 'ok'
