@@ -1,4 +1,5 @@
 <view class="page">
+  <canvas type="2d" id="meal-photo-canvas" class="photo-processing-canvas" />
   <!-- 今日摄入汇总 -->
   <view class="card sum-card">
     <view class="flex-between">

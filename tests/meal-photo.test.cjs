@@ -57,6 +57,18 @@ test('large photo is compressed before HTTP upload; oversized output is not sent
   await photos.uploadPhoto('large');assert.equal(uploaded,1);assert.equal(compressions,1);
   small=false;await assert.rejects(photos.uploadPhoto('large'),/压缩/);assert.equal(uploaded,1);
 });
+test('portrait scales by height; PNG falls back to JPEG canvas with bounded dimensions',async()=>{
+  const sizes=[],exports=[];let uploaded;
+  const canvas={width:1,height:1,createImage(){return {width:3000,height:6000,set src(v){this.onload();}};},getContext(){return {fillRect(){},drawImage(){}};}};
+  const photos=load('miniprogram/utils/photos.js',{'./cloud.js':{call:async(n,p)=>{uploaded=p.base64;return {fileID:'photo'};}}},{wx:{
+    getFileSystemManager:()=>({readFile:o=>o.success({data:'a'.repeat(o.filePath==='converted'?50000:200000)})}),
+    getImageInfo:o=>o.success({width:3000,height:6000}),
+    compressImage:async o=>{sizes.push(o);return {tempFilePath:'still-large-png'};},
+    createSelectorQuery:()=>({select(){return this;},fields(){return this;},exec(fn){fn([{node:canvas}]);}}),
+    canvasToTempFilePath:o=>{exports.push({...o});o.success({tempFilePath:'converted'});}
+  }});
+  await photos.uploadPhoto('large');assert.ok(sizes.every(x=>x.compressedHeight&&!x.compressedWidth));assert.equal(exports[0].destWidth,640);assert.equal(exports[0].destHeight,1280);assert.equal(exports[0].fileType,'jpg');assert.equal(uploaded.length,50000);assert.equal(canvas.width,1);
+});
 test('server aggregate is owned, idempotent and validates date/portion',async()=>{
   let stored,insertions=0,heads=0;
   const mod=load('server/record/meal-record.js',{'./meal-estimate':meal,'./photos':{ownedPhoto:(id,owner)=>id==='photo-'+owner,objectCall:async()=>{heads++;}},'./fitdb':{str:x=>JSON.stringify(x),jsonb:x=>{stored=x;return 'payload';},one:async sql=>{if(sql.startsWith('INSERT')){insertions++;return null;}return insertions?[['saved']]:null;}}});
