@@ -57,6 +57,14 @@ test('large photo is compressed before HTTP upload; oversized output is not sent
   await photos.uploadPhoto('large');assert.equal(uploaded,1);assert.equal(compressions,1);
   small=false;await assert.rejects(photos.uploadPhoto('large'),/压缩/);assert.equal(uploaded,1);
 });
+test('80 KiB photo must compress: base64 plus token stays below gateway body limit',async()=>{
+  let compressed=false,bodyBytes=0;
+  const photos=load('miniprogram/utils/photos.js',{'./cloud.js':{call:async(n,p)=>{bodyBytes=Buffer.byteLength(JSON.stringify({...p,token:'t'.repeat(4096)}));return {fileID:'photo'};}}},{wx:{
+    getFileSystemManager:()=>({readFile:o=>o.success({data:Buffer.alloc(o.filePath==='original'?80*1024:64*1024-2).toString('base64')})}),
+    compressImage:async()=>{compressed=true;return {tempFilePath:'compressed'};}
+  }});
+  await photos.uploadPhoto('original');assert.equal(compressed,true);assert.ok(bodyBytes<100*1024);
+});
 test('portrait scales by height; PNG falls back to JPEG canvas with bounded dimensions',async()=>{
   const sizes=[],exports=[];let uploaded;
   const canvas={width:1,height:1,createImage(){return {width:3000,height:6000,set src(v){this.onload();}};},getContext(){return {fillRect(){},drawImage(){}};}};

@@ -1,7 +1,8 @@
 const { call } = require('./cloud.js');
 const cache = new Map();
-// HTTP gateway body limit also includes base64 expansion and authentication.
-const MAX_BYTES = 80 * 1024;
+// Gateway rejects bodies above ~100 KiB. 64 KiB becomes ~86 KiB of base64,
+// leaving room for JSON, authentication and transport overhead.
+const MAX_BYTES = 64 * 1024;
 const fits = base64 => base64.length <= Math.floor(MAX_BYTES / 3) * 4;
 async function canvasPhoto(filePath, read) {
   const canvas = await new Promise((resolve,reject) => {
