@@ -13,6 +13,18 @@ module.exports={
    {key:'extension',name:'仰卧臂屈伸',exerciseId:null,note:'器械和肩屈角度待核对，请查看原视频。'},
    {key:'y-raise',name:'Y 字侧平举',exerciseId:null,note:'不使用普通侧平举 GIF 冒充 Y 字动作。'}
   ]},
+  {id:'squat-article',title:'蹲日(公众号版)',subtitle:'腿 + 肩 · 官方组次已核实',source:'https://mp.weixin.qq.com/s/52UaVn1cwEL0FBgXcfZnEQ',actions:[
+   {key:'w-band-abd',name:'弹力带肩外展',exerciseId:'9501',sets:2,reps:10,warmup:true,note:'只做后半程，改善卧推肩痛。'},
+   {key:'w-band-circle',name:'弹力带绕肩',exerciseId:'9502',sets:2,reps:10,warmup:true,note:'保持张力不卸力。'},
+   {key:'w-wall-angel',name:'墙天使',exerciseId:'9503',sets:2,reps:'力竭',warmup:true,note:'头背腰贴墙，可换地天使。'},
+   {key:'w-db-circle',name:'哑铃半程环绕',exerciseId:'9504',sets:3,reps:'力竭',warmup:true,note:'只做上半程。'},
+   {key:'press',name:'实力推(肩前束)',exerciseId:'9505',sets:4,reps:12,note:'握距肩宽1.5-2倍，不顶腰反弓。'},
+   {key:'bent-row',name:'俯身杠铃提拉(肩后束)',exerciseId:'9506',sets:4,reps:12,note:'肘向外打开，不下放到底。'},
+   {key:'lat-raise',name:'哑铃侧平举(肩中束)',exerciseId:'9507',sets:4,reps:12,note:'斜前方抬起，肘带动。'},
+   {key:'leg-curl',name:'俯身腿弯举(大腿后侧)',exerciseId:'9508',sets:4,reps:15,note:'脚尖内八，可换坐姿腿弯举。'},
+   {key:'rhino-squat',name:'犀牛蹲(大腿前侧)',exerciseId:'9509',sets:4,reps:15,note:'双脚外八躯干直立，可换T杆深蹲。'},
+   {key:'bulgarian-split',name:'保加利亚单腿蹲(大腿前侧)',exerciseId:'9510',sets:4,reps:15,eachSide:true,note:'垂直蹲站，后膝缓落。'}
+  ]},
   {id:'pull',title:'拉日',subtitle:'背 · 肩后束 · 二头',source:'https://jingxuan.douyin.com/m/video/7627846384783297834',actions:[
    {key:'single-pulldown',name:'单手钢线下拉',exerciseId:null,note:'力线与身体位置待核对。'},
    {key:'machine-row',name:'单手器械划船',exerciseId:null,note:'具体器械和支撑方式待核对。'},
