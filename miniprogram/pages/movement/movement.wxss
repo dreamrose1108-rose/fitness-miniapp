@@ -2,3 +2,15 @@
 .demo{margin-top:28rpx}.demo-frames{height:440rpx;background:#fff;margin-top:20rpx}.demo-image{width:100%;height:100%}.frame-caption{text-align:center;color:var(--color-text-2);font-size:24rpx;margin:14rpx 0}.frame-controls{display:flex;gap:12rpx;justify-content:center}.frame-controls button{margin:0;font-size:24rpx}.frame-controls .play{background:var(--color-primary);color:white}.media-note,.media-credit{font-size:22rpx;line-height:1.7;color:var(--color-text-2);margin-top:20rpx}.media-credit text{display:block}.source-link{color:var(--color-primary);padding-top:10rpx}.demo-video{width:100%;height:390rpx;background:#111}.video-title{font-size:28rpx;font-weight:600;margin:28rpx 0 16rpx}.media-state{padding:40rpx 0;text-align:center;color:var(--color-text-2);font-size:26rpx}.media-state button{display:block;width:220rpx;margin-top:16rpx}
 
 .gif-image{display:block;width:100%;height:480rpx;background:#fff;}
+
+/* GIF 全屏预览层 */
+.gif-overlay {
+  position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0, 0, 0, 0.92); z-index: 999;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+}
+.gif-overlay-img { width: 100%; height: 80vh; }
+.gif-overlay-hint {
+  color: rgba(255,255,255,0.6); font-size: 24rpx; margin-top: 24rpx;
+}

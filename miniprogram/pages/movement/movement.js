@@ -16,7 +16,12 @@ Page({
  step(e){this.stop();const count=this.data.images.length;if(count)this.setData({frame:(this.data.frame+Number(e.currentTarget.dataset.delta)+count)%count});},
  stop(){if(this.timer)clearInterval(this.timer);this.timer=null;this.setData({playing:false});},
  togglePlay(){if(this.data.playing){this.stop();return;}if(this.data.images.some((_,i)=>!this.data.loadedFrames[i])){wx.showToast({title:'请等待图片加载完成',icon:'none'});return;}this.setData({playing:true});this.timer=setInterval(()=>{this.setData({frame:(this.data.frame+1)%this.data.images.length});},1200);},
- preview(){this.stop();wx.previewImage({urls:this.data.gif?[this.data.gif]:this.data.images,current:this.data.gif||this.data.images[this.data.frame]});},
+ preview(){
+  this.stop();
+  if(this.data.gif){this.setData({gifOverlay:true});return;}
+  wx.previewImage({urls:this.data.images,current:this.data.images[this.data.frame]});
+ },
+ closeGifOverlay(){this.setData({gifOverlay:false});},
  copySource(){const m=this.data.mediaInfo;wx.setClipboardData({data:(m.hasGif?[m.gifSource,'https://gymvisual.com/']:[m.photoSource,m.videoSource,m.videoLicenseUrl]).filter(Boolean).join('\n')});},
  favorite(){if(!this.data.item)return;try{const ids=library.toggleFavorite(this.data.item.id);this.setData({favorite:ids.includes(this.data.item.id)});}catch(e){wx.showToast({title:'收藏未保存，请重试',icon:'none'});}},
  record(){if(!this.data.item)return;this.stop();getApp().globalData.pendingExerciseId=this.data.item.id;wx.switchTab({url:'/pages/exercise/exercise',fail:()=>wx.showToast({title:'打开运动记录失败，请重试',icon:'none'})});},

@@ -9,3 +9,8 @@
 <view class="card"><view class="card-title">动作步骤</view><view wx:for="{{item.steps}}" wx:key="index" class="step"><text class="number">{{index + 1}}</text><text class="instruction">{{item}}</text></view></view>
 <button class="btn-primary" bindtap="record">记录这个动作</button><view class="hint">记录时填写时长，消耗热量可选填。</view>
 <view wx:if="{{item.isSupplemental}}" class="source">补充动作 · 中文步骤由卡路喵整理</view><block wx:else><view class="source" bindtap="license">基础文字数据 © 2026 Hasan Emir Yıldırım<br/>exercises-dataset · MIT 许可 {{showLicense ? '收起' : '查看'}}</view><text wx:if="{{showLicense}}" class="license" selectable>{{license}}</text></block></block></view>
+<!-- GIF 全屏预览层（wx.previewImage 不支持动图，改用 image 组件保证循环播放） -->
+<view wx:if="{{gifOverlay}}" class="gif-overlay" bindtap="closeGifOverlay">
+  <image class="gif-overlay-img" src="{{gif}}" mode="aspectFit" />
+  <view class="gif-overlay-hint">点击任意处关闭</view>
+</view>
