@@ -5,9 +5,9 @@ const media=require('../miniprogram/data/exercise-media.js');
 const audit=require('./fixtures/reference-audit.json');
 const supplemental=require('./fixtures/supplemental-id-map.json');
 
-test('1378 names and all three classification labels match the captured catalog',()=>{
+test('1388 names and all three classification labels match the captured catalog',()=>{
   assert.equal(audit.complete,true);
-  assert.equal(library.items.length,1378);
+  assert.equal(library.items.length,1388);
   for(const row of audit.mapped.concat(supplemental)){
     const item=library.get(row.id);
     assert.ok(item,row.id);
@@ -29,13 +29,13 @@ test('existing IDs, original names and instructions stay attached to the same ac
   for(const id of Object.keys(media)) assert.ok(base.some(x=>x.id===id),`media ${id} must retain its original action`);
 });
 test('body counts match the reference and equipment/muscle pickers reach every item',()=>{
-  const counts={'upper arms':301,'upper legs':239,back:210,waist:177,chest:169,shoulders:153,'lower legs':61,'lower arms':37,cardio:29,neck:2};
+  const counts={'upper arms':301,'upper legs':242,back:210,waist:177,chest:169,shoulders:160,'lower legs':61,'lower arms':37,cardio:29,neck:2};
   for(const [body,count]of Object.entries(counts))assert.equal(library.search({body}).length,count,body);
   for(const field of ['equipment','target']){
     const options=library[field+'Options'].slice(1);
     const ids=options.flatMap(option=>library.search({[field]:option.key}).map(x=>x.id));
-    assert.equal(ids.length,1378,field);
-    assert.equal(new Set(ids).size,1378,field);
+    assert.equal(ids.length,1388,field);
+    assert.equal(new Set(ids).size,1388,field);
     assert.equal(new Set(options.map(x=>x.label)).size,options.length,field+' duplicate labels');
   }
 });
