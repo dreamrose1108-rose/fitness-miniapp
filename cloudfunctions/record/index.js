@@ -21,14 +21,41 @@ async function listDocs(table, whereSql, orderSql, limit) {
 
 exports.main = async (event) => {
   const params = parseEvent(event);
+  const { action, type } = params;
+  // 管理员媒体导入：不要求用户登录态，用独立 adminKey 鉴权
+  if (action === 'mediaIngest') {
+    if (params.adminKey !== process.env.FIT_ADMIN_KEY) return { code: -1, msg: '无权限' };
+    try {
+      const { objectCall } = require('./photos');
+      const https = require('https');
+      const items = (params.items || []).slice(0, 12);
+      const results = [];
+      for (const it of items) {
+        if (!/^exercise-media\/gif-v1\/\d{4}-[A-Za-z0-9]+\.gif$/.test(it.key)) { results.push({ key: it.key, ok: false, err: 'bad key' }); continue; }
+        try {
+          const bytes = await new Promise((resolve, reject) => {
+            const bufs = [];
+            https.get(it.url, { headers: { 'User-Agent': 'Mozilla/5.0' }, timeout: 30000 }, r => {
+              if (r.statusCode !== 200) return reject(new Error('HTTP ' + r.statusCode));
+              r.on('data', c => bufs.push(c)); r.on('end', () => resolve(Buffer.concat(bufs)));
+            }).on('error', reject).on('timeout', function() { this.destroy(new Error('下载超时')); });
+          });
+          if (bytes.length < 10000 || bytes.length > 20 * 1024 * 1024) throw new Error('尺寸异常 ' + bytes.length);
+          await objectCall('putObject', it.key, { Body: bytes, ACL: 'private', ContentType: 'image/gif' });
+          results.push({ key: it.key, ok: true, size: bytes.length });
+        } catch (e) { results.push({ key: it.key, ok: false, err: String(e.message).slice(0, 80) }); }
+      }
+      return { code: 0, data: results, msg: 'ok' };
+    } catch (err) { console.error('media ingest failure:', err.message); return { code: -1, msg: '导入失败' }; }
+  }
   const openid = getOpenid(params);
   if (!openid) return { code: -1, msg: '登录态缺失或已过期，请重启小程序' };
-  const { action, type } = params;
   if(action==='savePhotoMeal'){try{return {code:0,data:await require('./meal-record').save(params.data,openid),msg:'ok'};}catch(e){const msg=String(e.message||'');return {code:-1,msg:/照片|日期|餐次|食物|分量|热量|营养素|总量|未保存/.test(msg)?msg:'餐食保存失败，请重试'};}}
   if (action === 'exerciseMedia') {
     try { return { code: 0, data: await require('./exercise-media').getMedia(params.ids), msg: 'ok' }; }
     catch (err) { console.error('exercise media failure:', err.code || err.name); return { code: -1, msg: '演示加载失败，请重试' }; }
   }
+
   if (['waterAdd', 'waterList', 'waterRemove', 'calendar'].includes(action)) {
     try { return { code: 0, data: await require('./wellness').handleWellness(params, openid), msg: 'ok' }; }
     catch (err) { console.error('wellness failure:', err.code || err.name); return { code: -1, msg: /日期|毫升|编号|未知操作/.test(err.message) ? err.message : '记录服务暂不可用，请重试' }; }
