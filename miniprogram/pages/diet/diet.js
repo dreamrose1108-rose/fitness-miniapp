@@ -251,7 +251,6 @@ Page({
             macro[dst] = Math.round(Number(food[src]) * amount) / 100;
           }
         });
-        console.log('[MACRO调试] food携带=', food.protein, food.carb, food.fat, ' amount=', amount, ' 算出=', JSON.stringify(macro));
         try {
           await call('record', {
             action: 'add', type: 'diet',
