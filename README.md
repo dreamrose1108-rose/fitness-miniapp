@@ -16,4 +16,6 @@
 
 现有 exercise-media.test.cjs 的资源集成检查依赖本机 fitness-backend 的媒体清单以及 reports/exercise-media/publish 下的资源；这些外部资源不包含在客户端源码提交中。其余测试使用源码及 tests/fixtures。
 
-reports 包含本地调试项目、下载媒体和运行报告，不提交。此仓库记录客户端源码，cloudfunctions 为历史目录，本次未部署云函数。GIF 调试资源也未随本次提交发布。
+reports 包含本地调试项目、下载媒体和运行报告，不提交。此仓库记录客户端源码，cloudfunctions 为历史目录，本次未部署云函数。1324 个 GIF 已上传到现有云存储 exercise-media/gif-v1/。客户端通过已登录的 record.exerciseMedia 接口获取短期签名地址，详情页优先显示连续 GIF；媒体二进制不存入 Git。
+
+GIF 接入验证：1324 个文件共 128741397 字节，云端 Size/MD5 全量匹配；前端 53 项、相关后端 12 项测试通过。模拟器验证云端加载与列表 30 项缩略图。后端全套测试另有 3 项既有 AI 教练测试失败，本次不涉及该模块。
