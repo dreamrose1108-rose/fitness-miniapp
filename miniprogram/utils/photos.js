@@ -1,11 +1,21 @@
 const { call } = require('./cloud.js');
 const cache = new Map();
-const MAX_BYTES = 512 * 1024;
+// HTTP gateway body limit also includes base64 expansion and authentication.
+const MAX_BYTES = 80 * 1024;
 async function uploadPhoto(filePath) {
   const fs = wx.getFileSystemManager();
-  const base64 = await new Promise((resolve, reject) => fs.readFile({ filePath, encoding: 'base64', success: r => resolve(r.data), fail: reject }));
-  if (base64.length > Math.ceil(MAX_BYTES / 3) * 4) throw new Error('图片较大，请选择小于512KB的图片');
-  return call('record', { action: 'photoUpload', base64 });
+  const read = p => new Promise((resolve, reject) => fs.readFile({ filePath:p, encoding:'base64', success:r=>resolve(r.data), fail:reject }));
+  let base64 = await read(filePath);
+  for (const [quality,compressedWidth] of [[40,1280],[25,960],[15,640]]) {
+    if (base64.length <= Math.ceil(MAX_BYTES / 3) * 4) break;
+    if (typeof wx.compressImage !== 'function') break;
+    try {
+      const compressed = await wx.compressImage({src:filePath,quality,compressedWidth});
+      base64 = await read(compressed.tempFilePath);
+    } catch (_) {}
+  }
+  if (base64.length > Math.ceil(MAX_BYTES / 3) * 4) throw new Error('照片压缩后仍较大，请裁剪餐食区域后重试');
+  return call('record', { action:'photoUpload', base64 });
 }
 async function readPhoto(fileID) {
   if (cache.has(fileID)) return cache.get(fileID);

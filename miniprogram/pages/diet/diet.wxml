@@ -28,8 +28,9 @@
   <!-- 添加按钮 -->
   <view class="add-row">
     <button class="btn-primary add-btn" bindtap="openPicker">+ 添加{{activeMealLabel}}</button>
-    <button class="photo-btn" bindtap="onTakePhoto" disabled="{{photoUploading}}">📷 拍照记录</button>
+    <button class="photo-btn" bindtap="onTakePhoto" disabled="{{photoUploading}}">📷 AI 拍照估算</button>
   </view>
+  <view class="photo-ai-note disclosure">照片将发送至智谱 AI 识别餐食，估算结果需你确认后保存。</view>
   <view wx:if="{{pendingPhoto}}" class="pending-photo-tip">
     📷 照片已就绪，选择食物后将自动绑定
     <text class="pp-cancel" bindtap="clearPendingPhoto">取消</text>
@@ -51,7 +52,7 @@
           <text class="food-name">{{item.foodName}}</text>
           <text class="food-amount text-3">{{item.amount}}g · {{item.mealLabel}}</text>
         </view>
-        <text class="food-kcal">{{item.kcal}} kcal</text>
+        <view><text class="food-kcal">{{item.kcal}} kcal</text><text wx:if="{{item.estimated}}" class="photo-ai-note">照片估算 · 已确认</text></view>
         <text class="del" data-id="{{item._id}}" bindtap="onDelete">✕</text>
       </view>
     </view>

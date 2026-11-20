@@ -159,9 +159,10 @@ Page({
   },
 
   // ===== 拍照记录 =====
-  // 拍照 → 选食物 → 输分量 → 提交时一起落库；取消则删除已传照片（防孤儿文件）
+  // 拍照 → AI 估算 → 用户核对 → 保存；取消则清理未绑定照片。
   async onTakePhoto() {
     if (this._foodSelectionBusy || this.data.photoUploading) return;
+    const photoContext={date:formatDate(),mealType:this.data.activeMeal};
     wx.chooseMedia({
       count: 1,
       mediaType: ['image'],
@@ -172,16 +173,13 @@ Page({
         this.setData({ photoUploading: true });
         wx.showLoading({ title: '上传照片中' });
         try {
-          let filePath = tempPath;
-          if (typeof wx.compressImage === 'function') {
-            try { const compressed = await wx.compressImage({ src: tempPath, quality: 40 }); filePath = compressed.tempFilePath; } catch (e) {}
-          }
+          const filePath = tempPath;
           if (this.data.pendingPhoto && !await this.clearPendingPhoto()) return;
           const up = await uploadPhoto(filePath);
           if (this._unloaded) { await deletePhoto(up.fileID); return; }
           this.setData({ pendingPhoto: up.fileID });
-          wx.showToast({ title: '照片就绪，请选食物', icon: 'none' });
-          this.openPicker();
+          app.globalData.pendingMealPhoto={...photoContext,fileID:up.fileID,localPath:filePath};
+          wx.navigateTo({url:'/pages/meal-review/meal-review',success:()=>this.setData({pendingPhoto:''}),fail:()=>{delete app.globalData.pendingMealPhoto;this.clearPendingPhoto();wx.showToast({title:'无法打开识别页面，请重试',icon:'none'});}});
         } catch (e) {
           wx.showToast({ title: e.message || '照片上传失败', icon: 'none' });
         } finally {
@@ -350,4 +348,4 @@ Page({
     if (!this._foodSelectionBusy && this.data.pendingPhoto) this.clearPendingPhoto();
     this.cancelFoodSearch();
   }
-});
+});

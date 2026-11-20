@@ -24,6 +24,7 @@ exports.main = async (event) => {
   const openid = getOpenid(params);
   if (!openid) return { code: -1, msg: '登录态缺失或已过期，请重启小程序' };
   const { action, type } = params;
+  if(action==='savePhotoMeal'){try{return {code:0,data:await require('./meal-record').save(params.data,openid),msg:'ok'};}catch(e){const msg=String(e.message||'');return {code:-1,msg:/照片|日期|餐次|食物|分量|热量|营养素|总量|未保存/.test(msg)?msg:'餐食保存失败，请重试'};}}
   if (action === 'exerciseMedia') {
     try { return { code: 0, data: await require('./exercise-media').getMedia(params.ids), msg: 'ok' }; }
     catch (err) { console.error('exercise media failure:', err.code || err.name); return { code: -1, msg: '演示加载失败，请重试' }; }
@@ -94,9 +95,10 @@ exports.main = async (event) => {
         let where = owner;
         if (start && end) where += ` AND data->>'date' BETWEEN ${str(start)} AND ${str(end)}`;
         const order = type === 'coach'
-          ? `(data->>'createdAt')::bigint ASC`
+          ? `(data->>'createdAt')::bigint DESC`
           : `data->>'date' DESC, (data->>'createdAt')::bigint DESC`;
-        const docs = await listDocs(table, where, order, Math.min(limit, 100));
+        const docs = await listDocs(table, where, order, Math.min(Math.max(Number(limit)||50,1),100));
+        if(type==='coach')docs.reverse();
         return { code: 0, data: docs, msg: 'ok' };
       }
 

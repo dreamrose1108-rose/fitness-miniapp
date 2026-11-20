@@ -35,7 +35,7 @@
 
 现有 exercise-media.test.cjs 的资源集成检查依赖本机 fitness-backend 的媒体清单以及 reports/exercise-media/publish 下的资源；这些外部资源不包含在客户端源码提交中。其余测试使用源码及 tests/fixtures。
 
-reports 包含本地调试项目、下载媒体和运行报告，不提交。此仓库记录客户端源码，cloudfunctions 为历史目录，本次未部署云函数。1324 个 GIF 已上传到现有云存储 exercise-media/gif-v1/。客户端通过已登录的 record.exerciseMedia 接口获取短期签名地址，详情页优先显示连续 GIF；媒体二进制不存入 Git。
+reports 包含本地调试项目、下载媒体和运行报告，不提交。此仓库同时记录客户端和后端源码；cloudfunctions 为部署源目录，已同步线上最新代码。1324 个 GIF 已上传到现有云存储 exercise-media/gif-v1/。客户端通过已登录的 record.exerciseMedia 接口获取短期签名地址，详情页优先显示连续 GIF；媒体二进制不存入 Git。
 
 GIF 接入验证：1324 个文件共 128741397 字节，云端 Size/MD5 全量匹配；前端 53 项、相关后端 12 项测试通过。模拟器验证云端加载与列表 30 项缩略图。此前发现的 3 项 AI 教练测试失败，已在后续联网搜索接入中修复。
 
@@ -43,7 +43,7 @@ GIF 接入验证：1324 个文件共 128741397 字节，云端 Size/MD5 全量�
 
 教练页可开启“联网搜索”，也可直接说“搜索 / 查一下 / 最新”。使用智谱 Coding Plan 官方搜索 MCP，保留原模型；每轮至多搜索一次，返回最多 5 条真实来源，点击来源可复制链接。历史消息保留来源；搜索失败、无结果与成功分别显示，失败不会伪装成已搜索。
 
-云函数可部署源码位于 server/aiCoach，运行时环境变量沿用 LLM_API_KEY；如单独配置搜索密钥则使用 SEARCH_API_KEY。密钥不可写入源码。正式后端工作目录为独立的 fitness-backend/aiCoach，本目录保留同步副本供版本管理。不要部署根目录历史 cloudfunctions/aiCoach。
+云函数可部署源码位于 cloudfunctions/aiCoach，server/aiCoach 保留同步测试副本；运行时环境变量沿用 LLM_API_KEY；如单独配置搜索密钥则使用 SEARCH_API_KEY。密钥不可写入源码。独立 fitness-backend/aiCoach 是工作副本，部署以仓库 cloudfunctions/aiCoach 为准。
 
 搜索官方文档：https://docs.bigmodel.cn/cn/coding-plan/mcp/search-mcp-server
 
@@ -60,3 +60,13 @@ record 最近聊天排序修复同步于 server/record。2026-11-20 云端搜索
 校验覆盖动作 ID、组次范围、日期冲突、重复保存、存储失败及账号隔离。AI 草稿保留在聊天历史，可再次打开。
 
 日程接入验证（2026-11-20）：77 项仓库测试通过；真实 AI 返回两天六动作草稿，已验证聊天历史恢复、逐日改期、保存、完成标记持久化、GIF 跳转和未来日历标记。测试日程已清理。
+
+## AI 拍照估算餐食
+
+饮食页点击“AI 拍照估算”，上传前逐级压缩，照片保存到用户私有目录。aiCoach.analyzeMeal 校验照片归属后调用智谱视觉模型，返回食物、估算克数、热量和三大营养素。确认页可修改数值、移除食物；修改克数按比例重算，点击确认才计入当天摄入。识别失败可重试或手动选食物，不会伪造零热量记录。
+
+record.savePhotoMeal 接收 photoFileID、date、mealType、items，校验照片归属及食物数值后聚合保存。一张照片对应一条餐食记录，稳定 ID 防止网络重试重复记账。记录标为照片估算，清理逻辑保护已保存照片。
+
+视觉接口使用智谱官方视觉 MCP 对应的多模态模型，默认 glm-5.3-flash，可由 VISION_MODEL 覆盖；密钥从 VISION_API_KEY 或已有 LLM_API_KEY 读取，均只在云端配置。教练对话模型保持不变。
+
+验证（2026-11-20）：餐图识别、分量重算、确认保存、刷新恢复、重复提交不重复计入及照片读取均通过云端联调；临时餐食和照片已清理。测试命令：`node --test tests/*.test.cjs server/tests/*.test.cjs`。

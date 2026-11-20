@@ -231,6 +231,7 @@ exports.main = async (event) => {
   const params = parseEvent(event);
   const openid = getOpenid(params);
   if (!openid) return { code: -1, msg: '登录态缺失或已过期，请重启小程序' };
+  if(params.action==='analyzeMeal'){try{const result=await require('./meal-vision').analyze(params.fileID,openid);if(!await msgSecCheck(result.items.map(x=>x.name).join('、')+' '+result.notes,openid))throw Error('识别内容未通过检查，请重拍');return {code:0,data:result,msg:'ok'};}catch(e){const msg=String(e.message||'');return {code:-1,msg:/照片|识别|食物|分量|营养素/.test(msg)?msg:'照片识别失败，请重试'};}}
   const { question } = params;
 
   if (typeof question!=='string' || !question.trim()) return { code: -1, msg: '问题不能为空' };

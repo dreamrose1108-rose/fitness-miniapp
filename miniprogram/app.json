@@ -13,7 +13,8 @@
     "pages/movement/movement",
     "pages/plans/plans",
     "pages/reference-plan/reference-plan",
-    "pages/schedule/schedule"
+    "pages/schedule/schedule",
+    "pages/meal-review/meal-review"
   ],
   "window": {
     "navigationBarBackgroundColor": "#ffffff",

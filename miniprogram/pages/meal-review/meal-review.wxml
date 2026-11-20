@@ -1,0 +1,16 @@
+<view class="page">
+ <image wx:if="{{photo}}" class="meal-photo" src="{{photo}}" mode="aspectFit"/>
+ <view class="heading">{{date}} · {{mealLabel}}估算</view>
+ <view class="hint">照片无法准确称重或判断全部用油量。请核对食物和分量，确认后才会计入当天记录。</view>
+ <view wx:if="{{loading}}" class="card">正在识别餐食和估算营养…</view>
+ <view wx:if="{{error}}" class="error">{{error}}</view>
+ <view wx:if="{{notes}}" class="hint">{{notes}}</view>
+ <view wx:for="{{items}}" wx:key="index" class="card food">
+  <view class="food-heading"><input class="food-name" value="{{item.name}}" data-index="{{index}}" data-field="name" bindinput="edit" disabled="{{locked}}" maxlength="60"/><button size="mini" class="remove" data-index="{{index}}" bindtap="remove" disabled="{{locked}}">移除</button></view>
+  <view class="fields"><view><text>分量（克）</text><input type="digit" value="{{item.grams}}" data-index="{{index}}" bindblur="grams" disabled="{{locked}}"/></view><view><text>热量（kcal）</text><input type="digit" value="{{item.kcal}}" data-index="{{index}}" data-field="kcal" bindinput="edit" disabled="{{locked}}"/></view></view>
+  <view class="fields macros"><view><text>蛋白质（克）</text><input type="digit" value="{{item.proteinG}}" data-index="{{index}}" data-field="proteinG" bindinput="edit" disabled="{{locked}}"/></view><view><text>碳水（克）</text><input type="digit" value="{{item.carbG}}" data-index="{{index}}" data-field="carbG" bindinput="edit" disabled="{{locked}}"/></view><view><text>脂肪（克）</text><input type="digit" value="{{item.fatG}}" data-index="{{index}}" data-field="fatG" bindinput="edit" disabled="{{locked}}"/></view></view>
+ </view>
+ <view wx:if="{{totals}}" class="card"><view class="total">合计约 {{totals.kcal}} kcal</view><view class="hint">蛋白质 {{totals.proteinG}} g · 碳水 {{totals.carbG}} g · 脂肪 {{totals.fatG}} g</view><view class="hint">修改克数后按比例重算；热量与营养素也可单独修改。</view></view>
+ <button wx:if="{{items.length}}" class="btn-primary" bindtap="save" loading="{{saving}}" disabled="{{saving || !totals || saved}}">{{locked ? '重试保存（不重复记账）' : '确认这些估算并保存'}}</button>
+ <view class="actions"><button wx:if="{{!locked}}" bindtap="analyze" disabled="{{loading}}" size="mini">重新识别</button><button wx:if="{{!locked}}" bindtap="manual" disabled="{{loading}}" size="mini">手动选食物</button><button bindtap="back" disabled="{{saving}}" size="mini">返回</button></view>
+</view>
