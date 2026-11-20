@@ -33,6 +33,7 @@
         <text selectable>{{item.content}}</text>
         <view wx:if="{{item.searchLabel}}" class="search-label">{{item.searchLabel}}</view>
         <view wx:for="{{item.sources}}" wx:for-item="source" wx:for-index="sourceIndex" wx:key="url" class="search-source" data-message="{{item.id}}" data-index="{{sourceIndex}}" bindtap="copySource">[{{source.id}}] {{source.title}}<text class="source-meta">{{source.site}} {{source.date}}</text></view>
+        <view wx:if="{{item.trainingPlan}}" class="plan-draft"><view>{{item.trainingPlan.title}}</view><text>{{item.trainingPlan.days.length}} 个训练日 · 尚未写入日程</text><button size="mini" data-message="{{item.id}}" bindtap="previewPlan">预览并保存到训练日程</button></view>
         <text wx:if="{{typing && index === messages.length - 1 && item.role === 'assistant'}}" class="cursor"></text>
       </view>
       <view class="msg-avatar avatar-user" wx:if="{{item.role === 'user'}}">我</view>

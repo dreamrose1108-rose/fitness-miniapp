@@ -12,7 +12,8 @@
     "pages/library/library",
     "pages/movement/movement",
     "pages/plans/plans",
-    "pages/reference-plan/reference-plan"
+    "pages/reference-plan/reference-plan",
+    "pages/schedule/schedule"
   ],
   "window": {
     "navigationBarBackgroundColor": "#ffffff",

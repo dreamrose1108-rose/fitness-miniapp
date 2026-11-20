@@ -23,7 +23,7 @@ function fmtContent(raw) {
 function searchMeta(res={}) {
   const sources=(Array.isArray(res.sources)?res.sources:[]).filter(x=>x&&typeof x.url==='string'&&/^https?:\/\/[^\s]+$/.test(x.url)).slice(0,5).map(x=>({id:x.id,title:String(x.title||x.url),url:x.url,site:String(x.site||''),date:String(x.date||'')}));
   const labels={success:'已联网检索 · 点击来源复制链接',empty:'未找到相关网页',unavailable:'联网搜索暂不可用'};
-  return {sources,searchLabel:labels[res.searchStatus]||''};
+  return {sources,searchLabel:labels[res.searchStatus]||'',trainingPlan:res.trainingPlan&&Array.isArray(res.trainingPlan.days)?res.trainingPlan:null};
 }
 
 Page({
@@ -63,6 +63,7 @@ Page({
     } catch (e) { /* 无历史不影响使用 */ }
   },
 
+  previewPlan(e){const message=this.data.messages.find(x=>x.id===Number(e.currentTarget.dataset.message));if(!message||!message.trainingPlan)return;app.globalData.pendingAITrainingPlan=message.trainingPlan;wx.navigateTo({url:'/pages/schedule/schedule?preview=1'});},
   toggleSearch(){if(!this.data.thinking&&!this.data.typing)this.setData({webSearch:!this.data.webSearch});},
   copySource(e){const message=this.data.messages.find(x=>x.id===Number(e.currentTarget.dataset.message));const source=message&&message.sources&&message.sources[Number(e.currentTarget.dataset.index)];if(source)wx.setClipboardData({data:source.url});},
 

@@ -142,3 +142,5 @@ page { height: 100%; overflow: hidden; }
 .search-label{font-size:22rpx;color:var(--color-text-2);border-top:1rpx solid var(--color-border);margin-top:20rpx;padding-top:16rpx;}
 .search-source{font-size:24rpx;line-height:1.6;color:var(--color-primary);margin-top:14rpx;overflow-wrap:break-word;}
 .source-meta{display:block;color:var(--color-text-2);font-size:21rpx;}
+
+.plan-draft{margin-top:24rpx;padding:20rpx;background:var(--color-primary-light);border-radius:16rpx}.plan-draft text{display:block;font-size:23rpx;margin:12rpx 0;color:var(--color-text-2)}.plan-draft button{font-size:24rpx;color:white;background:var(--color-primary);margin:10rpx 0 0}

@@ -1,4 +1,5 @@
 <view class="page">
+  <navigator url="/pages/schedule/schedule" class="card">训练日程 · 查看 AI 安排 ›</navigator>
   <!-- 今日消耗汇总 -->
   <view class="card sum-card">
     <view class="flex-between">
