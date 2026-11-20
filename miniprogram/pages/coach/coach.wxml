@@ -30,7 +30,9 @@
     >
       <view class="msg-avatar avatar-cat" wx:if="{{item.role === 'assistant'}}"><image class="avatar-img" src="/images/coach-cat.png" mode="aspectFill" /></view>
       <view class="bubble {{item.role === 'user' ? 'bubble-user' : 'bubble-ai'}}">
-        <text>{{item.content}}</text>
+        <text selectable>{{item.content}}</text>
+        <view wx:if="{{item.searchLabel}}" class="search-label">{{item.searchLabel}}</view>
+        <view wx:for="{{item.sources}}" wx:for-item="source" wx:for-index="sourceIndex" wx:key="url" class="search-source" data-message="{{item.id}}" data-index="{{sourceIndex}}" bindtap="copySource">[{{source.id}}] {{source.title}}<text class="source-meta">{{source.site}} {{source.date}}</text></view>
         <text wx:if="{{typing && index === messages.length - 1 && item.role === 'assistant'}}" class="cursor"></text>
       </view>
       <view class="msg-avatar avatar-user" wx:if="{{item.role === 'user'}}">我</view>
@@ -46,6 +48,7 @@
     </view>
   </scroll-view>
 
+  <view class="search-options"><button class="search-toggle {{webSearch ? 'selected' : ''}}" size="mini" bindtap="toggleSearch" disabled="{{thinking || typing}}">{{webSearch ? '✓ 联网搜索已开启' : '联网搜索'}}</button><text>也可直接说“搜索…”</text></view>
   <!-- 输入栏 -->
   <view class="input-bar safe-bottom">
     <input

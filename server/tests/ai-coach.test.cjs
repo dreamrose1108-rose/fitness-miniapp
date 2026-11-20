@@ -1,0 +1,6 @@
+const test=require('node:test');const assert=require('node:assert/strict');const vm=require('node:vm');const fs=require('node:fs');const {EventEmitter}=require('node:events');
+const source=fs.readFileSync(require('node:path').join(__dirname,'../aiCoach/index.js'),'utf8');
+function load(status,body){let sent;const context={exports:{},process:{env:{LLM_API_KEY:'test',LLM_STREAM:'off'}},Buffer,console,require:name=>name==='https'?{request:(options,cb)=>{const req=new EventEmitter();req.setTimeout=()=>{};req.write=b=>{sent=JSON.parse(b)};req.end=()=>{const res=new EventEmitter();res.statusCode=status;cb(res);res.emit('data',JSON.stringify(body));res.emit('end')};return req;}}:name==='./fitdb'?{}:{}};vm.createContext(context);vm.runInContext(source,context);return {run:()=>context.callLLM([]),sent:()=>sent};}
+test('模型错误不伪装为空回答',async()=>{const h=load(401,{error:{code:'1001',message:'private upstream text'}});await assert.rejects(h.run(),e=>e.message==='模型服务返回 401（1001）');});
+test('禁用 GLM4.5 思考并读取正文',async()=>{const h=load(200,{choices:[{message:{content:'你好'}}]});assert.equal((await h.run()).full,'你好');assert.equal(h.sent().thinking.type,'disabled');});
+test('拒绝空正文',async()=>{await assert.rejects(load(200,{choices:[{message:{content:''}}]}).run(),/未返回正文/);});

@@ -20,9 +20,16 @@ function fmtContent(raw) {
     .replace(/\n{3,}/g, '\n\n');
 }
 
+function searchMeta(res={}) {
+  const sources=(Array.isArray(res.sources)?res.sources:[]).filter(x=>x&&typeof x.url==='string'&&/^https?:\/\/[^\s]+$/.test(x.url)).slice(0,5).map(x=>({id:x.id,title:String(x.title||x.url),url:x.url,site:String(x.site||''),date:String(x.date||'')}));
+  const labels={success:'已联网检索 · 点击来源复制链接',empty:'未找到相关网页',unavailable:'联网搜索暂不可用'};
+  return {sources,searchLabel:labels[res.searchStatus]||''};
+}
+
 Page({
   data: {
     messages: [],
+    webSearch: false,
     inputText: '',
     thinking: false,
     sendError: '',
@@ -32,7 +39,7 @@ Page({
       '如何制定一周减脂计划？',
       '减脂期应该怎么吃？',
       '跑步和力量训练怎么搭配？',
-      '如何避免减肥平台期？'
+      '搜索谭成义三分化训练计划，附上来源'
     ]
   },
 
@@ -49,11 +56,15 @@ Page({
       const messages = (list || []).map(item => ({
         id: ++msgSeq,
         role: item.role,
-        content: fmtContent(item.content)
+        content: fmtContent(item.content),
+        ...searchMeta(item)
       }));
       if (!this._hasSent && !this._unloaded) this.setData({ messages }, this.scrollToBottom);
     } catch (e) { /* 无历史不影响使用 */ }
   },
+
+  toggleSearch(){if(!this.data.thinking&&!this.data.typing)this.setData({webSearch:!this.data.webSearch});},
+  copySource(e){const message=this.data.messages.find(x=>x.id===Number(e.currentTarget.dataset.message));const source=message&&message.sources&&message.sources[Number(e.currentTarget.dataset.index)];if(source)wx.setClipboardData({data:source.url});},
 
   onInput(e) { this.setData({ inputText: e.detail.value }); },
 
@@ -75,7 +86,7 @@ Page({
     }, this.scrollToBottom);
 
     try {
-      const res = await call('aiCoach', { question: text });
+      const res = await call('aiCoach', { question: text, webSearch:this.data.webSearch });
       if (this._unloaded) return;
       const chunks = res && Array.isArray(res.chunks) ? res.chunks.filter(c => typeof c === 'string' && c.length) : [];
       const answer = res && typeof res.answer === 'string' ? res.answer : chunks.join('');
@@ -84,8 +95,9 @@ Page({
       // 有分片则打字机渲染，否则一次性展示（兼容旧返回/安全兜底文案）
       if (chunks.length > 1 && chunks.join('') === answer) {
         await this.typewriterRender(chunks);
+        if(!this._unloaded){const messages=this.data.messages.map(m=>m.id===this._twMsgId?{...m,...searchMeta(res)}:m);this.setData({messages},this.scrollToBottom);}
       } else {
-        const aiMsg = { id: ++msgSeq, role: 'assistant', content: fmtContent(answer) };
+        const aiMsg = { id: ++msgSeq, role: 'assistant', content: fmtContent(answer), ...searchMeta(res) };
         this.setData({
           messages: [...this.data.messages, aiMsg]
         }, this.scrollToBottom);

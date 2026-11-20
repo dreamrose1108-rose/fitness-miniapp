@@ -18,4 +18,16 @@
 
 reports 包含本地调试项目、下载媒体和运行报告，不提交。此仓库记录客户端源码，cloudfunctions 为历史目录，本次未部署云函数。1324 个 GIF 已上传到现有云存储 exercise-media/gif-v1/。客户端通过已登录的 record.exerciseMedia 接口获取短期签名地址，详情页优先显示连续 GIF；媒体二进制不存入 Git。
 
-GIF 接入验证：1324 个文件共 128741397 字节，云端 Size/MD5 全量匹配；前端 53 项、相关后端 12 项测试通过。模拟器验证云端加载与列表 30 项缩略图。后端全套测试另有 3 项既有 AI 教练测试失败，本次不涉及该模块。
+GIF 接入验证：1324 个文件共 128741397 字节，云端 Size/MD5 全量匹配；前端 53 项、相关后端 12 项测试通过。模拟器验证云端加载与列表 30 项缩略图。此前发现的 3 项 AI 教练测试失败，已在后续联网搜索接入中修复。
+
+## AI 教练联网搜索
+
+教练页可开启“联网搜索”，也可直接说“搜索 / 查一下 / 最新”。使用智谱 Coding Plan 官方搜索 MCP，保留原模型；每轮至多搜索一次，返回最多 5 条真实来源，点击来源可复制链接。历史消息保留来源；搜索失败、无结果与成功分别显示，失败不会伪装成已搜索。
+
+云函数可部署源码位于 server/aiCoach，运行时环境变量沿用 LLM_API_KEY；如单独配置搜索密钥则使用 SEARCH_API_KEY。密钥不可写入源码。正式后端工作目录为独立的 fitness-backend/aiCoach，本目录保留同步副本供版本管理。不要部署根目录历史 cloudfunctions/aiCoach。
+
+搜索官方文档：https://docs.bigmodel.cn/cn/coding-plan/mcp/search-mcp-server
+
+测试：`node --test tests/*.test.cjs server/tests/*.test.cjs`。
+
+record 最近聊天排序修复同步于 server/record。2026-11-20 云端搜索实测成功，返回 WHO 官网等 5 条来源。

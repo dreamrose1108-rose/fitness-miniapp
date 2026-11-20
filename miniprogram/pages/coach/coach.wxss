@@ -135,3 +135,10 @@ page { height: 100%; overflow: hidden; }
   padding: 20rpx; margin: 16rpx 0; color: var(--color-danger);
   background: #fdf0ee; border-radius: 12rpx; font-size: 24rpx;
 }
+
+.search-options{display:flex;align-items:center;gap:20rpx;padding:12rpx 24rpx;background:var(--color-card);flex-shrink:0;color:var(--color-text-2);font-size:22rpx;}
+.search-toggle{margin:0;font-size:24rpx;border-radius:24rpx;line-height:2.2;color:var(--color-primary);background:var(--color-primary-light);}
+.search-toggle.selected{color:white;background:var(--color-primary);}
+.search-label{font-size:22rpx;color:var(--color-text-2);border-top:1rpx solid var(--color-border);margin-top:20rpx;padding-top:16rpx;}
+.search-source{font-size:24rpx;line-height:1.6;color:var(--color-primary);margin-top:14rpx;overflow-wrap:break-word;}
+.source-meta{display:block;color:var(--color-text-2);font-size:21rpx;}
