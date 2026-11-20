@@ -1,0 +1,57 @@
+<view class="page">
+  <navigator url="/pages/calendar/calendar" class="card flex-between"><text>记录日历与近七天回顾</text><text>›</text></navigator>
+  <!-- 时间范围 -->
+  <view class="range-bar">
+    <view
+      wx:for="{{ranges}}" wx:key="key"
+      class="range-item {{activeRange === item.key ? 'active' : ''}}"
+      data-key="{{item.key}}" bindtap="switchRange"
+    >{{item.label}}</view>
+  </view>
+
+  <!-- 体重趋势 -->
+  <view class="card">
+    <view class="flex-between">
+      <text class="card-title" style="margin-bottom:0">体重趋势</text>
+      <text class="trend-delta {{weightDelta <= 0 ? 'down' : 'up'}}">{{weightText}}</text>
+    </view>
+    <view class="chart-wrap">
+      <canvas type="2d" id="weightChart" class="chart"></canvas>
+      <view wx:if="{{!hasWeightData}}" class="chart-empty">还没有体重数据喵 🐈</view>
+    </view>
+  </view>
+
+  <!-- 摄入 vs 消耗 -->
+  <view class="card">
+    <view class="card-title">热量趋势（摄入 / 消耗）</view>
+    <view class="legend">
+      <view class="legend-item"><view class="dot dot-in"></view><text>摄入</text></view>
+      <view class="legend-item"><view class="dot dot-out"></view><text>消耗</text></view>
+    </view>
+    <view class="chart-wrap">
+      <canvas type="2d" id="calorieChart" class="chart"></canvas>
+      <view wx:if="{{!hasCalorieData}}" class="chart-empty">还没有热量数据喵 🐾</view>
+    </view>
+  </view>
+
+  <!-- 数据小结 -->
+  <view class="card stat-card">
+    <view class="card-title">区间小结</view>
+    <view class="stat-grid">
+      <view class="stat-item">
+        <text class="stat-num">{{avgIntake}}</text>
+        <text class="stat-label text-3">日均摄入(kcal)</text>
+      </view>
+      <view class="stat-item">
+        <text class="stat-num">{{avgBurned}}</text>
+        <text class="stat-label text-3">日均消耗(kcal)</text>
+      </view>
+      <view class="stat-item">
+        <text class="stat-num">{{recordDays}}</text>
+        <text class="stat-label text-3">记录天数</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="tip">坚持记录，趋势才有意义 💪</view>
+</view>

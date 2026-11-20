@@ -1,0 +1,26 @@
+.range-bar { display: flex; background: #fff; border-radius: var(--radius); padding: 8rpx; margin-bottom: 24rpx; }
+.range-item { flex: 1; text-align: center; padding: 16rpx 0; font-size: 26rpx; color: var(--color-text-2); border-radius: 12rpx; }
+.range-item.active { background: var(--color-primary-light); color: var(--color-primary); font-weight: 600; }
+
+.trend-delta { font-size: 26rpx; font-weight: 600; }
+.trend-delta.down { color: var(--color-primary); }
+.trend-delta.up { color: var(--color-danger); }
+
+.chart-wrap { position: relative; height: 380rpx; margin-top: 20rpx; }
+.chart { width: 100%; height: 380rpx; }
+.chart-empty {
+  position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+  color: var(--color-text-3); font-size: 26rpx;
+}
+
+.legend { display: flex; gap: 32rpx; margin-top: 16rpx; font-size: 24rpx; color: var(--color-text-2); }
+.legend-item { display: flex; align-items: center; }
+.dot { width: 16rpx; height: 16rpx; border-radius: 50%; margin-right: 10rpx; }
+.dot-in { background: #5b9e7d; }
+.dot-out { background: #f0a13c; }
+
+.stat-grid { display: flex; }
+.stat-item { flex: 1; text-align: center; }
+.stat-num { display: block; font-size: 40rpx; font-weight: 700; color: var(--color-text); }
+.stat-label { display: block; font-size: 22rpx; margin-top: 8rpx; }
+.tip { text-align: center; font-size: 22rpx; color: var(--color-text-3); padding: 24rpx 0 40rpx; }

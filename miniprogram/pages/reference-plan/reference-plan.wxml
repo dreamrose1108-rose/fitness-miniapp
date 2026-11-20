@@ -1,0 +1,15 @@
+<view class="page reference-page">
+ <view class="eyebrow">公开课参考 / 有出处的动作清单</view><view class="heading">{{catalog.title}}</view>
+ <view class="notice">{{catalog.notice}}</view><view class="source" bindtap="overview">复制计划讲解原视频链接 ›</view>
+ <view class="tabs"><button wx:for="{{catalog.days}}" wx:key="id" class="{{selected === index ? 'active' : ''}}" data-index="{{index}}" bindtap="choose">{{item.title}}</button></view>
+ <view class="section"><view class="title">{{day.subtitle}}</view><text>{{done}} / {{rows.length}} 完成</text></view>
+ <view class="source" bindtap="source">复制本训练日跟练视频链接 ›</view>
+ <view class="hint">这是三个训练日的清单，不等同于固定的一周或原版递进周期。请按原视频与自身恢复安排训练和休息。</view>
+ <view wx:for="{{rows}}" wx:key="key" class="card {{item.done ? 'done' : ''}}">
+  <view class="title">{{index + 1}}. {{item.name}}</view><view wx:if="{{item.note}}" class="hint">{{item.note}}</view>
+  <view class="fields"><label>组数<input type="number" maxlength="2" value="{{item.sets}}" placeholder="待填写" data-key="{{item.key}}" data-field="sets" bindinput="edit"/></label><label>次数{{item.eachSide ? ' / 侧' : ''}}<input type="number" maxlength="2" value="{{item.reps}}" placeholder="待填写" data-key="{{item.key}}" data-field="reps" bindinput="edit"/></label><label>休息 / 秒<input type="number" maxlength="3" value="{{item.rest}}" placeholder="待填写" data-key="{{item.key}}" data-field="rest" bindinput="edit"/></label></view>
+  <view class="actions"><button wx:if="{{item.exerciseId}}" size="mini" data-key="{{item.key}}" bindtap="demo">动作库参考演示 ›</button><button wx:else size="mini" bindtap="source">动作演示待核对 · 原视频</button><button size="mini" data-key="{{item.key}}" bindtap="toggle">{{item.done ? '已完成 ✓' : '标记完成'}}</button></view>
+ </view>
+ <button class="btn-primary" bindtap="save">{{dirty ? '保存个人组次设置' : '保存到本机'}}</button><view class="hint">允许保存未填完的草稿。个人组次只在本机保存，不代表原作者处方，也不会自动计入热量。</view>
+ <button bindtap="reset">开始新一轮 · 保留组次</button><view class="hint">动作清单核对：2026-11-20。动作库演示来自独立素材库，并非两位作者的原视频。</view>
+</view>

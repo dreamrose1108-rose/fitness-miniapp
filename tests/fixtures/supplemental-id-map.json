@@ -1,0 +1,488 @@
+[
+  {
+    "id": "9000",
+    "name": "站姿哑铃过顶臂屈伸",
+    "body": "上臂",
+    "equipment": "哑铃",
+    "target": "肱三头肌",
+    "bodyKey": "upper arms",
+    "source": "section-upper-arms.json"
+  },
+  {
+    "id": "9001",
+    "name": "哑铃锤式弯举",
+    "body": "上臂",
+    "equipment": "哑铃",
+    "target": "肱肌／肱桡肌／肱二头肌",
+    "bodyKey": "upper arms",
+    "source": "section-upper-arms.json"
+  },
+  {
+    "id": "9002",
+    "name": "坐姿哑铃过顶臂屈伸（靠背支撑）",
+    "body": "上臂",
+    "equipment": "哑铃 + 训练凳",
+    "target": "肱三头肌",
+    "bodyKey": "upper arms",
+    "source": "section-upper-arms.json"
+  },
+  {
+    "id": "9003",
+    "name": "绳索过顶臂屈伸（绳把）",
+    "body": "上臂",
+    "equipment": "拉力器 + 绳把",
+    "target": "肱三头肌",
+    "bodyKey": "upper arms",
+    "source": "section-upper-arms.json"
+  },
+  {
+    "id": "9004",
+    "name": "地面坐姿绳索托臂弯举",
+    "body": "上臂",
+    "equipment": "拉力器 + 直杆 + 训练软垫",
+    "target": "肱二头肌",
+    "bodyKey": "upper arms",
+    "source": "section-upper-arms.json"
+  },
+  {
+    "id": "9005",
+    "name": "单臂绳索三头下压",
+    "body": "上臂",
+    "equipment": "拉力器 + 单手D把",
+    "target": "肱三头肌",
+    "bodyKey": "upper arms",
+    "source": "section-upper-arms.json"
+  },
+  {
+    "id": "9006",
+    "name": "站姿双哑铃同步弯举",
+    "body": "上臂",
+    "equipment": "哑铃",
+    "target": "肱二头肌",
+    "bodyKey": "upper arms",
+    "source": "section-upper-arms.json"
+  },
+  {
+    "id": "9007",
+    "name": "绳索三头下压（绳把）",
+    "body": "上臂",
+    "equipment": "拉力器＋绳把",
+    "target": "肱三头肌",
+    "bodyKey": "upper arms",
+    "source": "section-upper-arms.json"
+  },
+  {
+    "id": "9008",
+    "name": "交替哑铃锤式弯举",
+    "body": "上臂",
+    "equipment": "哑铃",
+    "target": "肱肌、肱桡肌；肱二头肌协同",
+    "bodyKey": "upper arms",
+    "source": "section-upper-arms.json"
+  },
+  {
+    "id": "9009",
+    "name": "哥本哈根侧平板髋内收",
+    "body": "大腿",
+    "equipment": "训练凳 + 训练软垫",
+    "target": "髋内收肌／核心",
+    "bodyKey": "upper legs",
+    "source": "section-upper-legs.json"
+  },
+  {
+    "id": "9010",
+    "name": "哑铃后撤弓步（单侧示范）",
+    "body": "大腿",
+    "equipment": "哑铃",
+    "target": "大腿／臀部",
+    "bodyKey": "upper legs",
+    "source": "section-upper-legs.json"
+  },
+  {
+    "id": "9011",
+    "name": "哑铃直腿硬拉",
+    "body": "大腿",
+    "equipment": "哑铃",
+    "target": "腘绳肌／臀部",
+    "bodyKey": "upper legs",
+    "source": "section-upper-legs.json"
+  },
+  {
+    "id": "9012",
+    "name": "哑铃交替后撤弓步",
+    "body": "大腿",
+    "equipment": "哑铃",
+    "target": "臀部／大腿",
+    "bodyKey": "upper legs",
+    "source": "section-upper-legs.json"
+  },
+  {
+    "id": "9013",
+    "name": "单腿旋转弓步蹲",
+    "body": "大腿",
+    "equipment": "配重片 + 训练凳",
+    "target": "臀部／大腿",
+    "bodyKey": "upper legs",
+    "source": "section-upper-legs.json"
+  },
+  {
+    "id": "9014",
+    "name": "杠铃前蹲",
+    "body": "大腿",
+    "equipment": "杠铃",
+    "target": "大腿／臀部",
+    "bodyKey": "upper legs",
+    "source": "section-upper-legs.json"
+  },
+  {
+    "id": "9015",
+    "name": "器械臀推",
+    "body": "大腿",
+    "equipment": "臀推器械",
+    "target": "臀部",
+    "bodyKey": "upper legs",
+    "source": "section-upper-legs.json"
+  },
+  {
+    "id": "9016",
+    "name": "哑铃罗马尼亚硬拉",
+    "body": "大腿",
+    "equipment": "哑铃",
+    "target": "腿后侧／臀部",
+    "bodyKey": "upper legs",
+    "source": "section-upper-legs.json"
+  },
+  {
+    "id": "9017",
+    "name": "坐姿腿弯举",
+    "body": "大腿",
+    "equipment": "坐姿腿弯举器械",
+    "target": "腿后侧",
+    "bodyKey": "upper legs",
+    "source": "section-upper-legs.json"
+  },
+  {
+    "id": "9018",
+    "name": "器械坐姿髋外展",
+    "body": "大腿",
+    "equipment": "坐姿髋外展器械",
+    "target": "臀中肌／髋外展肌群",
+    "bodyKey": "upper legs",
+    "source": "section-upper-legs.json"
+  },
+  {
+    "id": "9019",
+    "name": "哑铃地面臀桥",
+    "body": "大腿",
+    "equipment": "哑铃、地面",
+    "target": "臀大肌",
+    "bodyKey": "upper legs",
+    "source": "section-upper-legs.json"
+  },
+  {
+    "id": "9020",
+    "name": "侧卧髋外展（侧卧抬腿）",
+    "body": "大腿",
+    "equipment": "地面",
+    "target": "臀中肌、臀小肌",
+    "bodyKey": "upper legs",
+    "source": "section-upper-legs.json"
+  },
+  {
+    "id": "9021",
+    "name": "单臂哑铃俯身划船",
+    "body": "背部",
+    "equipment": "哑铃 + 训练凳",
+    "target": "背部",
+    "bodyKey": "back",
+    "source": "section-back.json"
+  },
+  {
+    "id": "9022",
+    "name": "凳背支撑坐姿单臂绳索划船（中立握）",
+    "body": "背部",
+    "equipment": "拉力器 + 单手D把 + 训练凳",
+    "target": "背部",
+    "bodyKey": "back",
+    "source": "section-back.json"
+  },
+  {
+    "id": "9023",
+    "name": "宽距中立握高位下拉",
+    "body": "背部",
+    "equipment": "拉力器 + 宽距中立握横梁",
+    "target": "背阔肌／上背",
+    "bodyKey": "back",
+    "source": "section-back.json"
+  },
+  {
+    "id": "9024",
+    "name": "凳背支撑坐姿单臂高位绳索划船（中立握）",
+    "body": "背部",
+    "equipment": "拉力器 + 单手D把 + 训练凳",
+    "target": "背部",
+    "bodyKey": "back",
+    "source": "section-back.json"
+  },
+  {
+    "id": "9025",
+    "name": "坐姿单臂器械划船",
+    "body": "背部",
+    "equipment": "坐姿单臂器械划船器械",
+    "target": "背阔肌",
+    "bodyKey": "back",
+    "source": "section-back.json"
+  },
+  {
+    "id": "9026",
+    "name": "器械助力引体向上",
+    "body": "背部",
+    "equipment": "助力引体向上器械",
+    "target": "背部／肱二头肌",
+    "bodyKey": "back",
+    "source": "section-back.json"
+  },
+  {
+    "id": "9027",
+    "name": "反握哑铃俯身划船",
+    "body": "背部",
+    "equipment": "哑铃",
+    "target": "背阔肌；肱二头肌与肩胛后缩肌群协同",
+    "bodyKey": "back",
+    "source": "section-back.json"
+  },
+  {
+    "id": "9028",
+    "name": "仰卧触膝卷腹",
+    "body": "腰腹",
+    "equipment": "自重＋训练垫",
+    "target": "腹部",
+    "bodyKey": "waist",
+    "source": "section-waist.json"
+  },
+  {
+    "id": "9029",
+    "name": "反向卷腹",
+    "body": "腰腹",
+    "equipment": "自重＋训练垫",
+    "target": "腹部",
+    "bodyKey": "waist",
+    "source": "section-waist.json"
+  },
+  {
+    "id": "9030",
+    "name": "前臂平板支撑",
+    "body": "腰腹",
+    "equipment": "自重＋训练垫",
+    "target": "核心",
+    "bodyKey": "waist",
+    "source": "section-waist.json"
+  },
+  {
+    "id": "9031",
+    "name": "侧平板支撑",
+    "body": "腰腹",
+    "equipment": "自重＋训练垫",
+    "target": "侧腹／核心",
+    "bodyKey": "waist",
+    "source": "section-waist.json"
+  },
+  {
+    "id": "9032",
+    "name": "绳索帕洛夫抗旋转推",
+    "body": "腰腹",
+    "equipment": "拉力器＋D形把手",
+    "target": "核心抗旋转",
+    "bodyKey": "waist",
+    "source": "section-waist.json"
+  },
+  {
+    "id": "9033",
+    "name": "空中自行车卷腹",
+    "body": "腰腹",
+    "equipment": "地面",
+    "target": "腹斜肌、腹直肌",
+    "bodyKey": "waist",
+    "source": "section-waist.json"
+  },
+  {
+    "id": "9034",
+    "name": "坐姿屈膝收腿",
+    "body": "腰腹",
+    "equipment": "地面",
+    "target": "腹部稳定；屈髋肌协同",
+    "bodyKey": "waist",
+    "source": "section-waist.json"
+  },
+  {
+    "id": "9035",
+    "name": "前臂后撑交替屈伸腿",
+    "body": "腰腹",
+    "equipment": "地面",
+    "target": "腹部稳定；屈髋肌协同",
+    "bodyKey": "waist",
+    "source": "section-waist.json"
+  },
+  {
+    "id": "9036",
+    "name": "地面哑铃卧推",
+    "body": "胸部",
+    "equipment": "哑铃 + 训练软垫",
+    "target": "胸部／肱三头肌",
+    "bodyKey": "chest",
+    "source": "section-chest.json"
+  },
+  {
+    "id": "9037",
+    "name": "地面哑铃飞鸟",
+    "body": "胸部",
+    "equipment": "哑铃 + 训练软垫",
+    "target": "胸部",
+    "bodyKey": "chest",
+    "source": "section-chest.json"
+  },
+  {
+    "id": "9038",
+    "name": "站姿绳索夹胸",
+    "body": "胸部",
+    "equipment": "拉力器 + 双侧手柄",
+    "target": "胸部",
+    "bodyKey": "chest",
+    "source": "section-chest.json"
+  },
+  {
+    "id": "9039",
+    "name": "坐姿绳索向上夹胸（低位滑轮）",
+    "body": "胸部",
+    "equipment": "拉力器 + 双侧手柄 + 训练凳",
+    "target": "胸部",
+    "bodyKey": "chest",
+    "source": "section-chest.json"
+  },
+  {
+    "id": "9040",
+    "name": "跪姿俯卧撑",
+    "body": "胸部",
+    "equipment": "地面",
+    "target": "胸大肌；肱三头肌、三角肌前束协同",
+    "bodyKey": "chest",
+    "source": "section-chest.json"
+  },
+  {
+    "id": "9041",
+    "name": "哑铃地面挤压卧推",
+    "body": "胸部",
+    "equipment": "哑铃、地面",
+    "target": "胸大肌；肱三头肌协同",
+    "bodyKey": "chest",
+    "source": "section-chest.json"
+  },
+  {
+    "id": "9042",
+    "name": "哑铃俯身反向飞鸟",
+    "body": "肩部",
+    "equipment": "哑铃 + 训练凳",
+    "target": "三角肌后束／上背",
+    "bodyKey": "shoulders",
+    "source": "section-shoulders.json"
+  },
+  {
+    "id": "9043",
+    "name": "器械反向飞鸟",
+    "body": "肩部",
+    "equipment": "反向飞鸟器械",
+    "target": "三角肌后束／上背",
+    "bodyKey": "shoulders",
+    "source": "section-shoulders.json"
+  },
+  {
+    "id": "9044",
+    "name": "仰卧绳索面拉",
+    "body": "肩部",
+    "equipment": "拉力器 + 绳把 + 训练凳",
+    "target": "三角肌后束／上背",
+    "bodyKey": "shoulders",
+    "source": "section-shoulders.json"
+  },
+  {
+    "id": "9045",
+    "name": "单臂绳索Y字侧平举",
+    "body": "肩部",
+    "equipment": "拉力器 + 单手D把",
+    "target": "肩部",
+    "bodyKey": "shoulders",
+    "source": "section-shoulders.json"
+  },
+  {
+    "id": "9046",
+    "name": "绳索后束划船（绳把）",
+    "body": "肩部",
+    "equipment": "拉力器 + 绳把",
+    "target": "三角肌后束／上背",
+    "bodyKey": "shoulders",
+    "source": "section-shoulders.json"
+  },
+  {
+    "id": "9047",
+    "name": "站姿绳索面拉",
+    "body": "肩部",
+    "equipment": "拉力器＋绳把",
+    "target": "三角肌后束／上背",
+    "bodyKey": "shoulders",
+    "source": "section-shoulders.json"
+  },
+  {
+    "id": "9048",
+    "name": "站姿哑铃推肩",
+    "body": "肩部",
+    "equipment": "哑铃",
+    "target": "三角肌前束与中束；肱三头肌协同",
+    "bodyKey": "shoulders",
+    "source": "section-shoulders.json"
+  },
+  {
+    "id": "9049",
+    "name": "哑铃俯身反向飞鸟",
+    "body": "肩部",
+    "equipment": "哑铃",
+    "target": "三角肌后束；菱形肌、斜方肌中部协同",
+    "bodyKey": "shoulders",
+    "source": "section-shoulders.json"
+  },
+  {
+    "id": "9050",
+    "name": "哑铃硬拉外旋",
+    "body": "肩部",
+    "equipment": "轻哑铃",
+    "target": "髋铰链与肩带外旋协调",
+    "bodyKey": "shoulders",
+    "source": "section-shoulders.json"
+  },
+  {
+    "id": "9051",
+    "name": "站姿哑铃外旋夹背",
+    "body": "肩部",
+    "equipment": "轻哑铃",
+    "target": "肩外旋肌群与肩胛控制",
+    "bodyKey": "shoulders",
+    "source": "section-shoulders.json"
+  },
+  {
+    "id": "9052",
+    "name": "站姿提踵（踏板）",
+    "body": "小腿",
+    "equipment": "踏板 + 稳固支撑",
+    "target": "小腿",
+    "bodyKey": "lower legs",
+    "source": "section-lower-legs.json"
+  },
+  {
+    "id": "9053",
+    "name": "哑铃站姿提踵",
+    "body": "小腿",
+    "equipment": "哑铃",
+    "target": "腓肠肌、比目鱼肌",
+    "bodyKey": "lower legs",
+    "source": "section-lower-legs.json"
+  }
+]

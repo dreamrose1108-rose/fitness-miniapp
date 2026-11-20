@@ -1,0 +1,128 @@
+<view class="page">
+  <!-- 今日摄入汇总 -->
+  <view class="card sum-card">
+    <view class="flex-between">
+      <view>
+        <text class="sum-label">今日摄入</text>
+        <text class="sum-num">{{totalIntake}} <text class="sum-unit">kcal</text></text>
+      </view>
+      <view class="sum-right">
+        <text class="text-3">目标 {{target}}</text>
+        <text class="remain">剩余 {{remain}}</text>
+      </view>
+    </view>
+    <view class="progress"><view class="progress-bar" style="width:{{progressPercent}}%"></view></view>
+  </view>
+
+  <!-- 餐次切换 -->
+  <view class="meal-tabs">
+    <view
+      wx:for="{{mealTypes}}"
+      wx:key="key"
+      class="meal-tab {{activeMeal === item.key ? 'active' : ''}}"
+      data-key="{{item.key}}"
+      bindtap="switchMeal"
+    >{{item.label}}</view>
+  </view>
+
+  <!-- 添加按钮 -->
+  <view class="add-row">
+    <button class="btn-primary add-btn" bindtap="openPicker">+ 添加{{activeMealLabel}}</button>
+    <button class="photo-btn" bindtap="onTakePhoto" disabled="{{photoUploading}}">📷 拍照记录</button>
+  </view>
+  <view wx:if="{{pendingPhoto}}" class="pending-photo-tip">
+    📷 照片已就绪，选择食物后将自动绑定
+    <text class="pp-cancel" bindtap="clearPendingPhoto">取消</text>
+  </view>
+
+  <!-- 当前餐次记录 -->
+  <view class="card">
+    <view class="card-title">{{activeMealLabel}}记录</view>
+    <view wx:if="{{currentList.length === 0}}" class="empty">
+      <text class="empty-icon">🍽️</text>
+      <text class="text-3">碗里空空的喵 🐟 还没有记录</text>
+    </view>
+    <view wx:else>
+      <view wx:for="{{currentList}}" wx:key="_id" class="food-row">
+        <view class="food-thumb" wx:if="{{item.photoFileID}}" data-fileid="{{item.photoFileID}}" catchtap="previewPhoto">
+          <image src="{{item.photoSrc}}" mode="aspectFill" class="thumb-img" lazy-load />
+        </view>
+        <view class="food-info">
+          <text class="food-name">{{item.foodName}}</text>
+          <text class="food-amount text-3">{{item.amount}}g · {{item.mealLabel}}</text>
+        </view>
+        <text class="food-kcal">{{item.kcal}} kcal</text>
+        <text class="del" data-id="{{item._id}}" bindtap="onDelete">✕</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 数据源状态提示 -->
+  <view wx:if="{{usingLocalDb}}" class="tip">当前为离线内置食物库，云端可用后自动恢复云端库</view>
+
+  <!-- 食物选择弹层 -->
+  <view wx:if="{{showPicker}}" class="mask" bindtap="closePicker"></view>
+  <view class="picker {{showPicker ? 'show' : ''}}">
+    <view class="picker-head">
+      <text class="picker-title">选择食物</text>
+      <text class="picker-close" bindtap="closePicker">关闭</text>
+    </view>
+    <!-- 分类 -->
+    <scroll-view scroll-x class="cat-bar">
+      <view
+        wx:for="{{categories}}" wx:key="*this"
+        class="cat-item {{activeCat === item ? 'active' : ''}}"
+        data-cat="{{item}}" bindtap="switchCat"
+      >{{item}}</view>
+    </scroll-view>
+    <!-- 搜索 -->
+    <view class="search-row">
+      <input class="search" placeholder="想吃什么喵？" bindinput="onSearch" value="{{keyword}}" />
+      <view class="add-custom-btn" bindtap="openCustomForm">+ 自定义</view>
+    </view>
+    <!-- 食物列表 -->
+    <scroll-view scroll-y class="food-list">
+      <view
+        wx:for="{{filteredFoods}}" wx:key="name"
+        class="picker-food" data-food="{{item}}" bindtap="selectFood"
+      >
+        <view>
+          <view class="pf-name-row">
+            <text class="pf-name">{{item.name}}</text>
+            <text wx:if="{{item.source === 'custom'}}" class="pf-badge">自定义</text>
+          </view>
+          <text class="pf-cat text-3">{{item.cat}} · {{item.unit}}</text>
+        </view>
+        <text class="pf-kcal">{{item.kcal}} kcal</text>
+      </view>
+      <view wx:if="{{filteredFoods.length === 0}}" class="empty">
+        <text class="text-3">喵没找到这个食物 🐾 换个关键词，或添加自定义食物</text>
+      </view>
+    </scroll-view>
+  </view>
+
+  <!-- 自定义食物表单弹层 -->
+  <view wx:if="{{showCustomForm}}" class="mask" bindtap="closeCustomForm"></view>
+  <view wx:if="{{showCustomForm}}" class="custom-form">
+    <view class="cf-title">添加自定义食物</view>
+    <view class="cf-item">
+      <text class="cf-label">名称</text>
+      <input class="cf-input" value="{{cfName}}" bindinput="onCfName" placeholder="如：妈妈牌红烧肉（喵会记住）" maxlength="20" />
+    </view>
+    <view class="cf-item">
+      <text class="cf-label">分类</text>
+      <picker range="{{cfCats}}" value="{{cfCatIndex}}" bindchange="onCfCat">
+        <view class="cf-picker">{{cfCats[cfCatIndex]}} ›</view>
+      </picker>
+    </view>
+    <view class="cf-item">
+      <text class="cf-label">热量(kcal)</text>
+      <input class="cf-input" type="digit" value="{{cfKcal}}" bindinput="onCfKcal" placeholder="每100g/ml的热量" />
+    </view>
+    <view class="cf-tip text-3">热量按每 100g 或 100ml 计算，可参考包装营养成分表</view>
+    <view class="cf-btns">
+      <button class="cf-cancel" bindtap="closeCustomForm">取消</button>
+      <button class="cf-ok" bindtap="submitCustom" disabled="{{cfSubmitting}}">{{cfSubmitting ? '保存中...' : '保存'}}</button>
+    </view>
+  </view>
+</view>

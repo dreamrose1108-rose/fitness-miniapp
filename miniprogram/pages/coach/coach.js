@@ -1,0 +1,162 @@
+// pages/coach/coach.js — AI 教练对话（打字机流式渲染）
+const app = getApp();
+const { call } = require('../../utils/cloud.js');
+
+let msgSeq = 0;
+
+// Markdown 兜底清洗：气泡是纯文本，AI 若输出 Markdown 语法则转成友好纯文本
+function fmtContent(raw) {
+  return String(raw || '')
+    .replace(/\r/g, '')
+    .split('\n').map(l =>
+      l
+        .replace(/^\s*#{1,6}\s*/, '')        // # 标题 → 纯文字
+        .replace(/\*\*(.+?)\*\*/g, '$1')     // **粗体** → 纯文字
+        .replace(/^\s*[-*+]\s+/, '🐾 ')      // 列表项 → 猫爪
+        .replace(/^\s*>\s?/, '')              // 引用符
+        .replace(/\|/g, ' ')                  // 表格竖线 → 空格
+        .replace(/`/g, '')
+    ).join('\n')
+    .replace(/\n{3,}/g, '\n\n');
+}
+
+Page({
+  data: {
+    messages: [],
+    inputText: '',
+    thinking: false,
+    sendError: '',
+    typing: false,        // 打字机渲染中
+    scrollToId: '',
+    quickQuestions: [
+      '如何制定一周减脂计划？',
+      '减脂期应该怎么吃？',
+      '跑步和力量训练怎么搭配？',
+      '如何避免减肥平台期？'
+    ]
+  },
+
+  async onLoad() {
+    if (!await app.login()) return;
+    await this.loadHistory();
+  },
+
+  async loadHistory() {
+    try {
+      const list = await call('record', {
+        action: 'list', type: 'coach', limit: 20
+      }).catch(() => []);
+      const messages = (list || []).map(item => ({
+        id: ++msgSeq,
+        role: item.role,
+        content: fmtContent(item.content)
+      }));
+      if (!this._hasSent && !this._unloaded) this.setData({ messages }, this.scrollToBottom);
+    } catch (e) { /* 无历史不影响使用 */ }
+  },
+
+  onInput(e) { this.setData({ inputText: e.detail.value }); },
+
+  onQuickQuestion(e) {
+    this.setData({ inputText: e.currentTarget.dataset.q }, this.onSend);
+  },
+
+  async onSend() {
+    const text = (this.data.inputText || '').trim();
+    if (!text || this.data.thinking || this.data.typing) return;
+    this._hasSent = true;
+
+    const userMsg = { id: ++msgSeq, role: 'user', content: text };
+    this.setData({
+      messages: [...this.data.messages, userMsg],
+      inputText: '',
+      sendError: '',
+      thinking: true
+    }, this.scrollToBottom);
+
+    try {
+      const res = await call('aiCoach', { question: text });
+      if (this._unloaded) return;
+      const chunks = res && Array.isArray(res.chunks) ? res.chunks.filter(c => typeof c === 'string' && c.length) : [];
+      const answer = res && typeof res.answer === 'string' ? res.answer : chunks.join('');
+      if (!answer.trim()) throw new Error('AI 暂未返回回答，请重试');
+      this.setData({ thinking: false });
+      // 有分片则打字机渲染，否则一次性展示（兼容旧返回/安全兜底文案）
+      if (chunks.length > 1 && chunks.join('') === answer) {
+        await this.typewriterRender(chunks);
+      } else {
+        const aiMsg = { id: ++msgSeq, role: 'assistant', content: fmtContent(answer) };
+        this.setData({
+          messages: [...this.data.messages, aiMsg]
+        }, this.scrollToBottom);
+      }
+    } catch (e) {
+      if (this._unloaded) return;
+      const reason = e && e.message ? e.message : '连接失败，请稍后重试';
+      this.setData({ thinking: false, sendError: reason, inputText: text }, this.scrollToBottom);
+    }
+  },
+
+  // 打字机渲染：先插入空气泡，再按片逐步填充
+  // setData 节流：片段入队，定时器每 80ms 批量合并刷新（避免高频 setData 卡顿）
+  typewriterRender(chunks) {
+    return new Promise((resolve) => {
+      const msgId = ++msgSeq;
+      // 插入空 AI 气泡
+      this.setData({
+        messages: [...this.data.messages, { id: msgId, role: 'assistant', content: '' }],
+        typing: true
+      }, this.scrollToBottom);
+
+      this._twQueue = chunks.slice();   // 待渲染分片
+      this._twMsgId = msgId;
+      this._twBuf = '';                 // 已渲染文本
+      this._twResolve = resolve;
+
+      this._twTimer = setInterval(() => {
+        if (!this._twQueue.length) {
+          this.finishTypewriter();
+          return;
+        }
+        // 每帧出队 1~2 片，长回答不至于渲染太慢
+        const take = this._twQueue.length > 30 ? 2 : 1;
+        for (let i = 0; i < take && this._twQueue.length; i++) {
+          this._twBuf += this._twQueue.shift();
+        }
+        this.updateTypingMessage(this._twBuf);
+      }, 80);
+    });
+  },
+
+  // 局部更新当前打字气泡（按 index 精确 setData，不整列表刷新）
+  updateTypingMessage(content) {
+    const msgs = this.data.messages;
+    const idx = msgs.findIndex(m => m.id === this._twMsgId);
+    if (idx < 0) return;
+    this.setData({
+      [`messages[${idx}].content`]: content
+    }, this.scrollToBottom);
+  },
+
+  finishTypewriter() {
+    if (this._twTimer) clearInterval(this._twTimer);
+    this._twTimer = null;
+    this.setData({ typing: false }, this.scrollToBottom);
+    if (this._twResolve) { this._twResolve(); this._twResolve = null; }
+  },
+
+  scrollToBottom() {
+    const msgs = this.data.messages;
+    if (msgs.length) {
+      this.setData({ scrollToId: 'msg-' + msgs[msgs.length - 1].id });
+    }
+  },
+
+  onUnload() {
+    this._unloaded = true;
+    if (this._twResolve) { this._twResolve(); this._twResolve = null; }
+    // 组件销毁清理定时器（E-09：防内存泄漏）
+    if (this._twTimer) clearInterval(this._twTimer);
+    if (this._searchTimer) clearTimeout(this._searchTimer);
+  }
+});

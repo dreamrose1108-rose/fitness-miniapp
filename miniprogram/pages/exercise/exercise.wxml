@@ -1,0 +1,76 @@
+<view class="page">
+  <!-- 今日消耗汇总 -->
+  <view class="card sum-card">
+    <view class="flex-between">
+      <view>
+        <text class="sum-label">今日消耗</text>
+        <text class="sum-num">{{totalBurned}} <text class="sum-unit">kcal</text></text>
+      </view>
+      <view class="sum-right">
+        <text class="text-3">运动次数</text>
+        <text class="count">{{todayList.length}} 次</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 运动类型网格 -->
+  <navigator url="/pages/plans/plans" class="card flex-between"><view><view class="card-title">训练计划</view><text class="text-2">选模板 · 定部位 · 按动作开始训练</text></view><text>›</text></navigator>
+  <navigator url="/pages/library/library" class="card flex-between"><view><view class="card-title">动作库</view><text class="text-2">1378 个动作 · 部位 / 肌群 / 器械筛选</text></view><text>›</text></navigator>
+  <view class="card">
+    <view class="card-title">选择运动</view>
+    <view class="ex-grid">
+      <view
+        wx:for="{{exercises}}" wx:key="name"
+        class="ex-item {{selected && selected.name === item.name ? 'active' : ''}}"
+        data-item="{{item}}" bindtap="selectExercise"
+      >
+        <text class="ex-icon">{{item.icon}}</text>
+        <text class="ex-name">{{item.name}}</text>
+        <text class="ex-met text-3">MET {{item.met}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 时长输入 + 提交 -->
+  <view class="card input-card">
+    <view wx:if="{{selected}}" class="card-title">{{selected.name}}</view>
+    <view class="flex-between input-row">
+      <text>运动时长</text>
+      <view class="duration-input">
+        <input type="number" value="{{duration}}" bindinput="onDuration" placeholder="30" disabled="{{submitting}}" />
+        <text>分钟</text>
+      </view>
+    </view>
+    <view wx:if="{{selected.library}}" class="input-row"><text>消耗热量（可选）</text><input type="digit" value="{{manualKcal}}" bindinput="onManualKcal" placeholder="填写设备测量值，单位 kcal" disabled="{{submitting}}"/><text class="text-3">留空仅记录动作和时长，不估算消耗。</text></view>
+    <view class="flex-between estimate" wx:if="{{selected && !selected.library && duration > 0}}">
+      <text class="text-3">预计消耗</text>
+      <text class="estimate-num">≈ {{estimatedKcal}} kcal</text>
+    </view>
+    <button class="btn-primary submit-btn" bindtap="onSubmit" disabled="{{!selected || duration <= 0 || submitting}}">
+      {{submitting ? '保存中...' : '完成记录'}}
+    </button>
+  </view>
+
+  <!-- 今日记录 -->
+  <view class="card">
+    <view class="card-title">今日运动</view>
+    <view wx:if="{{todayList.length === 0}}" class="empty">
+      <text class="empty-icon">🏃</text>
+      <text class="text-3">今天还没运动喵 🐾 猫都比你勤快</text>
+    </view>
+    <view wx:else>
+      <view wx:for="{{todayList}}" wx:key="_id" class="ex-row">
+        <text class="ex-row-icon">{{item.icon || '🏃'}}</text>
+        <view class="ex-row-info">
+          <text class="ex-row-name">{{item.name}}</text>
+          <text class="ex-row-meta text-3">{{item.duration}} 分钟</text>
+        </view>
+        <text class="ex-row-kcal">{{item.calorieSource === 'unprovided' ? '未填消耗' : item.kcalBurned + ' kcal'}}</text>
+        <text class="del" data-id="{{item._id}}" bindtap="onDelete">✕</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="tip">未填写消耗的动作只计入运动次数，不计入热量汇总。</view>
+  <view wx:if="{{!selected.library}}" class="tip">按{{weightIsDefault ? '默认' : '最近记录'}}体重 {{weight}}kg 估算{{weightIsDefault ? '，记录体重后更准确' : '，仅供参考'}}</view>
+</view>

@@ -1,0 +1,19 @@
+<view class="page">
+  <picker mode="date" value="{{date}}" end="{{today}}" bindchange="changeDate" disabled="{{busy || loading}}"><view class="date-row">{{date}} <text>选择日期 ›</text></view></picker>
+  <view wx:if="{{error}}" class="card" bindtap="load">{{error}}</view>
+  <view wx:elif="{{loading}}" class="card">正在加载饮水记录…</view>
+  <block wx:else>
+    <view class="card water-hero"><view class="text-2">已记录饮水</view><view class="volume">{{total}}<text> ml</text></view>
+      <view wx:if="{{goal}}">每日目标 {{goal}} ml · {{percent}}%</view><view wx:else>还未设置每日目标</view>
+      <progress wx:if="{{goal}}" percent="{{percent}}" stroke-width="8" activeColor="#2e7d5b" backgroundColor="#e8f3ed" />
+      <view class="goal-link" bindtap="goals">设置饮水目标 ›</view>
+    </view>
+    <view class="card"><view class="card-title">记一杯水</view><view class="presets"><button wx:for="{{presets}}" wx:key="*this" data-ml="{{item}}" bindtap="add" disabled="{{busy}}">+ {{item}} ml</button></view>
+      <view class="custom"><input type="number" value="{{amount}}" bindinput="input" placeholder="自定义毫升数" disabled="{{busy}}"/><button bindtap="add" disabled="{{busy}}" loading="{{busy}}">记录</button></view>
+    </view>
+    <view class="card"><view class="card-title">当天明细 · {{count}} 笔</view><view wx:if="{{!count}}" class="text-2">这一天还没有饮水记录。</view>
+      <view wx:for="{{records}}" wx:key="_id" class="record-row"><text>{{item.time}}</text><text>{{item.ml}} ml</text><button size="mini" data-id="{{item._id}}" bindtap="remove" disabled="{{busy}}">删除</button></view>
+      <view wx:if="{{count > 100}}" class="text-2">仅显示最新100笔，总量包含全部记录。</view>
+    </view>
+  </block>
+</view>

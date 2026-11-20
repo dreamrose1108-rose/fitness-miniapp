@@ -1,0 +1,56 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/diet/diet",
+    "pages/exercise/exercise",
+    "pages/trend/trend",
+    "pages/coach/coach",
+    "pages/mine/mine",
+    "pages/water/water",
+    "pages/calendar/calendar",
+    "pages/goals/goals",
+    "pages/library/library",
+    "pages/movement/movement",
+    "pages/plans/plans",
+    "pages/reference-plan/reference-plan"
+  ],
+  "window": {
+    "navigationBarBackgroundColor": "#ffffff",
+    "navigationBarTitleText": "健身减肥助手",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#f5f6f8",
+    "backgroundTextStyle": "dark",
+    "enablePullDownRefresh": false
+  },
+  "tabBar": {
+    "color": "#9aa0a6",
+    "selectedColor": "#2e7d5b",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "black",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "今日"
+      },
+      {
+        "pagePath": "pages/diet/diet",
+        "text": "饮食"
+      },
+      {
+        "pagePath": "pages/exercise/exercise",
+        "text": "运动"
+      },
+      {
+        "pagePath": "pages/trend/trend",
+        "text": "趋势"
+      },
+      {
+        "pagePath": "pages/coach/coach",
+        "text": "喵教练"
+      }
+    ]
+  },
+  "style": "v2",
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}

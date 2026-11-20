@@ -1,0 +1,92 @@
+.index-page {}
+
+.greeting {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12rpx 8rpx 28rpx;
+}
+.hello { display: block; font-size: 34rpx; font-weight: 600; }
+.date { display: block; font-size: 24rpx; color: var(--color-text-3); margin-top: 8rpx; }
+.avatar {
+  width: 76rpx; height: 76rpx; border-radius: 50%;
+  background: var(--color-primary-light); color: var(--color-primary);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 26rpx; font-weight: 600;
+}
+
+.overview .calorie-main {
+  display: flex; align-items: center; justify-content: space-around;
+  padding: 16rpx 0 24rpx;
+}
+.cal-item { text-align: center; }
+.cal-num { display: block; font-size: 72rpx; font-weight: 700; line-height: 1; color: var(--color-text); }
+.cal-label { display: block; font-size: 24rpx; color: var(--color-text-3); margin-top: 12rpx; }
+.ring {
+  width: 150rpx; height: 150rpx; border-radius: 50%;
+  border: 16rpx solid var(--color-primary-light);
+  border-top-color: var(--color-primary);
+  display: flex; align-items: center; justify-content: center;
+}
+.ring-inner { font-size: 34rpx; font-weight: 600; color: var(--color-primary); }
+
+.cal-row {
+  display: flex; justify-content: space-around;
+  border-top: 1rpx solid var(--color-border); padding-top: 22rpx;
+}
+.cal-cell { display: flex; align-items: center; font-size: 25rpx; color: var(--color-text-2); }
+.dot { width: 16rpx; height: 16rpx; border-radius: 50%; margin-right: 10rpx; }
+.dot-in { background: #5b9e7d; }
+.dot-out { background: #f0a13c; }
+
+.weight-num { display: block; font-size: 56rpx; font-weight: 700; color: var(--color-text); }
+.weight-unit { font-size: 26rpx; font-weight: 400; color: var(--color-text-3); }
+
+/* 打卡卡片 */
+.streak-card .flex-between { align-items: flex-start; }
+.streak-flame { font-size: 64rpx; line-height: 1; margin-top: 8rpx; }
+.streak-info { flex: 1; margin-left: 24rpx; }
+.streak-main { font-size: 30rpx; font-weight: 600; }
+.streak-num { color: var(--color-primary); font-size: 44rpx; font-weight: 700; }
+.streak-sub { font-size: 24rpx; margin-top: 10rpx; }
+.streak-badges { display: flex; flex-wrap: wrap; gap: 12rpx; margin-top: 16rpx; }
+.badge {
+  background: var(--color-primary-light); color: var(--color-primary);
+  font-size: 22rpx; border-radius: 24rpx; padding: 6rpx 20rpx;
+}
+.mini-btn {
+  font-size: 24rpx; color: var(--color-primary);
+  background: var(--color-primary-light);
+  border-radius: 32rpx; padding: 12rpx 24rpx; margin: 0;
+  line-height: 1.4;
+}
+.mini-btn::after { border: none; }
+
+.quick-grid { display: flex; flex-wrap: wrap; }
+.quick-item {
+  width: 25%; text-align: center; font-size: 24rpx; color: var(--color-text-2);
+}
+.quick-icon {
+  width: 92rpx; height: 92rpx; border-radius: 24rpx;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 44rpx; margin: 0 auto 14rpx;
+}
+.quick-diet { background: #fdf0e3; }
+.quick-ex { background: #e7f2fb; }
+.quick-trend { background: #e9f4ec; }
+.quick-coach { background: #f0ebfa; }
+
+.tip { text-align: center; font-size: 22rpx; color: var(--color-text-3); padding: 20rpx 0 40rpx; }
+
+/* ===== 三大营养素 ===== */
+.macro-row {
+  display: flex; margin-top: 20rpx; padding-top: 20rpx;
+  border-top: 1rpx solid var(--color-border);
+}
+.macro-cell { flex: 1; display: flex; flex-direction: column; align-items: center; }
+.macro-val { font-size: 36rpx; font-weight: 600; line-height: 1.2; }
+.macro-val.protein { color: #2e7d5b; }
+.macro-val.carb { color: #f0a13c; }
+.macro-val.fat { color: #e05a4f; }
+.macro-unit { font-size: 22rpx; font-weight: 400; margin-left: 2rpx; }
+.macro-label { font-size: 22rpx; color: var(--color-text-3); margin-top: 4rpx; }

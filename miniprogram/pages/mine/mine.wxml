@@ -1,0 +1,55 @@
+<view class="page">
+  <!-- 用户信息 -->
+  <view class="card user-card">
+    <view class="user-avatar">{{profile.nickname || '🐱'}}</view>
+    <view class="user-info">
+      <text class="user-name">{{profile.nickname || '健身新手'}}</text>
+      <text class="user-sub text-3">目标 {{profile.targetWeight || '--'}} kg · 和猫一起变轻盈</text>
+    </view>
+  </view>
+
+  <!-- 目标设置 -->
+  <navigator url="/pages/goals/goals" class="card flex-between"><view><view class="card-title">营养与饮水目标</view><text class="text-2">两步设置每日计划</text></view><text>›</text></navigator>
+  <view class="card">
+    <view class="card-title">我的目标</view>
+    <view class="setting-row">
+      <text>目标体重</text>
+      <view class="setting-val" bindtap="editField" data-field="targetWeight" data-label="目标体重(kg)">
+        <text>{{profile.targetWeight || '--'}} kg</text><text class="arrow">›</text>
+      </view>
+    </view>
+    <view class="setting-row">
+      <text>身高</text>
+      <view class="setting-val" bindtap="editField" data-field="height" data-label="身高(cm)">
+        <text>{{profile.height || '--'}} cm</text><text class="arrow">›</text>
+      </view>
+    </view>
+    <view class="setting-row">
+      <text>每日摄入目标</text>
+      <view class="setting-val" bindtap="editField" data-field="dailyCalorieTarget" data-label="每日摄入目标(kcal)">
+        <text>{{profile.dailyCalorieTarget || '--'}} kcal</text><text class="arrow">›</text>
+      </view>
+    </view>
+    <view class="setting-row">
+      <text>昵称</text>
+      <view class="setting-val" bindtap="editField" data-field="nickname" data-label="昵称">
+        <text>{{profile.nickname || '点击设置'}}</text><text class="arrow">›</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 数据与隐私 -->
+  <view class="card">
+    <view class="card-title">数据与隐私</view>
+    <view class="setting-row" bindtap="openPrivacyContract">
+      <text>用户隐私保护指引</text><text class="arrow">›</text>
+    </view>
+    <view class="setting-row" bindtap="showPrivacyTip">
+      <text>隐私说明</text><text class="arrow">›</text>
+    </view>
+  </view>
+
+  <view class="card about-card">
+    <text class="text-3">本小程序数据仅供个人健康管理参考，不构成医疗诊断或治疗建议。如有健康问题请咨询专业医师。</text>
+  </view>
+</view>

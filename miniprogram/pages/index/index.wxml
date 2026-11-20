@@ -1,0 +1,111 @@
+<view class="page">
+  <!-- 顶部问候 + 日期 -->
+  <view class="greeting">
+    <view>
+      <text class="hello">你好，开始今天的管理吧</text>
+      <text class="date">{{todayLabel}}</text>
+    </view>
+    <view class="avatar" bindtap="goMine">{{userInfo.nickname || 'Fit'}}</view>
+  </view>
+
+  <!-- 今日热量概览卡片 -->
+  <view class="card overview">
+    <view class="card-title">今日热量</view>
+    <view class="calorie-main">
+      <view class="cal-item">
+        <text class="cal-num">{{summary.net >= 0 ? '' : ''}}{{summary.net}}</text>
+        <text class="cal-label">净摄入 (kcal)</text>
+      </view>
+      <view class="ring">
+        <text class="ring-inner">{{intakePercent}}%</text>
+      </view>
+    </view>
+    <view class="cal-row">
+      <view class="cal-cell">
+        <view class="dot dot-in"></view>
+        <text>摄入 {{summary.intake}}</text>
+      </view>
+      <view class="cal-cell">
+        <view class="dot dot-out"></view>
+        <text>消耗 {{summary.burned}}</text>
+      </view>
+      <view class="cal-cell">
+        <text class="text-3">目标 {{target}}</text>
+      </view>
+    </view>
+    <!-- 三大营养素 -->
+    <view class="macro-row">
+      <view class="macro-cell">
+        <text class="macro-val protein">{{summary.proteinG || 0}}<text class="macro-unit">g</text></text>
+        <text class="macro-label">蛋白质</text>
+      </view>
+      <view class="macro-cell">
+        <text class="macro-val carb">{{summary.carbG || 0}}<text class="macro-unit">g</text></text>
+        <text class="macro-label">碳水</text>
+      </view>
+      <view class="macro-cell">
+        <text class="macro-val fat">{{summary.fatG || 0}}<text class="macro-unit">g</text></text>
+        <text class="macro-label">脂肪</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 体重记录 -->
+  <navigator url="/pages/water/water" class="card flex-between"><view><view class="card-title">饮水记录</view><text class="text-2">记一杯水，查看每日进度</text></view><text>›</text></navigator>
+  <view class="card weight-card">
+    <view class="flex-between">
+      <view>
+        <text class="card-title" style="margin-bottom:8rpx">当前体重</text>
+        <text class="weight-num">{{summary.latestWeight || '--'}}<text class="weight-unit"> kg</text></text>
+      </view>
+      <button class="mini-btn" bindtap="onRecordWeight">🐾 记录体重</button>
+    </view>
+  </view>
+
+  <!-- 打卡激励 -->
+  <view class="card streak-card">
+    <view class="flex-between">
+      <view>
+        <view class="streak-flame">{{streak.todayChecked ? '😺' : '🐱'}}</view>
+      </view>
+      <view class="streak-info">
+        <view class="streak-main">
+          喵～喵～已连续打卡 <text class="streak-num">{{streak.streak}}</text> 天
+        </view>
+        <view class="streak-sub text-3">
+          累计 {{streak.totalDays}} 天
+          <text wx:if="{{streak.next}}"> · 距下一里程碑还差 {{streak.next - streak.totalDays}} 天</text>
+          <text wx:else> · 全部里程碑达成 🎉</text>
+        </view>
+        <view wx:if="{{streak.achieved.length}}" class="streak-badges">
+          <text wx:for="{{streak.achieved}}" wx:key="*this" class="badge">{{item}}天</text>
+        </view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 功能区 -->
+  <view class="card">
+    <view class="card-title">快捷入口</view>
+    <view class="quick-grid">
+      <view class="quick-item" bindtap="goDiet">
+        <view class="quick-icon quick-diet">🍽️</view>
+        <text>记录饮食</text>
+      </view>
+      <view class="quick-item" bindtap="goExercise">
+        <view class="quick-icon quick-ex">🏃</view>
+        <text>记录运动</text>
+      </view>
+      <view class="quick-item" bindtap="goTrend">
+        <view class="quick-icon quick-trend">📈</view>
+        <text>查看趋势</text>
+      </view>
+      <view class="quick-item" bindtap="goCoach">
+        <view class="quick-icon quick-coach">🤖</view>
+        <text>AI 教练</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="tip">数据仅供健康管理参考，不构成医疗建议</view>
+</view>

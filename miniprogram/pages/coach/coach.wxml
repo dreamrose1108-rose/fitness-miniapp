@@ -1,0 +1,63 @@
+<view class="page coach-page">
+  <!-- 免责横幅（猫咪版） -->
+  <view class="disclaimer">🐾 卡路喵的建议仅供参考，不构成医疗诊断</view>
+
+  <!-- 消息列表 -->
+  <scroll-view
+    class="chat-list"
+    scroll-y
+    scroll-into-view="{{scrollToId}}"
+    enhanced
+    show-scrollbar="{{false}}"
+  >
+    <view class="chat-content">
+    <view class="welcome" wx:if="{{messages.length === 0}}">
+      <view class="welcome-avatar"><image class="avatar-img" src="/images/coach-cat.png" mode="aspectFill" /></view>
+      <text class="welcome-title">喵～我是你的猫咪教练</text>
+      <text class="welcome-desc">饮食、运动、减脂计划，喵都知道，随时问喵</text>
+      <view class="quick-questions">
+        <view
+          wx:for="{{quickQuestions}}" wx:key="*this"
+          class="quick-q" data-q="{{item}}" bindtap="onQuickQuestion"
+        >🐾 {{item}}</view>
+      </view>
+    </view>
+
+    <view
+      wx:for="{{messages}}" wx:key="id"
+      id="msg-{{item.id}}"
+      class="msg-row {{item.role === 'user' ? 'right' : 'left'}}"
+    >
+      <view class="msg-avatar avatar-cat" wx:if="{{item.role === 'assistant'}}"><image class="avatar-img" src="/images/coach-cat.png" mode="aspectFill" /></view>
+      <view class="bubble {{item.role === 'user' ? 'bubble-user' : 'bubble-ai'}}">
+        <text>{{item.content}}</text>
+        <text wx:if="{{typing && index === messages.length - 1 && item.role === 'assistant'}}" class="cursor"></text>
+      </view>
+      <view class="msg-avatar avatar-user" wx:if="{{item.role === 'user'}}">我</view>
+    </view>
+
+    <view wx:if="{{sendError}}" class="send-error">{{sendError}} · 问题已保留，可点击发送重试</view>
+
+    <!-- 思考中（猫爪走路） -->
+    <view class="msg-row left" wx:if="{{thinking}}">
+      <view class="msg-avatar avatar-cat"><image class="avatar-img" src="/images/coach-cat.png" mode="aspectFill" /></view>
+      <view class="bubble bubble-ai typing"><text class="paw-walk">🐾 怪喵思考中</text></view>
+    </view>
+    </view>
+  </scroll-view>
+
+  <!-- 输入栏 -->
+  <view class="input-bar safe-bottom">
+    <input
+      class="chat-input"
+      value="{{inputText}}"
+      bindinput="onInput"
+      bindconfirm="onSend"
+      confirm-type="send"
+      placeholder="想问喵什么..."
+      maxlength="500"
+      disabled="{{thinking || typing}}"
+    />
+    <button class="send-btn" style="width:136rpx;height:76rpx;padding:0;margin:0;" bindtap="onSend" disabled="{{thinking || typing || !inputText}}">喵送</button>
+  </view>
+</view>

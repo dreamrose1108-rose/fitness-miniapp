@@ -1,0 +1,26 @@
+# 依赖与产物
+node_modules/
+.miniprogram/
+.auto-test/
+
+# 本地自动化测试目录（含截图/日志，非源码）
+.autotest/
+
+# 密钥类文件（Key 只通过云开发控制台环境变量注入，绝不入库）
+# 若本地需要调试，复制 config.json 为 config.local.json 并自行填写，该文件已被下行忽略
+*.local.json
+
+# 系统文件
+.DS_Store
+Thumbs.db
+
+# 开发者工具本地缓存
+project.private.config.json
+
+# Local reports, downloads and credentials
+reports/
+*.log
+.env
+.env.*
+*.pem
+*.key
