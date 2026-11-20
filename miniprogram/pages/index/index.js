@@ -2,6 +2,8 @@
 const app = getApp();
 const { call } = require('../../utils/cloud.js');
 const { formatDate } = require('../../utils/date.js');
+const schedule = require('../../utils/training-schedule.js');
+const library = require('../../utils/exercise-library.js');
 
 Page({
   data: {
@@ -10,7 +12,8 @@ Page({
     target: 1800,
     intakePercent: 0,
     userInfo: {},
-    streak: { todayChecked: false, streak: 0, totalDays: 0, achieved: [], next: null }
+    streak: { todayChecked: false, streak: 0, totalDays: 0, achieved: [], next: null },
+    todayTraining: null
   },
 
   async onLoad() {
@@ -21,7 +24,35 @@ Page({
 
   async onShow() {
     if (!await app.login()) return;
-    await Promise.all([this.loadProfile(), this.loadSummary(), this.loadStreak()]);
+    await Promise.all([this.loadProfile(), this.loadSummary(), this.loadStreak(), this.loadTodayTraining()]);
+  },
+
+  // 今日训练安排
+  loadTodayTraining() {
+    try {
+      const today = formatDate();
+      const entry = schedule.read().find(x => x.date === today);
+      if (!entry) { this.setData({ todayTraining: null }); return; }
+      const doneCount = Object.values(entry.done || {}).filter(Boolean).length;
+      this.setData({
+        todayTraining: {
+          title: entry.title,
+          planTitle: entry.planTitle,
+          sourceKey: entry.sourceKey,
+          total: entry.exercises.length,
+          done: doneCount,
+          names: entry.exercises.map(x => (library.get(x.id) || {}).displayName || x.name || x.id).slice(0, 4),
+          more: Math.max(0, entry.exercises.length - 4),
+          complete: doneCount >= entry.exercises.length && entry.exercises.length > 0
+        }
+      });
+    } catch (e) {
+      this.setData({ todayTraining: null });
+    }
+  },
+
+  goTraining() {
+    wx.switchTab({ url: '/pages/exercise/exercise' });
   },
 
   // 打卡统计（饮食/运动/体重任一记录即算打卡）

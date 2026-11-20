@@ -50,6 +50,28 @@
     </view>
   </view>
 
+  <!-- 今日训练 -->
+  <view wx:if="{{todayTraining}}" class="card training-card" bindtap="goTraining">
+    <view class="flex-between">
+      <view class="training-main">
+        <view class="training-title-row">
+          <text class="card-title">🏋️ 今日训练</text>
+          <text wx:if="{{todayTraining.complete}}" class="training-done-badge">✅ 已完成</text>
+        </view>
+        <text class="training-plan text-2">{{todayTraining.title}}</text>
+        <view class="training-actions">
+          <text class="training-action" wx:for="{{todayTraining.names}}" wx:key="*this">{{item}}</text>
+          <text wx:if="{{todayTraining.more > 0}}" class="text-3">等 {{todayTraining.total}} 个动作</text>
+        </view>
+        <view class="training-progress">
+          <view class="training-progress-bar" style="width: {{todayTraining.total ? (todayTraining.done / todayTraining.total) * 100 : 0}}%"></view>
+        </view>
+        <text class="text-3 training-count">{{todayTraining.done}} / {{todayTraining.total}} 动作完成</text>
+      </view>
+      <text class="training-arrow">›</text>
+    </view>
+  </view>
+
   <!-- 体重记录 -->
   <navigator url="/pages/water/water" class="card flex-between"><view><view class="card-title">饮水记录</view><text class="text-2">记一杯水，查看每日进度</text></view><text>›</text></navigator>
   <view class="card weight-card">
