@@ -52,7 +52,7 @@ Page({
   },
 
   goTraining() {
-    wx.switchTab({ url: '/pages/exercise/exercise' });
+    wx.navigateTo({ url: '/pages/schedule/schedule' });
   },
 
   // 打卡统计（饮食/运动/体重任一记录即算打卡）
