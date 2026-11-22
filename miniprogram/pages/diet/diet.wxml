@@ -97,8 +97,31 @@
         </view>
         <text class="pf-kcal">{{item.kcal}} kcal</text>
       </view>
-      <view wx:if="{{filteredFoods.length === 0}}" class="empty">
-        <text class="text-3">喵没找到这个食物 🐾 换个关键词，或添加自定义食物</text>
+      <view wx:if="{{filteredFoods.length === 0 && keyword && !aiSearching && !aiResult}}" class="empty">
+        <text class="text-3">喵没找到「{{keyword}}」🐾</text>
+        <button class="ai-search-btn" size="mini" bindtap="aiFoodSearch">🔍 AI 联网查热量</button>
+        <text class="text-3" style="margin-top:8rpx">或切换关键词 / 添加自定义食物</text>
+      </view>
+      <view wx:if="{{aiSearching}}" class="empty">
+        <text class="text-3">🐾 正在联网查询「{{keyword}}」的热量…</text>
+      </view>
+      <view wx:if="{{aiResult}}" class="ai-result">
+        <view class="ai-result-card">
+          <view class="ai-result-title">🔍 AI 查询结果</view>
+          <view class="ai-result-body">
+            <text class="ai-result-name">{{aiResult.name}}</text>
+            <text class="ai-result-kcal">{{aiResult.kcal}} kcal</text>
+            <text class="ai-result-unit">/ {{aiResult.unit || '100g'}}</text>
+          </view>
+          <view class="ai-result-macros" wx:if="{{aiResult.protein}}">
+            <text>蛋白 {{aiResult.protein}}g · 碳水 {{aiResult.carb}}g · 脂肪 {{aiResult.fat}}g</text>
+          </view>
+          <view class="ai-result-actions">
+            <button class="save-ai-btn" size="mini" bindtap="saveAiFood" loading="{{aiSaving}}">保存到食物库</button>
+            <button size="mini" bindtap="clearAiResult">忽略</button>
+          </view>
+          <view class="ai-result-note text-3">AI 数据仅供参考，请核实后使用</view>
+        </view>
       </view>
     </scroll-view>
   </view>

@@ -124,3 +124,22 @@
 .photo-ai-note{display:block;font-size:22rpx;line-height:1.6;color:var(--color-text-2);margin-top:12rpx;}
 .disclosure{margin:-8rpx 0 24rpx;}
 .photo-processing-canvas{position:fixed;left:-9999px;top:0;width:1px;height:1px;pointer-events:none;}
+
+/* AI 在线查询 */
+.ai-search-btn {
+  background: var(--color-primary) !important; color: #fff !important;
+  font-size: 26rpx; border-radius: 20rpx; margin: 16rpx 0 0; padding: 10rpx 32rpx;
+}
+.ai-result { padding: 0 20rpx 16rpx; }
+.ai-result-card {
+  background: var(--color-primary-light); border-radius: 16rpx; padding: 24rpx;
+}
+.ai-result-title { font-size: 26rpx; color: var(--color-primary); font-weight: 600; margin-bottom: 12rpx; }
+.ai-result-body { display: flex; align-items: baseline; gap: 12rpx; margin-bottom: 8rpx; }
+.ai-result-name { font-size: 30rpx; font-weight: 600; }
+.ai-result-kcal { font-size: 36rpx; color: var(--color-primary); font-weight: 700; }
+.ai-result-unit { font-size: 22rpx; color: var(--color-text-3); }
+.ai-result-macros { font-size: 24rpx; color: var(--color-text-2); margin-bottom: 16rpx; }
+.ai-result-actions { display: flex; gap: 16rpx; }
+.save-ai-btn { background: var(--color-primary) !important; color: #fff !important; font-size: 24rpx; border-radius: 20rpx; }
+.ai-result-note { font-size: 20rpx; margin-top: 12rpx; }

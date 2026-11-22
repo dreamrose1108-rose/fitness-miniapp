@@ -24,6 +24,9 @@ Page({
     filteredFoods: [],
     cloudFoods: [],        // 云端拉取的食物（官方+自定义）
     usingLocalDb: false,   // 云端不可用时降级内置库
+    aiSearching: false,
+    aiResult: null,
+    aiSaving: false,
     photoUploading: false,
     pendingPhoto: '',      // 待绑定到记录的餐拍照片 fileID
     // 自定义食物表单
@@ -104,7 +107,71 @@ Page({
     if (this.data.cloudFoods.length === 0 && !this.data.usingLocalDb) {
       this.setData({ usingLocalDb: true });
     }
-    this.setData({ showPicker: true, keyword: '', activeCat: '全部' }, this.filterFoods);
+    this.setData({ showPicker: true, keyword: '', activeCat: '全部', aiResult: null, aiSearching: false }, this.filterFoods);
+  },
+
+  // AI 联网查询食物热量
+  async aiFoodSearch() {
+    const kw = this.data.keyword.trim();
+    if (!kw) return;
+    this.setData({ aiSearching: true, aiResult: null });
+    try {
+      const res = await call('aiCoach', {
+        question: `联网搜索：「${kw}」每100克（或100毫升）的热量是多少千卡？同时查蛋白质、碳水、脂肪（克）。只返回数据，格式：名称|热量kcal|蛋白质g|碳水g|脂肪g|单位（100g或100ml），用竖线分隔，不要解释。`
+      });
+      const answer = res && res.answer || '';
+      // 解析 AI 回答中的竖线分隔数据
+      const m = answer.match(/([^|\n]+)\|(\d+)[^0-9]*\|([\d.]+)[^0-9]*\|([\d.]+)[^0-9]*\|([\d.]+)[^0-9]*\|(100g|100ml)/);
+      if (m) {
+        this.setData({
+          aiSearching: false,
+          aiResult: { name: m[1].trim(), kcal: Number(m[2]), protein: Number(m[3]), carb: Number(m[4]), fat: Number(m[5]), unit: m[6] }
+        });
+      } else {
+        // 尝试从回答中提取数字
+        const kcal = answer.match(/(\d{2,4})\s*(?:千卡|kcal|大卡)/i);
+        if (kcal) {
+          this.setData({
+            aiSearching: false,
+            aiResult: { name: kw, kcal: Number(kcal[1]), protein: null, carb: null, fat: null, unit: '100g', raw: answer.slice(0, 200) }
+          });
+        } else {
+          wx.showToast({ title: 'AI 未能查到热量数据', icon: 'none' });
+          this.setData({ aiSearching: false });
+        }
+      }
+    } catch (e) {
+      this.setData({ aiSearching: false });
+      wx.showToast({ title: '查询失败，请重试', icon: 'none' });
+    }
+  },
+
+  async saveAiFood() {
+    const r = this.data.aiResult;
+    if (!r || this.data.aiSaving) return;
+    this.setData({ aiSaving: true });
+    try {
+      await call('foodLib', {
+        action: 'addCustom',
+        name: r.name,
+        cat: '其他',
+        kcal: r.kcal,
+        unit: r.unit,
+        protein: r.protein || undefined,
+        carb: r.carb || undefined,
+        fat: r.fat || undefined
+      });
+      wx.showToast({ title: '已保存到食物库 🐾' });
+      this.setData({ aiResult: null, aiSaving: false });
+      this.loadCloudFoods(); // 刷新列表
+    } catch (e) {
+      this.setData({ aiSaving: false });
+      wx.showToast({ title: e.message || '保存失败', icon: 'none' });
+    }
+  },
+
+  clearAiResult() {
+    this.setData({ aiResult: null });
   },
   closePicker() {
     if (this._foodSelectionBusy) return;
