@@ -37,6 +37,14 @@
     <text class="pp-cancel" bindtap="clearPendingPhoto">取消</text>
   </view>
 
+  <!-- 日期切换 -->
+  <view class="date-nav">
+    <picker mode="date" value="{{viewDate || today}}" end="{{today}}" bindchange="onDateChange">
+      <view class="date-nav-btn">📅 {{viewDateLabel}}</view>
+    </picker>
+    <text wx:if="{{viewDate}}" class="date-nav-today" bindtap="goToday">回到今天</text>
+  </view>
+
   <!-- 当前餐次记录 -->
   <view class="card">
     <view class="card-title">{{activeMealLabel}}记录</view>
@@ -49,9 +57,9 @@
         <view class="food-thumb" wx:if="{{item.photoFileID}}" data-fileid="{{item.photoFileID}}" catchtap="previewPhoto">
           <image src="{{item.photoSrc}}" mode="aspectFill" class="thumb-img" lazy-load />
         </view>
-        <view class="food-info">
+        <view class="food-info" data-id="{{item._id}}" bindtap="onEditRecord">
           <text class="food-name">{{item.foodName}}</text>
-          <text class="food-amount text-3">{{item.amount}}g · {{item.mealLabel}}</text>
+          <text class="food-amount text-3">{{item.amount}}g · {{item.mealLabel}} · 点击修改</text>
         </view>
         <view><text class="food-kcal">{{item.kcal}} kcal</text><text wx:if="{{item.estimated}}" class="photo-ai-note">照片估算 · 已确认</text></view>
         <text class="del" data-id="{{item._id}}" bindtap="onDelete">✕</text>

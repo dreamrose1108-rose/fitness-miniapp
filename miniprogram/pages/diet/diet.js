@@ -12,6 +12,8 @@ Page({
     activeMealLabel: '早餐',
     allRecords: [],
     currentList: [],
+    viewDate: '',
+    viewDateLabel: '今天',
     totalIntake: 0,
     target: 1800,
     remain: 1800,
@@ -52,9 +54,9 @@ Page({
 
   async loadRecords() {
     try {
-      const today = formatDate();
+      const date = this.data.viewDate || formatDate();
       const list = await call('record', {
-        action: 'list', type: 'diet', start: today, end: today, limit: 100
+        action: 'list', type: 'diet', start: date, end: date, limit: 100
       });
       const labelMap = { breakfast: '早餐', lunch: '午餐', dinner: '晚餐', snack: '加餐' };
       const decorated = list.map(r => ({ ...r, mealLabel: labelMap[r.mealType] || '' }));
@@ -356,6 +358,60 @@ Page({
   async previewPhoto(e) {
     try { const url = await readPhoto(e.currentTarget.dataset.fileid); wx.previewImage({ urls: [url] }); }
     catch (e) { wx.showToast({ title: '图片加载失败', icon: 'none' }); }
+  },
+
+  // ===== 日期切换 =====
+  onDateChange(e) {
+    const date = e.detail.value;
+    const today = formatDate();
+    const d = new Date(date + 'T12:00:00');
+    const week = ['日','一','二','三','四','五','六'][d.getDay()];
+    const label = date === today ? '今天' : `${d.getMonth()+1}月${d.getDate()}日 周${week}`;
+    this.setData({ viewDate: date, viewDateLabel: label }, () => this.loadRecords());
+  },
+  goToday() {
+    this.setData({ viewDate: '', viewDateLabel: '今天' }, () => this.loadRecords());
+  },
+
+  // ===== 编辑记录分量 =====
+  onEditRecord(e) {
+    const id = e.currentTarget.dataset.id;
+    const record = this.data.allRecords.find(r => r._id === id);
+    if (!record) return;
+    wx.showModal({
+      title: `修改「${record.foodName}」`,
+      content: '',
+      editable: true,
+      placeholderText: `当前 ${record.amount}g，输入新分量(g)`,
+      success: async res => {
+        if (!res.confirm || !res.content) return;
+        const newAmount = Number(String(res.content).replace(/[克gG\s]/g, ''));
+        if (!Number.isFinite(newAmount) || newAmount <= 0) {
+          wx.showToast({ title: '请输入有效分量', icon: 'none' });
+          return;
+        }
+        try {
+          // 删旧记录 + 添加新记录（后端无 update，用替换方式）
+          await call('record', { action: 'remove', type: 'diet', id });
+          const newKcal = Math.round(record.kcal * newAmount / record.amount);
+          await call('record', {
+            action: 'add', type: 'diet',
+            data: {
+              date: record.date,
+              mealType: record.mealType,
+              foodName: record.foodName,
+              amount: newAmount,
+              kcal: newKcal,
+              photoFileID: record.photoFileID || ''
+            }
+          });
+          wx.showToast({ title: '已修改 🐾' });
+          this.loadRecords();
+        } catch (err) {
+          wx.showToast({ title: '修改失败', icon: 'none' });
+        }
+      }
+    });
   },
 
   async onDelete(e) {

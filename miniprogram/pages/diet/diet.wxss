@@ -143,3 +143,8 @@
 .ai-result-actions { display: flex; gap: 16rpx; }
 .save-ai-btn { background: var(--color-primary) !important; color: #fff !important; font-size: 24rpx; border-radius: 20rpx; }
 .ai-result-note { font-size: 20rpx; margin-top: 12rpx; }
+
+/* 日期导航 */
+.date-nav { display: flex; align-items: center; gap: 16rpx; margin-bottom: 16rpx; }
+.date-nav-btn { background: var(--color-card); border: 1rpx solid var(--color-border); border-radius: 24rpx; padding: 12rpx 28rpx; font-size: 28rpx; color: var(--color-text); }
+.date-nav-today { color: var(--color-primary); font-size: 26rpx; }
