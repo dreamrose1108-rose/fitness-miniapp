@@ -300,7 +300,9 @@ Page({
           this.clearPendingPhoto();
           return;
         }
-        const amount = Number(res.content);
+        // 兼容用户输入"30克""30g""30 克"等带单位写法，提取纯数字
+        const amountStr = String(res.content).replace(/[克gGkK\s,，。．]/g, '');
+        const amount = Number(amountStr);
         if (!Number.isFinite(amount) || amount <= 0 || !Number.isFinite(food.kcal * amount / 100)) {
           this._foodSelectionBusy = false;
           wx.showToast({ title: '请输入有效分量', icon: 'none' });
