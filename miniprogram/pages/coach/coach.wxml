@@ -95,17 +95,16 @@
     </view>
   </scroll-view>
 
-  <view class="search-options"><button class="search-toggle {{webSearch ? 'selected' : ''}}" size="mini" bindtap="toggleSearch" disabled="{{thinking || typing}}">{{webSearch ? '✓ 联网搜索已开启' : '联网搜索'}}</button><text>也可直接说"搜索…"</text></view>
-
-  <!-- 输入栏 -->
+  <!-- 输入栏（搜索按钮合并到左侧） -->
   <view class="input-bar safe-bottom">
+    <view class="search-icon {{webSearch ? 'on' : ''}}" bindtap="toggleSearch">{{webSearch ? '🔍' : '🔎'}}</view>
     <input
       class="chat-input"
       value="{{inputText}}"
       bindinput="onInput"
       bindconfirm="onSend"
       confirm-type="send"
-      placeholder="想问喵什么..."
+      placeholder="{{webSearch ? '联网搜索中…' : '想问喵什么...'}}"
       maxlength="500"
       disabled="{{thinking || typing}}"
     />

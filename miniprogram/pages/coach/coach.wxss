@@ -180,3 +180,15 @@ page { height: 100%; overflow: hidden; }
 .quick-chip:active { background: var(--color-primary-light); border-color: var(--color-primary); }
 .quick-icon { font-size: 36rpx; }
 .quick-text { font-size: 22rpx; color: var(--color-text-2); text-align: center; }
+
+/* 搜索图标（合并到输入栏） */
+.search-icon {
+  width: 64rpx; height: 64rpx; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 36rpx; border-radius: 50%; margin-right: 12rpx;
+  background: var(--color-bg); transition: all .2s;
+}
+.search-icon.on {
+  background: var(--color-primary-light);
+  box-shadow: 0 0 0 4rpx var(--color-primary-light);
+}
