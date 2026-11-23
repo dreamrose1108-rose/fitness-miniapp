@@ -10,3 +10,7 @@ test('page preview makes no network mutation; apply saves targets and handles re
  page.data=JSON.parse(JSON.stringify(page.data));page.owner='nutrition-test';page.setData=v=>Object.assign(page.data,v);page.data.form={...form};page.generate();assert.equal(calls.length,0);assert.ok(page.data.result);
  await page.apply();assert.equal(page.data.saved,false);assert.ok(page.data.error);assert.equal(stored,undefined);accept=true;await page.apply();assert.equal(page.data.saved,true);assert.equal(calls.at(-1).proteinTarget,page.data.result.protein);assert.equal(stored.k,'nutritionEstimate:v1:nutrition-test');
 });
+test('time-restricted strategies change windows, not calorie estimates, and preserve meal totals',()=>{
+ const base=m.estimate(form);for(const [strategy,end] of [['tre14','18:00'],['tre16','16:00']]){const p=m.estimate({...form,strategy,fastingSuitable:true,windowStart:'08:00',snack:true});assert.equal(p.calories,base.calories);assert.equal(p.eatingWindow,'08:00–'+end);assert.equal(p.meals[0].name,'第 1 餐');assert.equal(p.meals.reduce((n,x)=>n+x.calories,0),p.calories);}
+ for(const change of [{strategy:'tre16'},{strategy:'tre14',fastingSuitable:true,windowStart:'23:00'},{strategy:'tre16',fastingSuitable:true,windowStart:'09:99'},{strategy:'fiveTwo'},{strategy:'unknown'},{strategy:'tre16',fastingSuitable:true,weight:40,height:180}])assert.throws(()=>m.estimate({...form,...change}));
+});
