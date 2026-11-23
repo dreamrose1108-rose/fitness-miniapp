@@ -1,3 +1,4 @@
+<page-meta page-style="{{appThemeStyle}}" />
 <view class="page coach-page">
   <!-- 今日速览（可收起） -->
   <view class="today-snapshot {{snapshotCollapsed ? 'collapsed' : ''}}">

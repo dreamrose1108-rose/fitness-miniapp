@@ -1,3 +1,4 @@
+<page-meta page-style="{{appThemeStyle}}" />
 <view class="page"><view wx:if="{{!item}}" class="card">动作不存在，请返回动作库重新选择。</view><block wx:else>
 <view class="category">{{item.bodyLabel}} / {{item.targetLabel}}</view><view class="title">{{item.displayName}}</view><view wx:if="{{item.displayName !== item.name}}" class="english">{{item.name}}</view><view class="equipment">器械：{{item.equipmentLabel}}</view>
 <view class="card demo" wx:if="{{mediaInfo}}"><view class="card-title">动作演示</view><view wx:if="{{loading}}" class="media-state">正在加载示范…</view><view wx:if="{{mediaError}}" class="media-state">{{mediaError}}<button size="mini" bindtap="retry">重新加载</button></view>

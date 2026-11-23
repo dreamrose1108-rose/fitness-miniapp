@@ -2,6 +2,7 @@
 const { rawPost, reportRequestError } = require('./utils/cloud.js');
 
 App({
+  applyTheme(page) { require('./utils/theme').apply(page); },
   globalData: {
     openid: null,
     userInfo: null,

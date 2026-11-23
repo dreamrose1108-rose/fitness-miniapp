@@ -3,7 +3,7 @@ const {call}=require('../../utils/cloud.js');
 const {formatDate}=require('../../utils/date.js');
 Page({
   data:{date:'',today:'',total:0,count:0,records:[],goal:null,percent:0,amount:'',busy:false,loading:true,error:'',presets:[200,300,500]},
-  async onShow(){ const today=formatDate();this.setData({today,date:this.data.date||today});if(await app.login())await this.load();else this.setData({loading:false,error:'登录未完成，请重试'}); },
+  async onShow(){if(getApp().applyTheme)getApp().applyTheme(this); const today=formatDate();this.setData({today,date:this.data.date||today});if(await app.login())await this.load();else this.setData({loading:false,error:'登录未完成，请重试'}); },
   async load(){this.setData({loading:true,error:''});try{
     const [result,profile]=await Promise.all([call('record',{action:'waterList',date:this.data.date}),call('userProfile',{action:'get'})]);
     this.setData({goal:profile.dailyWaterTarget||null});this.apply(result);

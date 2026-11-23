@@ -2,6 +2,7 @@ const {call}=require('../../utils/cloud');
 const {deletePhoto}=require('../../utils/photos');
 const meal=require('../../utils/meal-estimate');
 Page({
+ onShow(){if(getApp().applyTheme)getApp().applyTheme(this);},
  data:{photo:'',items:[],totals:null,loading:false,saving:false,locked:false,saved:false,error:'',notes:'',mealLabel:'',date:''},
  onLoad(){this.context=getApp().globalData.pendingMealPhoto;delete getApp().globalData.pendingMealPhoto;if(!this.context){this.setData({error:'照片已失效，请返回重新拍照'});return;}this.setData({photo:this.context.localPath,date:this.context.date,mealLabel:{breakfast:'早餐',lunch:'午餐',dinner:'晚餐',snack:'加餐'}[this.context.mealType]});this.analyze();},
  async analyze(){if(!this.context||this.data.loading||this.data.locked)return;this.setData({loading:true,error:'',items:[],totals:null});try{if(!await getApp().login())throw Error('请登录后重试');const result=await call('aiCoach',{action:'analyzeMeal',fileID:this.context.fileID});if(this._unloaded)return;if(!result.hasFood){this.setData({notes:result.notes,error:'未识别到清晰餐食，可重拍或手动选食物'});return;}const items=meal.normalize(result.items).map(x=>({...x,_gramsBase:x.grams}));this.setData({items,totals:meal.totals(items),notes:result.notes});}catch(e){if(!this._unloaded)this.setData({error:e.message||'识别失败，请重试或手动记录'});}finally{if(!this._unloaded)this.setData({loading:false});}},

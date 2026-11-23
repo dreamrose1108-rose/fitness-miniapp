@@ -1,3 +1,4 @@
+<page-meta page-style="{{appThemeStyle}}" />
 <view class="page">
  <view class="card"><view class="month-nav"><button size="mini" data-offset="-1" bindtap="changeMonth">上月</button><text>{{month}}</text><button size="mini" data-offset="1" bindtap="changeMonth" disabled="{{month >= maxMonth}}">下月</button></view>
  <view wx:if="{{error}}" class="notice" bindtap="load">{{error}}</view><view wx:elif="{{loading}}" class="notice">正在加载日历…</view>

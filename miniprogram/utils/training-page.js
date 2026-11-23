@@ -12,7 +12,7 @@ module.exports=function createTrainingPage(todayOnly=false){return {
    try{this.setData({draft:schedule.draft(normalized)});delete getApp().globalData.pendingAITrainingPlan;}catch(e){this._previewError=e.message;this.setData({error:e.message});}
   }
  },
- async onShow(){this._hidden=false;if(!await getApp().login()){this.setData({error:'请登录后重试'});return;}this.setData({today:formatDate()});this.render();this.resumeTimer();},
+ async onShow(){if(getApp().applyTheme)getApp().applyTheme(this);this._hidden=false;if(!await getApp().login()){this.setData({error:'请登录后重试'});return;}this.setData({today:formatDate()});this.render();this.resumeTimer();},
  onHide(){this._hidden=true;this.clearTimer();},
  onUnload(){this._hidden=true;this.clearTimer();},
  render(){try{

@@ -40,7 +40,7 @@ Page({
     cfSubmitting: false
   },
 
-  async onShow() {
+  async onShow() {if(getApp().applyTheme)getApp().applyTheme(this);
     if (!await app.login()) return;
     await Promise.all([this.loadRecords(), this.loadTarget(), this.loadCloudFoods()]);
   },

@@ -48,7 +48,7 @@ Page({
    wx.showToast({title:'链接已复制，请在浏览器打开',icon:'none'});
   }
  },
- onShow(){this.hidden=false;if(this.data.mediaInfo)this.loadMedia();},
+ onShow(){if(getApp().applyTheme)getApp().applyTheme(this);this.hidden=false;if(this.data.mediaInfo)this.loadMedia();},
  onHide(){this.hidden=true;this.stop();if(this.data.video)wx.createVideoContext('movementVideo',this).pause();},onUnload(){this.hidden=true;this.stop();this.requestId=(this.requestId||0)+1;},
  async loadMedia(force=false){if(!this.data.mediaInfo)return;const requestId=this.requestId=(this.requestId||0)+1;this.stop();this.setData({loading:true,gif:'',gifLoaded:false,mediaError:'',videoError:false,loadedFrames:{}});try{if(!await getApp().login())throw Error('login');const result=await media.load([this.data.item.id],force===true);if(requestId!==this.requestId||this.hidden)return;const item=result[0];if(!item||(!item.images.length&&!item.video))throw Error('missing');this.setData({gif:item.gif||'',images:item.gif?[]:item.images,video:item.gif?'':item.video,frame:0});}catch(e){if(requestId===this.requestId&&!this.hidden)this.setData({mediaError:'演示暂时加载失败，请点击重试'});}finally{if(requestId===this.requestId&&!this.hidden)this.setData({loading:false});}},
  gifLoaded(){this.setData({gifLoaded:true});},

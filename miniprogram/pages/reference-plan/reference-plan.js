@@ -1,5 +1,6 @@
 const model=require('../../utils/reference-plan.js');
 Page({
+ onShow(){if(getApp().applyTheme)getApp().applyTheme(this);},
  data:{catalog:model.catalog,selected:0,day:model.catalog.days[0],rows:[],entries:{},progress:{},dirty:false,done:0},
  onLoad(){this.setData(model.restore());this.render();},
  render(){const day=model.catalog.days[this.data.selected];const rows=day.actions.map(a=>{const key=day.id+':'+a.key;return {...a,key,...(this.data.entries[key]||{sets:'',reps:'',rest:''}),done:!!this.data.progress[key]};});this.setData({day,rows,done:rows.filter(x=>x.done).length});},

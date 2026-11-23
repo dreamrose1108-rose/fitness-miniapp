@@ -1,4 +1,4 @@
-.range-bar { display: flex; background: #fff; border-radius: var(--radius); padding: 8rpx; margin-bottom: 24rpx; }
+.range-bar { display: flex; background: var(--color-card); border-radius: var(--radius); padding: 8rpx; margin-bottom: 24rpx; }
 .range-item { flex: 1; text-align: center; padding: 16rpx 0; font-size: 26rpx; color: var(--color-text-2); border-radius: 12rpx; }
 .range-item.active { background: var(--color-primary-light); color: var(--color-primary); font-weight: 600; }
 

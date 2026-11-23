@@ -1,3 +1,4 @@
+<page-meta page-style="{{appThemeStyle}}" />
 <view class="page reference-page">
  <view class="eyebrow">公开课参考 / 有出处的动作清单</view><view class="heading">{{catalog.title}}</view>
  <view class="notice">{{catalog.notice}}</view><view class="source" bindtap="overview">复制计划讲解原视频链接 ›</view>

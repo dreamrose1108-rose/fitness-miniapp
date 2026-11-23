@@ -34,10 +34,10 @@ Page({
     const index = Number(e.detail.value);
     if (index !== 0 && index !== 1) return;
     const theme = index === 1 ? 'forest' : 'cat';
-    try { wx.setStorageSync('homeTheme:v1', theme); this.setData({theme, themeIndex:index}); } catch (e) { wx.showToast({title: '主题保存失败，请重试', icon: 'none'}); }
+    try { wx.setStorageSync('homeTheme:v1', theme); this.setData({theme, themeIndex:index}); if(app.applyTheme)app.applyTheme(this); } catch (e) { wx.showToast({title: '主题保存失败，请重试', icon: 'none'}); }
   },
 
-  async onShow() {
+  async onShow() {if(getApp().applyTheme)getApp().applyTheme(this);
     if (!await app.login()) return;
     await Promise.all([this.loadProfile(), this.loadSummary(), this.loadStreak(), this.loadTodayTraining()]);
   },

@@ -45,7 +45,7 @@ Page({
     await this.loadHistory();
   },
 
-  async onShow() {
+  async onShow() {if(getApp().applyTheme)getApp().applyTheme(this);
     // 每次进入页面刷新速览（切 tab 回来也更新）
     this.loadTodaySnapshot();
     // 从训练日程空状态跳转过来 → 自动生成计划

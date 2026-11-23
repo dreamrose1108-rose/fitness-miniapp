@@ -1,3 +1,4 @@
+<page-meta page-style="{{appThemeStyle}}" />
 <view class="page plans-page">
  <navigator url="/pages/schedule/schedule" class="template">我的训练日程 · 开始或继续训练 ›</navigator>
  <view class="eyebrow">TRAINING / 训练计划</view>

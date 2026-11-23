@@ -1,3 +1,4 @@
+<page-meta page-style="{{appThemeStyle}}" />
 <view class="page">
   <picker mode="date" value="{{date}}" end="{{today}}" bindchange="changeDate" disabled="{{busy || loading}}"><view class="date-row">{{date}} <text>选择日期 ›</text></view></picker>
   <view wx:if="{{error}}" class="card" bindtap="load">{{error}}</view>

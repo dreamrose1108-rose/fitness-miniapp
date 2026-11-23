@@ -18,7 +18,7 @@ Page({
     submitting: false
   },
 
-  async onShow() {
+  async onShow() {if(getApp().applyTheme)getApp().applyTheme(this);
     const pending = app.globalData && app.globalData.pendingExerciseId;
     if (pending) {
       const item = require('../../utils/exercise-library.js').get(pending);

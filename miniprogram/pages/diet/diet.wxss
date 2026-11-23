@@ -6,7 +6,7 @@
 .progress { height: 12rpx; background: var(--color-bg); border-radius: 8rpx; margin-top: 20rpx; overflow: hidden; }
 .progress-bar { height: 100%; background: var(--color-primary); border-radius: 8rpx; transition: width 0.3s; }
 
-.meal-tabs { display: flex; background: #fff; border-radius: var(--radius); padding: 8rpx; margin-bottom: 20rpx; }
+.meal-tabs { display: flex; background: var(--color-card); border-radius: var(--radius); padding: 8rpx; margin-bottom: 20rpx; }
 .meal-tab {
   flex: 1; text-align: center; padding: 18rpx 0; font-size: 26rpx;
   color: var(--color-text-2); border-radius: 12rpx;
@@ -17,7 +17,7 @@
 .add-row { display: flex; gap: 16rpx; margin-bottom: 24rpx; }
 .add-row .add-btn { flex: 1; margin-bottom: 0; }
 .photo-btn {
-  background: #fff; color: var(--color-text); border: 2rpx solid var(--color-border);
+  background: var(--color-card); color: var(--color-text); border: 2rpx solid var(--color-border);
   border-radius: 44rpx; font-size: 28rpx; padding: 16rpx 28rpx; margin: 0; line-height: 1.6;
 }
 .photo-btn::after { border: none; }
@@ -53,7 +53,7 @@
 .mask { position: fixed; inset: 0; background: rgba(0,0,0,0.45); z-index: 100; }
 .picker {
   position: fixed; left: 0; right: 0; bottom: 0; height: 75vh;
-  background: #fff; border-radius: 28rpx 28rpx 0 0; z-index: 101;
+  background: var(--color-card); border-radius: 28rpx 28rpx 0 0; z-index: 101;
   transform: translateY(110%); transition: transform 0.28s ease;
   display: flex; flex-direction: column; padding: 0 24rpx 24rpx;
 }
@@ -97,7 +97,7 @@
 /* 自定义食物表单 */
 .custom-form {
   position: fixed; left: 50%; top: 50%; transform: translate(-50%, -50%);
-  width: 620rpx; background: #fff; border-radius: 24rpx; z-index: 102;
+  width: 620rpx; background: var(--color-card); border-radius: 24rpx; z-index: 102;
   padding: 40rpx 36rpx 32rpx;
 }
 .cf-title { font-size: 32rpx; font-weight: 600; text-align: center; margin-bottom: 32rpx; }

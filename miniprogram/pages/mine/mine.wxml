@@ -1,3 +1,4 @@
+<page-meta page-style="{{appThemeStyle}}" />
 <view class="page">
   <!-- 用户信息 -->
   <view class="card user-card">

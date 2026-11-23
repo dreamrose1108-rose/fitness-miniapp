@@ -2,7 +2,7 @@ const media=require('../../utils/exercise-media.js');
 const library=require('../../utils/exercise-library.js');
 Page({
  data:{mediaOnly:false,mediaCount:Object.keys(media.manifest).length,thumbnails:{},query:'',bodyIndex:0,equipmentIndex:0,targetIndex:0,bodyOptions:library.bodyOptions,equipmentOptions:library.equipmentOptions,targetOptions:library.targetOptions,favoritesOnly:false,results:[],total:0,totalLibrary:library.items.length,hasMore:false},
- onShow(){this.refresh();},
+ onShow(){if(getApp().applyTheme)getApp().applyTheme(this);this.refresh();},
  input(e){this.setData({query:e.detail.value});this.refresh();},
  filter(e){const field=e.currentTarget.dataset.field;if(!['body','equipment','target'].includes(field))return;this.setData({[field+'Index']:Number(e.detail.value)});this.refresh();},
  demos(){this.setData({mediaOnly:!this.data.mediaOnly});this.refresh();},

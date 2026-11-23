@@ -1,3 +1,4 @@
+<page-meta page-style="{{appThemeStyle}}" />
 <view class="page schedule-page">
  <view class="heading">{{todayOnly ? '今日训练' : draft ? '确认日期，再开始训练' : '我的训练日程'}}</view>
  <view class="hint">组数与完成进度保存在本机 · 打卡不自动计入热量</view>

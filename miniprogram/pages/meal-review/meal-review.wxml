@@ -1,3 +1,4 @@
+<page-meta page-style="{{appThemeStyle}}" />
 <view class="page">
  <image wx:if="{{photo}}" class="meal-photo" src="{{photo}}" mode="aspectFit"/>
  <view class="heading">{{date}} · {{mealLabel}}估算</view>

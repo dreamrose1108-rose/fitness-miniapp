@@ -25,7 +25,7 @@ Page({
 
   onLoad() { this.days = lastDays(7); },
 
-  async onShow() {
+  async onShow() {if(getApp().applyTheme)getApp().applyTheme(this);
     if (!await app.login()) return;
     await this.loadTrend();
   },

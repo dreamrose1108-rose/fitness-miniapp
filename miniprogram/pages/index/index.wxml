@@ -1,3 +1,4 @@
+<page-meta page-style="{{appThemeStyle}}" />
 <view class="page home-page theme-{{theme}}">
   <view class="greeting">
     <view><text class="date">{{todayLabel}}</text><text class="hello">{{theme === 'cat' ? '今天也要元气满满喵' : '把健康，放进每一天'}}</text></view>

@@ -5,7 +5,7 @@ const { call } = require('../../utils/cloud.js');
 Page({
   data: { profile: {} },
 
-  async onShow() {
+  async onShow() {if(getApp().applyTheme)getApp().applyTheme(this);
     if (!await app.login()) return;
     await this.loadProfile();
   },

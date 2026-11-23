@@ -1,5 +1,6 @@
 const app=getApp();const {call}=require('../../utils/cloud.js');const {goalPatch}=require('../../utils/wellness.js');
 Page({
+ onShow(){if(getApp().applyTheme)getApp().applyTheme(this);},
  data:{step:1,loading:true,saving:false,error:'',form:{nutritionGoal:'maintain',dailyCalorieTarget:'',dailyWaterTarget:'',proteinTarget:'',carbTarget:'',fatTarget:''},choices:[{key:'maintain',label:'保持状态'},{key:'lose',label:'减脂管理'},{key:'gain',label:'增肌管理'}]},
  async onLoad(){if(await app.login())await this.load();else this.setData({loading:false,error:'登录未完成，请重试'});},
  async load(){this.setData({loading:true,error:''});try{const p=await call('userProfile',{action:'get'}),form=Object.assign({},this.data.form);Object.keys(form).forEach(k=>{if(p[k]!==undefined && p[k]!==null)form[k]=p[k];});this.setData({form});}catch(e){this.setData({error:'目标加载失败，点击重试'});}finally{this.setData({loading:false});}},

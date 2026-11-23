@@ -1,3 +1,4 @@
+<page-meta page-style="{{appThemeStyle}}" />
 <view class="page">
   <navigator url="/pages/calendar/calendar" class="card flex-between"><text>记录日历与近七天回顾</text><text>›</text></navigator>
   <!-- 时间范围 -->
