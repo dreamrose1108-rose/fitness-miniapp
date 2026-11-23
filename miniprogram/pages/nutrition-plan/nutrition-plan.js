@@ -9,5 +9,7 @@ Page({
  suitable(e){this.setData({'form.suitability':e.detail.value,result:null,saved:false,error:''});},
  generate(){try{const result=model.estimate(this.data.form);this.setData({result,error:'',saved:false});wx.pageScrollTo({selector:'#nutrition-result',duration:200});}catch(e){this.setData({error:e.message,result:null});}},
  async apply(){if(this.data.saving||!this.data.result)return;this.setData({saving:true,error:''});try{const result=model.estimate(this.data.form);const response=await call('userProfile',{action:'update',...model.patch(result)});if(!response||response.updated!==true)throw Error('目标未保存，请重试');let localError=false;try{wx.setStorageSync('nutritionEstimate:v1:'+this.owner,{form:this.data.form});}catch(e){localError=true;}this.setData({result,saved:true,error:localError?'每日目标已保存，但本机未能保存计算资料，下次需重新填写。':''});wx.showToast({title:'每日目标已应用'});}catch(e){this.setData({error:e.message||'保存失败，请重试'});}finally{this.setData({saving:false});}},
+ goHome(){if(!this.data.saving)wx.switchTab({url:'/pages/index/index',fail:()=>wx.showToast({title:'打开首页失败，请重试',icon:'none'})});},
+ goDiet(){if(!this.data.saving)wx.switchTab({url:'/pages/diet/diet',fail:()=>wx.showToast({title:'打开饮食记录失败，请重试',icon:'none'})});},
  copySources(){wx.setClipboardData({data:'计算参考：Mifflin–St Jeor 静息代谢公式 https://pubmed.ncbi.nlm.nih.gov/2305711/\n营养素参考范围 https://www.canada.ca/en/health-canada/services/food-nutrition/healthy-eating/dietary-reference-intakes/tables/reference-values-macronutrients.html'});}
 });
