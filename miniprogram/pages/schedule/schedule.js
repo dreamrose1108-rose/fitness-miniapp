@@ -5,7 +5,24 @@ const library=require('../../utils/exercise-library.js');
 Page({
  data:{draft:null,rows:[],today:'',start:'',maxDate:'',overrides:{},error:'',busy:false,showPast:false,success:'',
    restTimer:{visible:false,remain:0,total:0,label:''},activeExercise:null},
- onLoad(options){const today=formatDate();this.setData({today,start:today,maxDate:schedule.addDays(today,365)});if(options.preview==='1'){const input=getApp().globalData.pendingAITrainingPlan;delete getApp().globalData.pendingAITrainingPlan;try{this.setData({draft:schedule.draft(input)});}catch(e){this.setData({error:e.message});}}},
+ onLoad(options){const today=formatDate();this.setData({today,start:today,maxDate:schedule.addDays(today,365)});
+  if(options.preview==='1'){
+   const input=getApp().globalData.pendingAITrainingPlan;delete getApp().globalData.pendingAITrainingPlan;
+   // 字段名规范化：AI 可能生成 reps/rest 而非 repsMin/repsMax/restSec
+   if(input&&Array.isArray(input.days)){
+    input.days=input.days.map(d=>({...d,exercises:(d.exercises||[]).map(x=>{
+     const fixed={...x};
+     if(fixed.repsMin===undefined&&fixed.reps!==undefined){const r=Number(fixed.reps)||12;fixed.repsMin=r;fixed.repsMax=r;}
+     if(fixed.restSec===undefined&&fixed.rest!==undefined){fixed.restSec=Number(fixed.rest)||60;}
+     if(fixed.restSec===undefined&&fixed.restSec!==0){fixed.restSec=60;}
+     if(fixed.repsMin===undefined){fixed.repsMin=12;}
+     if(fixed.repsMax===undefined){fixed.repsMax=fixed.repsMin;}
+     if(fixed.sets===undefined){fixed.sets=3;}
+     return fixed;
+    })}));
+   }
+   try{this.setData({draft:schedule.draft(input)});}catch(e){this.setData({error:e.message});}
+  }},
  async onShow(){if(!await getApp().login()){this.setData({error:'请登录后重试'});return;}this.render();},
  render(){try{let rows=this.data.draft?schedule.preview(this.data.draft,this.data.start,this.data.overrides):schedule.read().filter(r=>this.data.showPast||r.date>=this.data.today);const today=this.data.today;const weekdays=['日','一','二','三','四','五','六'];rows=rows.map(r=>{const d=new Date(r.date+'T12:00:00');const isToday=r.date===today;const isPast=r.date<today;const w=weekdays[d.getDay()];const month=d.getMonth()+1,day=d.getDate();const dateLabel=isToday?'今天':isPast&&this.data.showPast?`${month}/${day}（周${w}）`:`${month}月${day}日 周${w}`;
   return {...r,dateLabel,isToday,isPast,exercises:r.exercises.map(x=>{
