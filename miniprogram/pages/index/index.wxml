@@ -1,11 +1,20 @@
 <view class="page home-page">
   <view class="greeting">
-    <view><text class="date">{{todayLabel}}</text><text class="hello">把健康，放进每一天</text></view>
+    <view><text class="date">{{todayLabel}}</text><text class="hello">今天也要元气满满喵</text></view>
     <view class="profile-link" bindtap="goMine" hover-class="pressed">我的<text>›</text></view>
   </view>
 
+  <view class="cat-welcome">
+    <view class="welcome-copy"><text class="welcome-label">卡路喵的每日陪伴</text><text class="welcome-title">好好吃饭，好好运动</text><text class="welcome-note">不着急，我们一起慢慢变好。</text></view>
+    <view class="mascot" aria-hidden="true">
+      <view class="cat-tail"></view><view class="cat-body"></view>
+      <view class="cat-ear ear-left"><view></view></view><view class="cat-ear ear-right"><view></view></view>
+      <view class="cat-head"><view class="cat-stripe stripe-one"></view><view class="cat-stripe stripe-two"></view><view class="cat-eye eye-left"></view><view class="cat-eye eye-right"></view><view class="cat-cheek cheek-left"></view><view class="cat-cheek cheek-right"></view><view class="cat-nose"></view><view class="cat-mouth mouth-left"></view><view class="cat-mouth mouth-right"></view><view class="whisker whisker-left"></view><view class="whisker whisker-right"></view></view>
+      <view class="cat-paw paw-left"></view><view class="cat-paw paw-right"></view>
+    </view>
+  </view>
   <view class="energy-card">
-    <view class="energy-top"><text>今日热量</text><text class="energy-tag">饮食 · 运动</text></view>
+    <view class="energy-top"><text>今日热量</text><view class="energy-tag"><view class="paw-print"><view></view><view></view><view></view><view></view><view></view></view><text>今日能量账本</text></view></view>
     <view class="energy-main"><view><text class="energy-label">净摄入</text><view class="energy-number">{{summary.net}}<text>kcal</text></view></view><view class="target-block"><text>每日摄入目标</text><view>{{target}}<text> kcal</text></view></view></view>
     <view class="energy-stats"><text>摄入 <text class="stat-value">{{summary.intake}}</text></text><text>运动消耗 <text class="stat-value">{{summary.burned}}</text></text></view>
     <view class="energy-track"><view class="energy-fill" style="width: {{intakePercent}}%"></view></view>
@@ -24,7 +33,7 @@
     <view class="quick-item" bindtap="goCoach" hover-class="pressed"><view class="quick-symbol coach-symbol">AI</view><text>喵教练</text></view>
   </view>
 
-  <view class="section-heading"><text>今日训练</text><text class="section-note">留一点时间，给自己</text></view>
+  <view class="section-heading"><text>今日训练</text><text class="section-note">和喵一起，伸个懒腰</text></view>
   <view class="training-card" bindtap="goTraining" hover-class="pressed">
     <block wx:if="{{todayTraining}}">
       <view class="training-top"><text class="training-plan">{{todayTraining.planTitle || '今日安排'}}</text><text class="status-pill">{{todayTraining.finished ? '已结束' : todayTraining.started ? '进行中' : '待开始'}}</text></view>
@@ -36,12 +45,12 @@
     <block wx:else><view class="training-top"><text class="training-plan">今天的运动时间</text><text class="status-pill">待安排</text></view><view class="training-title">从适合自己的节奏开始</view><view class="empty-copy">选择一个计划，开启今天的训练。</view><view class="training-bottom"><text>循序渐进，每一步都算数</text><view class="training-cta">去安排 <text>↗</text></view></view></block>
   </view>
 
-  <view class="section-heading"><text>日常小习惯</text><text class="section-note">积累一点点改变</text></view>
+  <view class="section-heading"><text>日常小习惯</text><text class="section-note">照顾好自己，也是一种进步</text></view>
   <view class="habit-grid">
-    <navigator url="/pages/water/water" class="habit-card water-card" hover-class="pressed"><view class="habit-top"><text>饮水记录</text><text>↗</text></view><view class="habit-title">记得喝水</view><view class="habit-note">记一杯水，补充活力</view><view class="habit-action">去记录 ›</view></navigator>
+    <navigator url="/pages/water/water" class="habit-card water-card" hover-class="pressed"><view class="habit-top"><text>饮水记录</text><text>↗</text></view><view class="habit-title">该喝水啦喵</view><view class="habit-note">记一杯水，补充活力</view><view class="habit-action">去记录 ›</view></navigator>
     <view class="habit-card weight-card" bindtap="onRecordWeight" hover-class="pressed"><view class="habit-top"><text>当前体重</text><text>＋</text></view><view class="weight-number">{{summary.latestWeight || '--'}}<text> kg</text></view><view class="habit-note">关注身体的每一点变化</view><view class="habit-action">记录体重 ›</view></view>
   </view>
 
-  <view class="streak-card"><view class="streak-number">{{streak.streak}}<text>天</text></view><view class="streak-info"><view class="streak-title">连续打卡，慢慢变好</view><view class="streak-note">累计 {{streak.totalDays}} 天 · {{streak.todayChecked ? '今天已打卡' : '今天也要记得记录'}}</view><view wx:if="{{streak.achieved.length}}" class="streak-badges"><text wx:for="{{streak.achieved}}" wx:key="*this">{{item}}天</text></view></view></view>
+  <view class="streak-card"><view class="streak-number">{{streak.streak}}<text>天</text></view><view class="streak-info"><view class="streak-title">每天一小步，喵陪你进步</view><view class="streak-note">累计 {{streak.totalDays}} 天 · {{streak.todayChecked ? '今天已打卡' : '今天也要记得记录'}}</view><view wx:if="{{streak.achieved.length}}" class="streak-badges"><text wx:for="{{streak.achieved}}" wx:key="*this">{{item}}天</text></view></view></view>
   <view class="tip">数据仅供健康管理参考，不构成医疗建议</view>
 </view>
