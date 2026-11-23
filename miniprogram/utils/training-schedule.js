@@ -19,4 +19,48 @@ function save(input,start,overrides={},skipConflicts=false){
 }
 function toggle(sourceKey,id){const entries=read();const row=entries.find(x=>x.sourceKey===sourceKey);if(!row||!row.exercises.some(x=>x.id===id))throw Error('训练动作不存在');row.done={...row.done,[id]:!row.done[id]};wx.setStorageSync(key(),{version:1,entries});}
 function remove(sourceKey){const entries=read();wx.setStorageSync(key(),{version:1,entries:entries.filter(x=>x.sourceKey!==sourceKey)});}
-module.exports={draft,date,addDays,read,preview,save,toggle,remove};
+function fromTemplate(plan){
+ const days=[];
+ plan.weeks.forEach((week,w)=>week.sessions.forEach(session=>{
+  if(session.rest)return;
+  days.push({offset:w*7+session.day,title:week.title+' · '+session.title,exercises:session.exercises.map(x=>{
+   const match=String(x.reps).match(/^(\d+)(?:[～~–-](\d+))?$/);
+   if(!match)throw Error('模板次数格式无效');
+   return {id:x.id,sets:x.sets,repsMin:Number(match[1]),repsMax:Number(match[2]||match[1]),restSec:x.rest,eachSide:!!x.eachSide};
+  })});
+ }));
+ return draft({id:'template_'+plan.createdAt+'_'+plan.config.template,title:plan.title,notes:'四周安排；开始日期对应第一周第一个训练日。',days});
+}
+function mutate(sourceKey,fn){const entries=read(),row=entries.find(r=>r.sourceKey===sourceKey);if(!row)throw Error('训练安排已不存在');fn(row);wx.setStorageSync(key(),{version:1,entries});return row;}
+function count(row,exercise){return row.done&&row.done[exercise.id]?exercise.sets:Math.min(exercise.sets,Math.max(0,Number(row.completedSets&&row.completedSets[exercise.id])||0));}
+function begin(sourceKey){return mutate(sourceKey,row=>{
+ if(row.date!==formatDate())throw Error('只能开始今天的训练；其他日期可查看安排');
+ if(row.finishedAt)throw Error('这次训练已结束');
+ row.startedAt=row.startedAt||Date.now();
+});}
+function completeSet(sourceKey,id,expected){let changed=false;
+ const row=mutate(sourceKey,row=>{
+  if(!row.startedAt||row.date!==formatDate()||row.finishedAt)throw Error('请先开始今天的训练');
+  if(row.rest&&row.rest.until>Date.now())throw Error('正在休息，可先跳过休息');
+  const ex=row.exercises.find(x=>x.id===id);if(!ex)throw Error('训练动作不存在');
+  const current=count(row,ex);
+  if(row.skipped&&row.skipped[id]||current>=ex.sets||expected!==current+1)return;
+  row.completedSets={...row.completedSets,[id]:current+1};
+  row.done={...row.done,[id]:current+1===ex.sets};
+  row.rest=current+1<ex.sets?{until:Date.now()+ex.restSec*1000,total:ex.restSec,label:ex.name+' · 第 '+(current+1)+' 组完成'}:null;
+  changed=true;
+ });return {row,changed};
+}
+function skipExercise(sourceKey,id){return mutate(sourceKey,row=>{
+ if(!row.startedAt||row.date!==formatDate()||row.finishedAt)throw Error('请先开始今天的训练');
+ const ex=row.exercises.find(x=>x.id===id);if(!ex)throw Error('训练动作不存在');
+ if(count(row,ex)>=ex.sets)throw Error('已完成的动作不能跳过');
+ row.skipped={...row.skipped,[id]:!(row.skipped&&row.skipped[id])};row.rest=null;
+});}
+function endRest(sourceKey){return mutate(sourceKey,row=>{row.rest=null;});}
+function finish(sourceKey){return mutate(sourceKey,row=>{
+ if(!row.startedAt||row.date!==formatDate())throw Error('请先开始今天的训练');
+ if(!row.exercises.every(x=>count(row,x)>=x.sets||row.skipped&&row.skipped[x.id]))throw Error('还有未完成的动作，请完成或明确跳过');
+ row.finishedAt=row.finishedAt||Date.now();row.rest=null;
+});}
+module.exports={draft,date,addDays,read,preview,save,toggle,remove,fromTemplate,count,begin,completeSet,skipExercise,endRest,finish};

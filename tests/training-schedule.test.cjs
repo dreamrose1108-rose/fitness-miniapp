@@ -8,3 +8,33 @@ test('conflicts never overwrite existing completion, skip only adds unoccupied d
 test('date overrides reject duplicates/past dates and storage failure is not success',()=>{setup();const start=formatDate();assert.throws(()=>schedule.save(plan,start,{2:start}),/同一天/);assert.throws(()=>schedule.save(plan,'2000-01-01'),/一年内/);fail=true;assert.throws(()=>schedule.save(plan,start),/storage failed/);assert.equal(schedule.read().length,0);});
 test('completion and removal only affect the selected scheduled session',()=>{setup();schedule.save(plan,formatDate());const [a,b]=schedule.read();schedule.toggle(a.sourceKey,'0025');assert.equal(schedule.read()[0].done['0025'],true);assert.throws(()=>schedule.toggle(b.sourceKey,'0025'),/不存在/);schedule.remove(a.sourceKey);assert.equal(schedule.read()[0].sourceKey,b.sourceKey);});
 test('malformed stored data prevents accidental overwrite',()=>{setup();store['trainingSchedule:v1:u1']={version:99,entries:[]};assert.throws(()=>schedule.save(plan,formatDate()),/数据无效/);assert.equal(store['trainingSchedule:v1:u1'].version,99);});
+test('all template variants become validated schedules without losing training days',()=>{
+ const planner=require('../miniprogram/utils/training-plan');
+ for(const template of planner.templates)for(const days of template.days)for(const equipment of ['gym','dumbbell'])for(const level of ['beginner','regular']){
+  if(level==='beginner'&&template.id!=='full')continue;
+  const p=planner.generate({template:template.id,focus:'all',equipment,days,level});
+  const d=schedule.fromTemplate(p);assert.equal(d.days.length,days*4);assert.deepEqual(d.days.map(x=>x.offset),p.weeks.flatMap((w,i)=>w.sessions.filter(s=>!s.rest).map(s=>i*7+s.day)));
+  assert.equal(schedule.fromTemplate(p).id,d.id);
+ }
+});
+test('sets persist, duplicate completion is idempotent, skip is not completion',()=>{
+ setup();schedule.save(plan,formatDate());const key=schedule.read()[0].sourceKey;
+ assert.throws(()=>schedule.completeSet(key,'0025',1),/开始/);schedule.begin(key);
+ assert.equal(schedule.completeSet(key,'0025',1).changed,true);
+ assert.equal(schedule.read()[0].completedSets['0025'],1);
+ assert.ok(schedule.read()[0].rest.until>Date.now());
+ assert.throws(()=>schedule.completeSet(key,'0025',2),/休息/);
+ schedule.endRest(key);assert.equal(schedule.completeSet(key,'0025',1).changed,false);
+ schedule.skipExercise(key,'0025');assert.equal(schedule.read()[0].done['0025'],false);
+ assert.equal(schedule.read()[0].skipped['0025'],true);
+ schedule.skipExercise(key,'0025');assert.equal(schedule.completeSet(key,'0025',2).changed,true);
+ assert.equal(schedule.completeSet(key,'0025',2).changed,false);
+ assert.equal(schedule.read()[0].done['0025'],true);schedule.finish(key);
+ assert.ok(schedule.read()[0].finishedAt);assert.throws(()=>schedule.begin(key),/结束/);
+});
+test('future dates cannot execute, failed writes do not advance sets, new session does not inherit old sets',()=>{
+ setup();schedule.save(plan,formatDate());const [a,b]=schedule.read();assert.throws(()=>schedule.begin(b.sourceKey),/今天/);
+ schedule.begin(a.sourceKey);fail=true;assert.throws(()=>schedule.completeSet(a.sourceKey,'0025',1),/storage failed/);fail=false;assert.equal(schedule.read()[0].completedSets,undefined);
+ schedule.completeSet(a.sourceKey,'0025',1);schedule.remove(a.sourceKey);
+ const other={...plan,id:'ai_new_session_12',days:[plan.days[0]]};schedule.save(other,formatDate());assert.equal(schedule.read().find(x=>x.planId===other.id).completedSets,undefined);
+});

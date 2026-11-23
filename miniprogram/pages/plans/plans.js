@@ -1,4 +1,5 @@
 const planner=require('../../utils/training-plan.js');
+const schedule=require('../../utils/training-schedule.js');
 Page({
  data:{stage:0,templates:planner.templates,focuses:planner.focuses,sources:planner.sources,showSources:false,template:'full',templateName:'全身训练',focus:'all',level:'beginner',equipment:'gym',days:3,dayOptions:[2,3],plan:null,saved:false,week:0,day:0,weekInfo:planner.weeks[0],weekSessions:[],session:null,rows:[],doneCount:0,totalCount:0,progress:{}},
  onLoad(){const stored=planner.restore();if(stored){const c=stored.plan.config,t=planner.templates.find(x=>x.id===c.template);this.setData({...c,templateName:t.name,dayOptions:t.days,plan:stored.plan,progress:stored.progress,saved:true,stage:2});this.render();}},
@@ -8,7 +9,8 @@ Page({
  settings(){this.setData({stage:1});},
  upgrade(){if(!this.data.plan)return;this.setData({...this.data.plan.config});this.generate();},
  generate(){try{const plan=planner.generate(this.data);this.setData({plan,progress:{},saved:false,stage:2,week:0,day:0});this.render();wx.pageScrollTo({scrollTop:0,duration:0});}catch(e){wx.showToast({title:e.message,icon:'none',duration:2500});}},
- save(){try{planner.save(this.data.plan,this.data.progress);this.setData({saved:true});wx.showToast({title:'已保存到本机',icon:'success'});}catch(e){wx.showToast({title:'保存失败，请检查存储空间',icon:'none'});}},
+ save(){try{planner.save(this.data.plan,this.data.progress);this.setData({saved:true});this.schedule();}catch(e){wx.showToast({title:'保存失败，请检查存储空间',icon:'none'});}},
+ schedule(){try{getApp().globalData.pendingAITrainingPlan=schedule.fromTemplate(this.data.plan);wx.navigateTo({url:'/pages/schedule/schedule?preview=1'});}catch(e){wx.showToast({title:e.message||'无法生成日程',icon:'none'});}},
  pickWeek(e){const week=Number(e.currentTarget.dataset.index);if(week>=0&&week<4){this.setData({week});this.render();}},
  pickDay(e){const day=Number(e.currentTarget.dataset.index);if(day>=0&&day<7){this.setData({day});this.render();}},
  render(){const {plan,week,day,progress}=this.data;if(!plan)return;const weekInfo=plan.weeks[week],weekSessions=weekInfo.sessions,session=weekSessions[day];const rows=session.exercises.map(x=>({...x,key:week+':'+day+':'+x.id,done:!!progress[week+':'+day+':'+x.id]}));let totalCount=0,doneCount=0;weekSessions.forEach(s=>s.exercises.forEach(x=>{totalCount++;if(progress[week+':'+s.day+':'+x.id])doneCount++;}));this.setData({session,rows,weekInfo,weekSessions,totalCount,doneCount});},

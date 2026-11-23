@@ -1,120 +1,46 @@
 const schedule=require('../../utils/training-schedule');
 const {formatDate}=require('../../utils/date');
-const {call}=require('../../utils/cloud.js');
-const library=require('../../utils/exercise-library.js');
 Page({
- data:{draft:null,rows:[],today:'',start:'',maxDate:'',overrides:{},error:'',busy:false,showPast:false,success:'',
-   restTimer:{visible:false,remain:0,total:0,label:''},activeExercise:null},
- onLoad(options){const today=formatDate();this.setData({today,start:today,maxDate:schedule.addDays(today,365)});
+ data:{draft:null,rows:[],today:'',start:'',maxDate:'',overrides:{},error:'',busy:false,showPast:false,success:'',activeKey:'',restTimer:{visible:false,remain:0,total:0,label:''}},
+ onLoad(options={}){
+  const today=formatDate();this.setData({today,start:today,maxDate:schedule.addDays(today,365)});
   if(options.preview==='1'){
-   const input=getApp().globalData.pendingAITrainingPlan;delete getApp().globalData.pendingAITrainingPlan;
-   // 字段名规范化：AI 可能生成 reps/rest 而非 repsMin/repsMax/restSec
-   if(input&&Array.isArray(input.days)){
-    input.days=input.days.map(d=>({...d,exercises:(d.exercises||[]).map(x=>{
-     const fixed={...x};
-     if(fixed.repsMin===undefined&&fixed.reps!==undefined){const r=Number(fixed.reps)||12;fixed.repsMin=r;fixed.repsMax=r;}
-     if(fixed.restSec===undefined&&fixed.rest!==undefined){fixed.restSec=Number(fixed.rest)||60;}
-     if(fixed.restSec===undefined&&fixed.restSec!==0){fixed.restSec=60;}
-     if(fixed.repsMin===undefined){fixed.repsMin=12;}
-     if(fixed.repsMax===undefined){fixed.repsMax=fixed.repsMin;}
-     if(fixed.sets===undefined){fixed.sets=3;}
-     return fixed;
-    })}));
-   }
-   try{this.setData({draft:schedule.draft(input)});}catch(e){this.setData({error:e.message});}
-  }},
- async onShow(){if(!await getApp().login()){this.setData({error:'请登录后重试'});return;}this.render();},
- render(){try{let rows=this.data.draft?schedule.preview(this.data.draft,this.data.start,this.data.overrides):schedule.read().filter(r=>this.data.showPast||r.date>=this.data.today);const today=this.data.today;const weekdays=['日','一','二','三','四','五','六'];rows=rows.map(r=>{const d=new Date(r.date+'T12:00:00');const isToday=r.date===today;const isPast=r.date<today;const w=weekdays[d.getDay()];const month=d.getMonth()+1,day=d.getDate();const dateLabel=isToday?'今天':isPast&&this.data.showPast?`${month}/${day}（周${w}）`:`${month}月${day}日 周${w}`;
-  return {...r,dateLabel,isToday,isPast,exercises:r.exercises.map(x=>{
-   const doneSets=this._setProgress[r.date+':'+x.id]||0;
-   const totalSets=x.sets||1;
-   return {...x,done:!!(r.done&&r.done[x.id]),doneSets,totalSets,setDots:Array.from({length:totalSets},(_,i)=>i<doneSets)};
-  }),doneCount:r.exercises.filter(x=>r.done&&r.done[x.id]).length};});this.setData({rows,error:''});}catch(e){this.setData({error:e.message});}},
-
- // ===== 组间打卡 + 倒计时 =====
- _setProgress:{},
- _restTimerId:null,
-
- onSetTap(e){
-  const {key,id,set}=e.currentTarget.dataset;
-  const {date}=e.currentTarget.dataset;
-  if(this.data.draft)return;
-  const progressKey=date+':'+id;
-  const current=this._setProgress[progressKey]||0;
-  const newDone=current+1;
-  const row=this.data.rows.find(r=>r.sourceKey===key);
-  if(!row)return;
-  const ex=row.exercises.find(x=>x.id===id);
-  if(!ex)return;
-  const totalSets=ex.sets||1;
-
-  // 更新组数进度
-  this._setProgress[progressKey]=newDone;
-  this.render();
-
-  if(newDone>=totalSets){
-   // 全部组完成 → 标记整体完成 + 自动记录运动消耗
-   this._autoRecord(ex,date);
-   try{schedule.toggle(key,id);this.render();}catch(e){}
-   wx.showToast({title:'✅ 全部完成，已记录消耗',icon:'none',duration:2000});
-   this._stopRestTimer();
-  }else{
-   // 还有剩余组 → 启动组间休息倒计时
-   const restSec=ex.restSec||60;
-   this._startRestTimer(restSec,ex.name,newDone,totalSets);
-   wx.vibrateShort({type:'light'});
+   const input=getApp().globalData.pendingAITrainingPlan;
+   if(!input){this._previewError='计划预览已失效，请返回重新打开';this.setData({error:this._previewError});return;}
+   // Normalize known aliases only. Missing or invalid prescriptions must not be invented.
+   const normalized={...input,days:Array.isArray(input.days)?input.days.map(d=>({...d,exercises:Array.isArray(d.exercises)?d.exercises.map(x=>({...x,repsMin:x.repsMin===undefined?x.reps:x.repsMin,repsMax:x.repsMax===undefined?(x.repsMin===undefined?x.reps:x.repsMin):x.repsMax,restSec:x.restSec===undefined?x.rest:x.restSec})):d.exercises})):input.days};
+   try{this.setData({draft:schedule.draft(normalized)});delete getApp().globalData.pendingAITrainingPlan;}catch(e){this._previewError=e.message;this.setData({error:e.message});}
   }
  },
-
- _startRestTimer(sec,label,doneSet,totalSets){
-  this._stopRestTimer();
-  this.setData({restTimer:{visible:true,remain:sec,total:sec,label:`${label} · 第${doneSet}/${totalSets}组完成`}});
-  this._restTimerId=setInterval(()=>{
-   const remain=this.data.restTimer.remain-1;
-   if(remain<=0){
-    this._stopRestTimer();
-    wx.vibrateLong();
-    wx.showToast({title:'休息结束，开始下一组！',icon:'none',duration:2000});
-   }else{
-    this.setData({'restTimer.remain':remain});
-   }
-  },1000);
- },
-
- _stopRestTimer(){
-  if(this._restTimerId){clearInterval(this._restTimerId);this._restTimerId=null;}
-  this.setData({'restTimer.visible':false});
- },
-
- skipRest(){this._stopRestTimer();wx.showToast({title:'跳过休息 💪',icon:'none'});},
-
- // ===== 自动记录运动消耗 =====
- async _autoRecord(ex,date){
-  try{
-   const lib=library.get(ex.id);
-   const met=lib&&lib.met||4;
-   // 估算时长：组数×每组时间(约45秒) + 组间休息
-   const estMin=ex.sets*((ex.repsMax||ex.repsMin||10)*3+45)/60 + (ex.sets-1)*(ex.restSec||60)/60;
-   const profile=await call('userProfile',{action:'get'}).catch(()=>null);
-   const weight=(profile&&profile.targetWeight)||65;
-   const kcalBurned=Math.round(met*weight*estMin/60*10)/10;
-   await call('record',{
-    action:'add',type:'exercise',
-    data:{date,name:ex.name,met,duration:Math.round(estMin),kcalBurned}
-   });
-  }catch(e){console.log('auto record failed:',e.message);}
- },
-
- // ===== 原有功能 =====
+ async onShow(){this._hidden=false;if(!await getApp().login()){this.setData({error:'请登录后重试'});return;}this.setData({today:formatDate()});this.render();this.resumeTimer();},
+ onHide(){this._hidden=true;this.clearTimer();},
+ onUnload(){this._hidden=true;this.clearTimer();},
+ render(){try{
+  const today=this.data.today;
+  let rows=this.data.draft?schedule.preview(this.data.draft,this.data.start,this.data.overrides):schedule.read().filter(r=>this.data.showPast||r.date>=today);
+  rows=rows.map(r=>{
+   const exercises=r.exercises.map(x=>{const doneSets=schedule.count(r,x);return {...x,doneSets,nextSet:doneSets+1,done:doneSets>=x.sets,skipped:!!(r.skipped&&r.skipped[x.id]),setDots:Array.from({length:x.sets},(_,i)=>i<doneSets)};});
+   const doneCount=exercises.filter(x=>x.done).length,skippedCount=exercises.filter(x=>x.skipped&&!x.done).length;
+   return {...r,exercises,doneCount,skippedCount,ready:doneCount+skippedCount===exercises.length,isToday:r.date===today,isPast:r.date<today,dateLabel:r.date===today?'今天':r.date,active:r.sourceKey===this.data.activeKey};
+  });
+  this.setData({rows,error:this._previewError||''});
+ }catch(e){this.setData({error:e.message});}},
+ begin(e){if(this.data.draft)return;try{const key=e.currentTarget.dataset.key;schedule.begin(key);this.setData({activeKey:key,success:'训练已开始，完成一组后点击下方按钮'});this.render();this.resumeTimer();}catch(e){this.setData({error:e.message});}},
+ onSetTap(e){if(this.data.draft||this._setBusy)return;const {key,id,set}=e.currentTarget.dataset;if(key!==this.data.activeKey)return;this._setBusy=true;try{schedule.completeSet(key,id,Number(set));this.render();this.resumeTimer();}catch(e){this.setData({error:e.message});}finally{this._setBusy=false;}},
+ toggle(e){if(this.data.draft)return;const {key,id}=e.currentTarget.dataset;if(key!==this.data.activeKey)return;try{schedule.skipExercise(key,id);this.render();this.resumeTimer();}catch(e){this.setData({error:e.message});}},
+ finish(e){try{const row=schedule.finish(e.currentTarget.dataset.key);this.setData({activeKey:'',success:'训练已结束，已保存 '+row.exercises.filter(x=>schedule.count(row,x)>=x.sets).length+' 个完成动作；跳过动作不计完成'});this.clearTimer();this.setData({restTimer:{visible:false}});this.render();}catch(e){this.setData({error:e.message});}},
+ clearTimer(){if(this._timer){clearInterval(this._timer);this._timer=null;}},
+ resumeTimer(){this.clearTimer();if(this._hidden||!this.data.activeKey)return;const tick=()=>{try{const row=schedule.read().find(r=>r.sourceKey===this.data.activeKey);const rest=row&&row.rest;const remain=rest?Math.max(0,Math.ceil((rest.until-Date.now())/1000)):0;this.setData({restTimer:remain?{...rest,visible:true,remain}:{visible:false}});if(!remain)this.clearTimer();}catch(e){this.clearTimer();this.setData({restTimer:{visible:false},error:e.message});}};tick();if(this.data.restTimer.visible)this._timer=setInterval(tick,1000);},
+ skipRest(){try{schedule.endRest(this.data.activeKey);this.clearTimer();this.setData({restTimer:{visible:false}});}catch(e){this.setData({error:e.message});}},
  start(e){this.setData({start:e.detail.value,overrides:{},success:''});this.render();},
- day(e){const index=Number(e.currentTarget.dataset.index),d=this.data.draft&&this.data.draft.days[index];if(!d)return;this.setData({overrides:{...this.data.overrides,[d.offset]:e.detail.value},success:''});this.render();},
- async save(){if(this.data.busy||!this.data.draft)return;this.setData({busy:true});try{const result=schedule.save(this.data.draft,this.data.start,this.data.overrides);if(result.conflicts.length){wx.showModal({title:'这些日期已有训练',content:result.conflicts.join('、')+'。跳过这些日期，保留原安排与完成进度？',confirmText:'跳过冲突',cancelText:'调整日期',success:r=>{if(r.confirm)this.finishSave(true);},complete:()=>this.setData({busy:false})});return;}this.saved(result);}catch(e){this.setData({error:e.message});}this.setData({busy:false});},
+ day(e){const d=this.data.draft&&this.data.draft.days[Number(e.currentTarget.dataset.index)];if(d){this.setData({overrides:{...this.data.overrides,[d.offset]:e.detail.value}});this.render();}},
+ async save(){if(this.data.busy||!this.data.draft)return;this.setData({busy:true,error:''});let confirming=false;try{const result=schedule.save(this.data.draft,this.data.start,this.data.overrides);if(result.conflicts.length){confirming=true;wx.showModal({title:'部分日期已有训练',content:result.conflicts.join('、')+'。跳过冲突日期并保留已有安排？',confirmText:'跳过冲突',success:r=>{if(r.confirm)this.finishSave(true);},complete:()=>this.setData({busy:false})});return;}this.saved(result);}catch(e){this.setData({error:e.message});}finally{if(!confirming)this.setData({busy:false});}},
  finishSave(skip){try{this.saved(schedule.save(this.data.draft,this.data.start,this.data.overrides,skip));}catch(e){this.setData({error:e.message});}},
- saved(result){if(!result.added){this.setData({error:'没有新增日程：日期已有安排或该计划已保存，请调整日期。'});return;}this.setData({draft:null,success:'已保存 '+result.added+' 个训练日到本机',overrides:{}});this.render();},
- toggle(e){const {key,id}=e.currentTarget.dataset;if(this.data.draft)return;try{schedule.toggle(key,id);this.render();}catch(e){this.setData({error:e.message});}},
- remove(e){const key=e.currentTarget.dataset.key;wx.showModal({title:'移除这天的安排？',content:'同时移除本机的动作完成标记。其他日期不受影响。',success:r=>{if(r.confirm)try{schedule.remove(key);this.render();}catch(e){this.setData({error:e.message});}}});},
+ saved(result){this.setData({draft:null,overrides:{},success:result.added?'已保存 '+result.added+' 个训练日。点击今天的“开始训练”进入逐组打卡。':'该计划已保存或日期已有安排，下方可查看现有日程。'});this.render();wx.pageScrollTo({scrollTop:0,duration:0});},
+ remove(e){const key=e.currentTarget.dataset.key;wx.showModal({title:'移除这天的安排？',content:'同时移除本机组数和完成记录。其他日期不受影响。',success:r=>{if(r.confirm)try{schedule.remove(key);if(this.data.activeKey===key){this.clearTimer();this.setData({activeKey:'',restTimer:{visible:false}});}this.render();}catch(e){this.setData({error:e.message});}}});},
  movement(e){const id=e.currentTarget.dataset.id;if(this.data.rows.some(r=>r.exercises.some(x=>x.id===id)))wx.navigateTo({url:'/pages/movement/movement?id='+id});},
  past(){this.setData({showPast:!this.data.showPast});this.render();},
  calendar(){wx.navigateTo({url:'/pages/calendar/calendar'});},
- coach(){getApp().globalData.autoGeneratePlan=true;wx.switchTab({url:'/pages/coach/coach'});}
+ coach(){getApp().globalData.autoGeneratePlan=true;wx.switchTab({url:'/pages/coach/coach'});},
+ templates(){wx.navigateTo({url:'/pages/plans/plans'});}
 });

@@ -51,7 +51,7 @@ Page({
     // 从训练日程空状态跳转过来 → 自动生成计划
     if (getApp().globalData.autoGeneratePlan) {
       getApp().globalData.autoGeneratePlan = false;
-      this.setData({ inputText: '帮我制定一个简单的三分化训练计划，每周3次，增肌目标，家里有哑铃和弹力带' }, () => {
+      this.setData({ inputText: '请帮我制定可保存到训练日程的计划。先询问我的目标、训练经验、可用器械和每周训练天数，再生成具体安排。' }, () => {
         this.onSend();
       });
     }

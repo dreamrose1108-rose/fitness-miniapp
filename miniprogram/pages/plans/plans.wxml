@@ -1,8 +1,8 @@
 <view class="page plans-page">
- <navigator url="/pages/schedule/schedule" class="template">我的训练日程 · 查看 AI 已保存安排 ›</navigator>
+ <navigator url="/pages/schedule/schedule" class="template">我的训练日程 · 开始或继续训练 ›</navigator>
  <view class="eyebrow">TRAINING / 训练计划</view>
  <view class="heading">{{stage === 0 ? '找到你的训练节奏' : stage === 1 ? '让计划适合你' : '按计划，练好每一次'}}</view>
- <view class="steps"><text class="{{stage === 0 ? 'current' : ''}}">01 选模板</text><text>—</text><text class="{{stage === 1 ? 'current' : ''}}">02 选部位与条件</text><text>—</text><text class="{{stage === 2 ? 'current' : ''}}">03 开始训练</text></view>
+ <view class="steps"><text class="{{stage === 0 ? 'current' : ''}}">01 选模板</text><text>—</text><text class="{{stage === 1 ? 'current' : ''}}">02 选部位与条件</text><text>—</text><text class="{{stage === 2 ? 'current' : ''}}">03 预览与排期</text></view>
  <block wx:if="{{stage === 0}}">
   <navigator url="/pages/reference-plan/reference-plan" class="template"><view class="template-top"><text class="tag">公开课参考</text><text class="frequency">推 / 拉 / 腿</text></view><view class="template-title">凯圣王 × 谭成义</view><view class="description">按作者跟练简介整理动作顺序，附原视频出处。组次待核实，可保存你的个人设置。</view><view class="choose">查看动作清单与原视频 ›</view></navigator>
   <view class="intro">常见训练结构，按经验与时间选择。具体动作由卡路喵结合训练原则整理。</view>
@@ -21,10 +21,11 @@
   <view class="small-note">适用于一般健康成年人。存在伤病、术后恢复或运动限制时，应先取得个体化训练建议。</view>
  </block>
  <block wx:elif="{{plan}}">
-  <view class="plan-banner"><view class="template-top"><text>{{plan.config.days}} 天 / 周 · 4 周周期</text><text>{{saved ? '已保存到本机' : '计划预览'}}</text></view><view class="template-title">{{plan.title}}</view><view>重点：{{plan.focusName}} · {{plan.config.equipment === 'gym' ? '健身房' : '哑铃＋地垫'}}</view><view class="progress-line">本周完成 {{doneCount}} / {{totalCount}} 个动作</view></view>
+  <view class="plan-banner"><view class="template-top"><text>{{plan.config.days}} 天 / 周 · 4 周周期</text><text>{{saved ? '模板已保存' : '计划预览'}}</text></view><view class="template-title">{{plan.title}}</view><view>重点：{{plan.focusName}} · {{plan.config.equipment === 'gym' ? '健身房' : '哑铃＋地垫'}}</view><view class="progress-line">确认训练日期后，在日程中开始或继续训练</view></view>
   <view wx:if="{{plan.legacy}}" class="week-note">当前为旧版固定安排，历史打卡已保留。<button size="mini" bindtap="upgrade">预览新版四周递进计划</button></view>
   <view class="plan-actions"><button size="mini" bindtap="settings">调整条件</button><button size="mini" bindtap="templates">换个模板</button></view>
-  <button wx:if="{{!saved}}" class="btn-primary save-plan" bindtap="save">保存为我的计划 · 开始新周期</button>
+  <button wx:if="{{!saved}}" class="btn-primary save-plan" bindtap="save">保存计划并选择训练日期</button>
+  <button wx:if="{{saved}}" class="btn-primary save-plan" bindtap="schedule">安排日期 · 前往训练日程</button>
   <view wx:if="{{!saved}}" class="small-note">保存会替换本机原计划；未保存前不会改变旧计划或进度。</view>
   <view class="week-tabs"><button wx:for="{{plan.weeks}}" wx:key="title" class="week {{week === index ? 'selected' : ''}}" data-index="{{index}}" bindtap="pickWeek">第 {{index + 1}} 周</button></view>
   <view class="week-note"><view class="section-title">{{weekInfo.title}}</view><view>{{weekInfo.note}}</view><view class="week-volume">本周 {{weekInfo.totalSets}} 个正式组 · {{plan.config.days}} 个训练日</view></view>
@@ -33,11 +34,11 @@
   <view wx:if="{{session.rest}}" class="card rest"><view class="section-title">恢复，也是计划的一部分</view><view class="description">可以轻松散步、做舒适范围内的活动。保证睡眠，不必为了补进度连续加练。</view></view>
   <block wx:else>
    <view class="warmup">先热身 5～8 分钟，再为第一个负重动作做轻重量热身组。下列为正式组。</view>
-   <view wx:for="{{rows}}" wx:key="id" class="exercise-card {{item.done ? 'completed' : ''}}">
+   <view wx:for="{{rows}}" wx:key="id" class="exercise-card">
     <view class="exercise-title"><text class="order">{{index + 1}}</text><view class="exercise-main"><view class="exercise-name">{{item.name}}</view><text class="muted">{{item.equipment}}<text wx:if="{{item.focus}}"> · 重点部位</text></text></view></view>
     <view class="prescription"><text>{{item.sets}} 组 × {{item.reps}} 次{{item.eachSide ? ' / 侧' : ''}}</text><text>组间休息 {{item.rest}} 秒</text></view>
     <view wx:if="{{item.loadNote}}" class="load-note">{{item.loadNote}}</view>
-    <view class="exercise-actions"><button size="mini" class="demo-button" data-id="{{item.id}}" bindtap="movement">查看动作演示 ›</button><button size="mini" class="done-button" data-key="{{item.key}}" bindtap="toggleDone" disabled="{{!saved}}">{{item.done ? '已完成 ✓' : '标记完成'}}</button></view>
+    <view class="exercise-actions"><button size="mini" class="demo-button" data-id="{{item.id}}" bindtap="movement">查看动作演示 ›</button></view>
    </view>
    <view class="small-note">选择能保持动作稳定的负荷，结束时保留约 2～3 次余力。出现疼痛应停止该动作。这里只记录计划进度，不自动增加运动时长或热量。</view>
   </block>
