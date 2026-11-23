@@ -16,6 +16,7 @@ Page({
     viewDateLabel: '今天',
     totalIntake: 0,
     target: 1800,
+    nutritionTargets: null,
     remain: 1800,
     progressPercent: 0,
     // 弹层
@@ -48,7 +49,7 @@ Page({
   async loadTarget() {
     try {
       const p = await call('userProfile', { action: 'get' });
-      if (p) this.setData({ target: p.dailyCalorieTarget || 1800 }, this.updateSummary);
+      if (p) this.setData({ target: p.dailyCalorieTarget || 1800, nutritionTargets: p.proteinTarget != null && p.carbTarget != null && p.fatTarget != null ? {protein:p.proteinTarget,carb:p.carbTarget,fat:p.fatTarget} : null }, this.updateSummary);
     } catch (e) {}
   },
 
