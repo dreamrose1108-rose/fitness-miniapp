@@ -1,10 +1,10 @@
-<view class="page home-page">
+<view class="page home-page theme-{{theme}}">
   <view class="greeting">
-    <view><text class="date">{{todayLabel}}</text><text class="hello">今天也要元气满满喵</text></view>
-    <view class="profile-link" bindtap="goMine" hover-class="pressed">我的<text>›</text></view>
+    <view><text class="date">{{todayLabel}}</text><text class="hello">{{theme === 'cat' ? '今天也要元气满满喵' : '把健康，放进每一天'}}</text></view>
+    <view class="header-actions"><picker mode="selector" range="{{themeNames}}" value="{{themeIndex}}" bindchange="changeTheme"><view class="theme-button">换主题<text>{{themeNames[themeIndex]}} ▾</text></view></picker><view class="profile-link" bindtap="goMine" hover-class="pressed">我的<text>›</text></view></view>
   </view>
 
-  <view class="cat-welcome">
+  <view wx:if="{{theme === 'cat'}}" class="cat-welcome">
     <view class="welcome-copy"><text class="welcome-label">卡路喵的每日陪伴</text><text class="welcome-title">好好吃饭，好好运动</text><text class="welcome-note">不着急，我们一起慢慢变好。</text></view>
     <view class="mascot" aria-hidden="true">
       <view class="cat-tail"></view><view class="cat-body"></view>
@@ -33,7 +33,7 @@
     <view class="quick-item" bindtap="goCoach" hover-class="pressed"><view class="quick-symbol coach-symbol">AI</view><text>喵教练</text></view>
   </view>
 
-  <view class="section-heading"><text>今日训练</text><text class="section-note">和喵一起，伸个懒腰</text></view>
+  <view class="section-heading"><text>今日训练</text><text class="section-note">{{theme === 'cat' ? '和喵一起，伸个懒腰' : '留一点时间，给自己'}}</text></view>
   <view class="training-card" bindtap="goTraining" hover-class="pressed">
     <block wx:if="{{todayTraining}}">
       <view class="training-top"><text class="training-plan">{{todayTraining.planTitle || '今日安排'}}</text><text class="status-pill">{{todayTraining.finished ? '已结束' : todayTraining.started ? '进行中' : '待开始'}}</text></view>
@@ -47,10 +47,10 @@
 
   <view class="section-heading"><text>日常小习惯</text><text class="section-note">照顾好自己，也是一种进步</text></view>
   <view class="habit-grid">
-    <navigator url="/pages/water/water" class="habit-card water-card" hover-class="pressed"><view class="habit-top"><text>饮水记录</text><text>↗</text></view><view class="habit-title">该喝水啦喵</view><view class="habit-note">记一杯水，补充活力</view><view class="habit-action">去记录 ›</view></navigator>
+    <navigator url="/pages/water/water" class="habit-card water-card" hover-class="pressed"><view class="habit-top"><text>饮水记录</text><text>↗</text></view><view class="habit-title">{{theme === 'cat' ? '该喝水啦喵' : '记得喝水'}}</view><view class="habit-note">记一杯水，补充活力</view><view class="habit-action">去记录 ›</view></navigator>
     <view class="habit-card weight-card" bindtap="onRecordWeight" hover-class="pressed"><view class="habit-top"><text>当前体重</text><text>＋</text></view><view class="weight-number">{{summary.latestWeight || '--'}}<text> kg</text></view><view class="habit-note">关注身体的每一点变化</view><view class="habit-action">记录体重 ›</view></view>
   </view>
 
-  <view class="streak-card"><view class="streak-number">{{streak.streak}}<text>天</text></view><view class="streak-info"><view class="streak-title">每天一小步，喵陪你进步</view><view class="streak-note">累计 {{streak.totalDays}} 天 · {{streak.todayChecked ? '今天已打卡' : '今天也要记得记录'}}</view><view wx:if="{{streak.achieved.length}}" class="streak-badges"><text wx:for="{{streak.achieved}}" wx:key="*this">{{item}}天</text></view></view></view>
+  <view class="streak-card"><view class="streak-number">{{streak.streak}}<text>天</text></view><view class="streak-info"><view class="streak-title">{{theme === 'cat' ? '每天一小步，喵陪你进步' : '连续打卡，慢慢变好'}}</view><view class="streak-note">累计 {{streak.totalDays}} 天 · {{streak.todayChecked ? '今天已打卡' : '今天也要记得记录'}}</view><view wx:if="{{streak.achieved.length}}" class="streak-badges"><text wx:for="{{streak.achieved}}" wx:key="*this">{{item}}天</text></view></view></view>
   <view class="tip">数据仅供健康管理参考，不构成医疗建议</view>
 </view>

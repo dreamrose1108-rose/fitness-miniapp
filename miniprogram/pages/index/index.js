@@ -8,6 +8,9 @@ const library = require('../../utils/exercise-library.js');
 Page({
   data: {
     todayLabel: '',
+    theme: 'cat',
+    themeIndex: 0,
+    themeNames: ['猫咪奶茶', '自然森林'],
     summary: { intake: 0, burned: 0, net: 0, latestWeight: null },
     target: 1800,
     intakePercent: 0,
@@ -17,9 +20,21 @@ Page({
   },
 
   async onLoad() {
+    this.restoreTheme();
     const d = new Date();
     const week = ['日', '一', '二', '三', '四', '五', '六'][d.getDay()];
     this.setData({ todayLabel: `${d.getMonth() + 1}月${d.getDate()}日 星期${week}` });
+  },
+
+  restoreTheme() {
+    try { const theme = wx.getStorageSync('homeTheme:v1') === 'forest' ? 'forest' : 'cat'; this.setData({theme, themeIndex: theme === 'forest' ? 1 : 0}); } catch (e) { this.setData({theme: 'cat', themeIndex: 0}); }
+  },
+
+  changeTheme(e) {
+    const index = Number(e.detail.value);
+    if (index !== 0 && index !== 1) return;
+    const theme = index === 1 ? 'forest' : 'cat';
+    try { wx.setStorageSync('homeTheme:v1', theme); this.setData({theme, themeIndex:index}); } catch (e) { wx.showToast({title: '主题保存失败，请重试', icon: 'none'}); }
   },
 
   async onShow() {
