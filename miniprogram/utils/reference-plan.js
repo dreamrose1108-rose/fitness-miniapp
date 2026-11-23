@@ -11,8 +11,11 @@ for(const d of catalog.days){
   else if(a.defSets)defaults[k]={sets:a.defSets,reps:a.defReps||12,rest:a.defRest||60};
  }
 }
-// 获取某动作的推荐方案
-function getDefault(key){return defaults[key]||{sets:3,reps:12,rest:60};}
+// 获取某动作的推荐方案（确保值为合法数字）
+function getDefault(key){
+ const d=defaults[key]||{sets:3,reps:12,rest:60};
+ return {sets:String(Math.min(10,Math.max(1,Number(d.sets)||3))),reps:String(Math.min(50,Math.max(1,Number(d.reps)||12))),rest:String(Math.min(600,Math.max(15,Number(d.rest)||60)))};
+}
 // 用推荐方案填充所有未填写的动作
 function fillDefaults(entries={}){
  const out={};
