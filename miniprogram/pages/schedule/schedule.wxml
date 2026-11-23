@@ -32,8 +32,8 @@
    <view wx:for="{{item.exercises}}" wx:for-item="exercise" wx:for-index="eidx" wx:key="id" class="exercise-item {{exercise.done ? 'is-done' : ''}}">
     <view class="exercise-info">
      <view class="exercise-heading"><text class="exercise-step">动作 {{eidx + 1}}</text><text wx:if="{{!draft && exercise.handled}}" class="exercise-status">{{exercise.done ? '已完成' : '本次已结束'}}</text></view><view class="exercise-name">{{exercise.plainName}}</view><view wx:if="{{exercise.plainName !== exercise.originalName}}" class="exercise-original">动作原名：{{exercise.originalName}}</view><view wx:if="{{exercise.explanation}}" class="exercise-explanation">{{exercise.explanation}}</view><view wx:if="{{exercise.bodyLabel}}" class="exercise-target">主要练{{exercise.bodyLabel}} · {{exercise.equipmentLabel}}</view>
-     <view class="exercise-detail">{{exercise.sets}} 组 × {{exercise.repsMin}}{{exercise.repsMax > exercise.repsMin ? '～' + exercise.repsMax : ''}} 次{{exercise.eachSide ? '/侧' : ''}} · 休息 {{exercise.restSec}} 秒</view>
-     <view wx:if="{{!draft}}" class="exercise-detail">实际完成 {{exercise.doneSets}} 组 / 计划 {{exercise.sets}} 组 · 跳过 {{exercise.skippedSets}} 组</view>
+     <view class="exercise-prescription"><view><text class="prescription-label">计划组数</text><text class="prescription-value">{{exercise.sets}} 组</text></view><view><text class="prescription-label">每组次数</text><text class="prescription-value">{{exercise.repsMin}}{{exercise.repsMax > exercise.repsMin ? '～' + exercise.repsMax : ''}} 次{{exercise.eachSide ? '/侧' : ''}}</text></view><view><text class="prescription-label">组间休息</text><text class="prescription-value">{{exercise.restSec}} 秒</text></view></view>
+     <view wx:if="{{!draft}}" class="exercise-result"><text class="result-completed">已完成 <text class="result-number">{{exercise.doneSets}}</text> 组</text><text class="result-skipped">跳过 {{exercise.skippedSets}} 组</text></view>
      <view class="exercise-controls">
       <button size="mini" data-id="{{exercise.id}}" bindtap="movement">查看动作示范</button>
       <block wx:if="{{item.active && !item.finishedAt && !draft}}">
