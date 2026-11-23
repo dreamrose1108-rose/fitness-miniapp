@@ -31,7 +31,7 @@
 .exercise-list{padding:16rpx 24rpx}
 .exercise-item{display:flex;align-items:center;justify-content:space-between;padding:16rpx 0;border-bottom:1rpx solid var(--color-border)}
 .exercise-item:last-child{border-bottom:none}
-.exercise-item.is-done .exercise-name{text-decoration:line-through;color:var(--color-text-3)}
+.exercise-item.is-done .exercise-name{color:var(--color-text)}
 .exercise-item.is-done .exercise-detail{color:var(--color-text-3)}
 .exercise-left{display:flex;align-items:center;flex:1}
 .exercise-num{width:48rpx;height:48rpx;border-radius:50%;background:var(--color-bg);color:var(--color-text-2);display:flex;align-items:center;justify-content:center;font-size:24rpx;font-weight:600;margin-right:16rpx;flex-shrink:0}
@@ -68,3 +68,8 @@
 .toolbar{flex-wrap:wrap;gap:12rpx;}
 
 .actual-sets-picker{display:flex;justify-content:space-between;gap:20rpx;margin:18rpx 0;padding:20rpx;border:1rpx solid var(--color-border);background:var(--color-primary-light);color:var(--color-primary);border-radius:14rpx;font-size:25rpx;}
+
+.session-eyebrow{font-size:23rpx;color:var(--color-primary);margin-bottom:12rpx;font-weight:600;}
+.session-title{font-size:36rpx;line-height:1.5;}.session-overview{font-size:26rpx;margin:12rpx 0;color:var(--color-text-2);}
+.exercise-list{padding:20rpx;}.exercise-item{padding:26rpx;margin-bottom:20rpx;border:1rpx solid var(--color-border);border-radius:20rpx;background:var(--color-card);}.exercise-item:last-child{border-bottom:1rpx solid var(--color-border);}
+.exercise-info{min-width:0;}.exercise-heading{display:flex;justify-content:space-between;align-items:center;margin-bottom:14rpx;gap:12rpx;}.exercise-step{font-size:23rpx;font-weight:600;color:var(--color-primary);}.exercise-status{font-size:21rpx;padding:5rpx 14rpx;background:var(--color-primary-light);color:var(--color-primary);border-radius:20rpx;}.exercise-name{font-size:31rpx;font-weight:600;line-height:1.5;}.exercise-original{font-size:23rpx;color:var(--color-text-2);margin-top:8rpx;}.exercise-explanation{font-size:25rpx;color:var(--color-text-2);line-height:1.7;margin-top:12rpx;}.exercise-target{font-size:22rpx;color:var(--color-primary);margin:14rpx 0;}.exercise-detail{line-height:1.7;}

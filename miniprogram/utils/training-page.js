@@ -1,4 +1,5 @@
 const schedule=require('./training-schedule');
+const labels=require('./training-labels');
 const {formatDate}=require('./date');
 module.exports=function createTrainingPage(todayOnly=false){return {
  data:{todayOnly,draft:null,rows:[],today:'',start:'',maxDate:'',overrides:{},error:'',busy:false,showPast:false,success:'',activeKey:'',restTimer:{visible:false,remain:0,total:0,label:''}},
@@ -19,9 +20,9 @@ module.exports=function createTrainingPage(todayOnly=false){return {
   const today=this.data.today;
   let rows=this.data.draft?schedule.preview(this.data.draft,this.data.start,this.data.overrides):schedule.read().filter(r=>todayOnly?r.date===today:(this.data.showPast||r.date>=today));
   rows=rows.map(r=>{
-   const exercises=r.exercises.map(x=>{const doneSets=schedule.count(r,x),skippedSets=schedule.skippedCount(r,x);return {...x,doneSets,skippedSets,handled:doneSets+skippedSets>=x.sets,nextSet:doneSets+skippedSets+1,done:doneSets>=x.sets,skipped:!!(r.skipped&&r.skipped[x.id]),setDots:Array.from({length:x.sets},(_,i)=>i<doneSets)};});
+   const exercises=r.exercises.map(x=>{const doneSets=schedule.count(r,x),skippedSets=schedule.skippedCount(r,x);return {...labels.exercise(x),doneSets,skippedSets,handled:doneSets+skippedSets>=x.sets,nextSet:doneSets+skippedSets+1,done:doneSets>=x.sets,skipped:!!(r.skipped&&r.skipped[x.id]),setDots:Array.from({length:x.sets},(_,i)=>i<doneSets)};});
    const doneCount=exercises.filter(x=>x.done).length,skippedCount=exercises.filter(x=>x.skipped&&!x.done).length;
-   return {...r,exercises,doneCount,skippedCount,skippedSets:exercises.reduce((sum,x)=>sum+x.skippedSets,0),actualSets:exercises.reduce((sum,x)=>sum+x.doneSets,0),plannedSets:exercises.reduce((sum,x)=>sum+x.sets,0),ready:exercises.every(x=>x.handled),isToday:r.date===today,isPast:r.date<today,dateLabel:r.date===today?'今天':r.date,active:r.sourceKey===this.data.activeKey};
+   return {...r,displayTitle:labels.session(r),exercises,doneCount,skippedCount,skippedSets:exercises.reduce((sum,x)=>sum+x.skippedSets,0),actualSets:exercises.reduce((sum,x)=>sum+x.doneSets,0),plannedSets:exercises.reduce((sum,x)=>sum+x.sets,0),ready:exercises.every(x=>x.handled),isToday:r.date===today,isPast:r.date<today,dateLabel:r.date===today?'今天':r.date,active:r.sourceKey===this.data.activeKey};
   });
   if(todayOnly&&!rows.some(r=>r.sourceKey===this.data.activeKey)){this.clearTimer();this.setData({activeKey:'',restTimer:{visible:false}});}
   this.setData({rows,error:this._previewError||''});

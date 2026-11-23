@@ -4,6 +4,7 @@ const { call } = require('../../utils/cloud.js');
 const { formatDate } = require('../../utils/date.js');
 const schedule = require('../../utils/training-schedule.js');
 const library = require('../../utils/exercise-library.js');
+const trainingLabels = require('../../utils/training-labels');
 
 Page({
   data: {
@@ -51,14 +52,14 @@ Page({
       const doneCount = Object.values(entry.done || {}).filter(Boolean).length;
       this.setData({
         todayTraining: {
-          title: entry.title,
+          title: trainingLabels.session(entry),
           planTitle: entry.planTitle,
           sourceKey: entry.sourceKey,
           started: !!entry.startedAt,
           finished: !!entry.finishedAt,
           total: entry.exercises.length,
           done: doneCount,
-          names: entry.exercises.map(x => (library.get(x.id) || {}).displayName || x.name || x.id).slice(0, 4),
+          names: entry.exercises.map(x => trainingLabels.exercise(x).plainName).slice(0, 4),
           more: Math.max(0, entry.exercises.length - 4),
           complete: doneCount >= entry.exercises.length && entry.exercises.length > 0
         }
