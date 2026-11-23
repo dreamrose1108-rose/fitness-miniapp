@@ -16,7 +16,7 @@
     <view class="progress"><view class="progress-bar" style="width:{{progressPercent}}%"></view></view>
   </view>
 
-  <navigator url="/pages/nutrition-plan/nutrition-plan" class="card flex-between nutrition-entry"><view><view class="card-title">饮食计划</view><text class="text-2">估算每日热量与三餐营养分配</text></view><text>›</text></navigator>
+  <navigator url="/pages/nutrition-plan/nutrition-plan" class="card flex-between nutrition-entry"><view><view class="card-title">{{nutritionTargets ? '计划修改' : '饮食计划'}}</view><text class="text-2">{{nutritionTargets ? '调整每日热量与三餐营养分配' : '估算每日热量与三餐营养分配'}}</text></view><text>›</text></navigator>
   <view wx:if="{{nutritionTargets}}" class="card"><view class="card-title">每日营养目标</view><view class="text-2">蛋白质 {{nutritionTargets.protein}} g · 碳水 {{nutritionTargets.carb}} g · 脂肪 {{nutritionTargets.fat}} g</view></view>
   <!-- 餐次切换 -->
   <view class="meal-tabs">
