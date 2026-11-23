@@ -1,5 +1,5 @@
 <view class="page schedule-page">
- <view class="heading">{{draft ? '确认日期，再开始训练' : '我的训练日程'}}</view>
+ <view class="heading">{{todayOnly ? '今日训练' : draft ? '确认日期，再开始训练' : '我的训练日程'}}</view>
  <view class="hint">组数与完成进度保存在本机 · 打卡不自动计入热量</view>
  <view wx:if="{{error}}" class="notice error">{{error}}</view>
  <view wx:if="{{success}}" class="notice ok">{{success}}</view>
@@ -8,12 +8,12 @@
   <picker mode="date" value="{{start}}" start="{{today}}" end="{{maxDate}}" bindchange="start"><view class="date-btn">开始日期 {{start}} · 修改</view></picker>
   <view class="hint">可逐日调整，已有训练不会被覆盖。保存后才能开始训练。</view>
  </view>
- <view wx:if="{{!draft}}" class="toolbar">
+ <view wx:if="{{!draft && !todayOnly}}" class="toolbar">
   <button size="mini" bindtap="past">{{showPast ? '仅看今后' : '查看历史'}}</button><button size="mini" bindtap="calendar">日历</button><button size="mini" bindtap="coach">AI 新计划</button><button size="mini" bindtap="templates">选模板</button>
  </view>
  <view wx:if="{{!rows.length && !draft && !error}}" class="card empty-card">
-  <view class="empty-title">还没有训练日程</view><view class="hint">可以让 AI 按你的条件生成，也可以直接选择训练模板。</view>
-  <button class="btn-primary empty-btn" bindtap="coach">让 AI 制定计划</button><button bindtap="templates">选择训练模板</button>
+  <view class="empty-title">{{todayOnly ? '今天还没有训练安排' : '还没有训练日程'}}</view><view class="hint">可以让 AI 按你的条件生成，也可以直接选择训练模板。</view>
+  <block wx:if="{{todayOnly}}"><button class="btn-primary empty-btn" bindtap="templates">选择计划</button><button bindtap="freeTraining">自由运动记录</button></block><block wx:else><button class="btn-primary empty-btn" bindtap="coach">让 AI 制定计划</button><button bindtap="templates">选择训练模板</button></block>
  </view>
  <view wx:for="{{rows}}" wx:key="sourceKey" class="session-card {{item.isToday ? 'is-today' : ''}}">
   <view class="session-header">
@@ -45,7 +45,7 @@
    </view>
   </view>
   <button wx:if="{{item.active && !item.finishedAt}}" class="btn-primary session-start" data-key="{{item.sourceKey}}" bindtap="finish" disabled="{{!item.ready}}">结束本次训练</button>
-  <view wx:if="{{!draft}}" class="session-footer"><button size="mini" class="remove-btn" data-key="{{item.sourceKey}}" bindtap="remove">移除此日</button></view>
+  <view wx:if="{{!draft && !todayOnly}}" class="session-footer"><button size="mini" class="remove-btn" data-key="{{item.sourceKey}}" bindtap="remove">移除此日</button></view>
  </view>
  <button wx:if="{{draft}}" class="btn-primary save-btn" bindtap="save" loading="{{busy}}" disabled="{{busy}}">确认保存，进入训练日程</button>
  <view wx:if="{{restTimer.visible}}" class="rest-overlay"><view class="rest-card">
