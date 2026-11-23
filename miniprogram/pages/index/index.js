@@ -39,6 +39,8 @@ Page({
           title: entry.title,
           planTitle: entry.planTitle,
           sourceKey: entry.sourceKey,
+          started: !!entry.startedAt,
+          finished: !!entry.finishedAt,
           total: entry.exercises.length,
           done: doneCount,
           names: entry.exercises.map(x => (library.get(x.id) || {}).displayName || x.name || x.id).slice(0, 4),

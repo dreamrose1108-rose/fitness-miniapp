@@ -1,133 +1,47 @@
-<view class="page">
-  <!-- 顶部问候 + 日期 -->
+<view class="page home-page">
   <view class="greeting">
-    <view>
-      <text class="hello">你好，开始今天的管理吧</text>
-      <text class="date">{{todayLabel}}</text>
-    </view>
-    <view class="avatar" bindtap="goMine">{{userInfo.nickname || 'Fit'}}</view>
+    <view><text class="date">{{todayLabel}}</text><text class="hello">把健康，放进每一天</text></view>
+    <view class="profile-link" bindtap="goMine" hover-class="pressed">我的<text>›</text></view>
   </view>
 
-  <!-- 今日热量概览卡片 -->
-  <view class="card overview">
-    <view class="card-title">今日热量</view>
-    <view class="calorie-main">
-      <view class="cal-item">
-        <text class="cal-num">{{summary.net >= 0 ? '' : ''}}{{summary.net}}</text>
-        <text class="cal-label">净摄入 (kcal)</text>
-      </view>
-      <view class="ring">
-        <text class="ring-inner">{{intakePercent}}%</text>
-      </view>
-    </view>
-    <view class="cal-row">
-      <view class="cal-cell">
-        <view class="dot dot-in"></view>
-        <text>摄入 {{summary.intake}}</text>
-      </view>
-      <view class="cal-cell">
-        <view class="dot dot-out"></view>
-        <text>消耗 {{summary.burned}}</text>
-      </view>
-      <view class="cal-cell">
-        <text class="text-3">目标 {{target}}</text>
-      </view>
-    </view>
-    <!-- 三大营养素 -->
+  <view class="energy-card">
+    <view class="energy-top"><text>今日热量</text><text class="energy-tag">饮食 · 运动</text></view>
+    <view class="energy-main"><view><text class="energy-label">净摄入</text><view class="energy-number">{{summary.net}}<text>kcal</text></view></view><view class="target-block"><text>每日摄入目标</text><view>{{target}}<text> kcal</text></view></view></view>
+    <view class="energy-stats"><text>摄入 <text class="stat-value">{{summary.intake}}</text></text><text>运动消耗 <text class="stat-value">{{summary.burned}}</text></text></view>
+    <view class="energy-track"><view class="energy-fill" style="width: {{intakePercent}}%"></view></view>
+    <view class="energy-caption"><text>摄入占目标比例</text><text>{{intakePercent}}%</text></view>
     <view class="macro-row">
-      <view class="macro-cell">
-        <text class="macro-val protein">{{summary.proteinG || 0}}<text class="macro-unit">g</text></text>
-        <text class="macro-label">蛋白质</text>
-      </view>
-      <view class="macro-cell">
-        <text class="macro-val carb">{{summary.carbG || 0}}<text class="macro-unit">g</text></text>
-        <text class="macro-label">碳水</text>
-      </view>
-      <view class="macro-cell">
-        <text class="macro-val fat">{{summary.fatG || 0}}<text class="macro-unit">g</text></text>
-        <text class="macro-label">脂肪</text>
-      </view>
+      <view><text class="macro-label">蛋白质</text><view class="macro-value">{{summary.proteinG || 0}}<text> g</text></view></view>
+      <view><text class="macro-label">碳水</text><view class="macro-value">{{summary.carbG || 0}}<text> g</text></view></view>
+      <view><text class="macro-label">脂肪</text><view class="macro-value">{{summary.fatG || 0}}<text> g</text></view></view>
     </view>
   </view>
 
-  <!-- 今日训练 -->
-  <view wx:if="{{todayTraining}}" class="card training-card" bindtap="goTraining">
-    <view class="flex-between">
-      <view class="training-main">
-        <view class="training-title-row">
-          <text class="card-title">🏋️ 今日训练</text>
-          <text wx:if="{{todayTraining.complete}}" class="training-done-badge">✅ 已完成</text>
-        </view>
-        <text class="training-plan text-2">{{todayTraining.title}}</text>
-        <view class="training-actions">
-          <text class="training-action" wx:for="{{todayTraining.names}}" wx:key="*this">{{item}}</text>
-          <text wx:if="{{todayTraining.more > 0}}" class="text-3">等 {{todayTraining.total}} 个动作</text>
-        </view>
-        <view class="training-progress">
-          <view class="training-progress-bar" style="width: {{todayTraining.total ? (todayTraining.done / todayTraining.total) * 100 : 0}}%"></view>
-        </view>
-        <text class="text-3 training-count">{{todayTraining.done}} / {{todayTraining.total}} 动作完成</text>
-      </view>
-      <text class="training-arrow">›</text>
-    </view>
+  <view class="quick-grid">
+    <view class="quick-item" bindtap="goDiet" hover-class="pressed"><view class="quick-symbol diet-symbol">食</view><text>记录饮食</text></view>
+    <view class="quick-item" bindtap="goExercise" hover-class="pressed"><view class="quick-symbol exercise-symbol">动</view><text>记录运动</text></view>
+    <view class="quick-item" bindtap="goTrend" hover-class="pressed"><view class="quick-symbol trend-symbol">势</view><text>查看趋势</text></view>
+    <view class="quick-item" bindtap="goCoach" hover-class="pressed"><view class="quick-symbol coach-symbol">AI</view><text>喵教练</text></view>
   </view>
 
-  <!-- 体重记录 -->
-  <navigator url="/pages/water/water" class="card flex-between"><view><view class="card-title">饮水记录</view><text class="text-2">记一杯水，查看每日进度</text></view><text>›</text></navigator>
-  <view class="card weight-card">
-    <view class="flex-between">
-      <view>
-        <text class="card-title" style="margin-bottom:8rpx">当前体重</text>
-        <text class="weight-num">{{summary.latestWeight || '--'}}<text class="weight-unit"> kg</text></text>
-      </view>
-      <button class="mini-btn" bindtap="onRecordWeight">🐾 记录体重</button>
-    </view>
+  <view class="section-heading"><text>今日训练</text><text class="section-note">留一点时间，给自己</text></view>
+  <view class="training-card" bindtap="goTraining" hover-class="pressed">
+    <block wx:if="{{todayTraining}}">
+      <view class="training-top"><text class="training-plan">{{todayTraining.planTitle || '今日安排'}}</text><text class="status-pill">{{todayTraining.finished ? '已结束' : todayTraining.started ? '进行中' : '待开始'}}</text></view>
+      <view class="training-title">{{todayTraining.title}}</view>
+      <view class="training-actions"><text wx:for="{{todayTraining.names}}" wx:key="*this">{{item}}</text></view>
+      <view class="training-progress"><view style="width: {{todayTraining.total ? todayTraining.done / todayTraining.total * 100 : 0}}%"></view></view>
+      <view class="training-bottom"><text>{{todayTraining.done}} / {{todayTraining.total}} 个动作完成</text><view class="training-cta">{{todayTraining.finished ? '查看训练' : todayTraining.started ? '继续训练' : '开始训练'}} <text>↗</text></view></view>
+    </block>
+    <block wx:else><view class="training-top"><text class="training-plan">今天的运动时间</text><text class="status-pill">待安排</text></view><view class="training-title">从适合自己的节奏开始</view><view class="empty-copy">选择一个计划，开启今天的训练。</view><view class="training-bottom"><text>循序渐进，每一步都算数</text><view class="training-cta">去安排 <text>↗</text></view></view></block>
   </view>
 
-  <!-- 打卡激励 -->
-  <view class="card streak-card">
-    <view class="flex-between">
-      <view>
-        <view class="streak-flame">{{streak.todayChecked ? '😺' : '🐱'}}</view>
-      </view>
-      <view class="streak-info">
-        <view class="streak-main">
-          喵～喵～已连续打卡 <text class="streak-num">{{streak.streak}}</text> 天
-        </view>
-        <view class="streak-sub text-3">
-          累计 {{streak.totalDays}} 天
-          <text wx:if="{{streak.next}}"> · 距下一里程碑还差 {{streak.next - streak.totalDays}} 天</text>
-          <text wx:else> · 全部里程碑达成 🎉</text>
-        </view>
-        <view wx:if="{{streak.achieved.length}}" class="streak-badges">
-          <text wx:for="{{streak.achieved}}" wx:key="*this" class="badge">{{item}}天</text>
-        </view>
-      </view>
-    </view>
+  <view class="section-heading"><text>日常小习惯</text><text class="section-note">积累一点点改变</text></view>
+  <view class="habit-grid">
+    <navigator url="/pages/water/water" class="habit-card water-card" hover-class="pressed"><view class="habit-top"><text>饮水记录</text><text>↗</text></view><view class="habit-title">记得喝水</view><view class="habit-note">记一杯水，补充活力</view><view class="habit-action">去记录 ›</view></navigator>
+    <view class="habit-card weight-card" bindtap="onRecordWeight" hover-class="pressed"><view class="habit-top"><text>当前体重</text><text>＋</text></view><view class="weight-number">{{summary.latestWeight || '--'}}<text> kg</text></view><view class="habit-note">关注身体的每一点变化</view><view class="habit-action">记录体重 ›</view></view>
   </view>
 
-  <!-- 功能区 -->
-  <view class="card">
-    <view class="card-title">快捷入口</view>
-    <view class="quick-grid">
-      <view class="quick-item" bindtap="goDiet">
-        <view class="quick-icon quick-diet">🍽️</view>
-        <text>记录饮食</text>
-      </view>
-      <view class="quick-item" bindtap="goExercise">
-        <view class="quick-icon quick-ex">🏃</view>
-        <text>记录运动</text>
-      </view>
-      <view class="quick-item" bindtap="goTrend">
-        <view class="quick-icon quick-trend">📈</view>
-        <text>查看趋势</text>
-      </view>
-      <view class="quick-item" bindtap="goCoach">
-        <view class="quick-icon quick-coach">🤖</view>
-        <text>AI 教练</text>
-      </view>
-    </view>
-  </view>
-
+  <view class="streak-card"><view class="streak-number">{{streak.streak}}<text>天</text></view><view class="streak-info"><view class="streak-title">连续打卡，慢慢变好</view><view class="streak-note">累计 {{streak.totalDays}} 天 · {{streak.todayChecked ? '今天已打卡' : '今天也要记得记录'}}</view><view wx:if="{{streak.achieved.length}}" class="streak-badges"><text wx:for="{{streak.achieved}}" wx:key="*this">{{item}}天</text></view></view></view>
   <view class="tip">数据仅供健康管理参考，不构成医疗建议</view>
 </view>
