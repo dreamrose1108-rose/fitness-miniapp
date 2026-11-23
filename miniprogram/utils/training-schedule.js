@@ -47,16 +47,25 @@ function begin(sourceKey){return mutate(sourceKey,row=>{
  if(row.finishedAt)throw Error('这次训练已结束');
  row.startedAt=row.startedAt||Date.now();
 });}
+function skippedCount(row,ex){const remaining=Math.max(0,ex.sets-count(row,ex));return row.skipped&&row.skipped[ex.id]?remaining:Math.min(remaining,Math.max(0,Number(row.skippedSets&&row.skippedSets[ex.id])||0));}
+function skipSet(sourceKey,id,expected){let changed=false;const row=mutate(sourceKey,row=>{
+ if(!row.startedAt||row.date!==formatDate()||row.finishedAt)throw Error('请先开始今天的训练');
+ if(row.rest&&row.rest.until>Date.now())throw Error('正在休息，可先跳过休息');
+ const ex=row.exercises.find(x=>x.id===id);if(!ex)throw Error('训练动作不存在');
+ const handled=count(row,ex)+skippedCount(row,ex);
+ if(handled>=ex.sets||expected!==handled+1)return;
+ row.skippedSets={...row.skippedSets,[id]:skippedCount(row,ex)+1};row.rest=null;changed=true;
+ });return {row,changed};}
 function completeSet(sourceKey,id,expected){let changed=false;
  const row=mutate(sourceKey,row=>{
   if(!row.startedAt||row.date!==formatDate()||row.finishedAt)throw Error('请先开始今天的训练');
   if(row.rest&&row.rest.until>Date.now())throw Error('正在休息，可先跳过休息');
   const ex=row.exercises.find(x=>x.id===id);if(!ex)throw Error('训练动作不存在');
-  const current=count(row,ex);
-  if(row.skipped&&row.skipped[id]||current>=ex.sets||expected!==current+1)return;
+  const current=count(row,ex),handled=current+skippedCount(row,ex);
+  if(row.skipped&&row.skipped[id]||handled>=ex.sets||expected!==handled+1)return;
   row.completedSets={...row.completedSets,[id]:current+1};
   row.done={...row.done,[id]:current+1===ex.sets};
-  row.rest=current+1<ex.sets?{until:Date.now()+ex.restSec*1000,total:ex.restSec,label:ex.name+' · 第 '+(current+1)+' 组完成'}:null;
+  row.rest=handled+1<ex.sets?{until:Date.now()+ex.restSec*1000,total:ex.restSec,label:ex.name+' · 第 '+(handled+1)+' 组完成'}:null;
   changed=true;
  });return {row,changed};
 }
@@ -69,7 +78,7 @@ function skipExercise(sourceKey,id){return mutate(sourceKey,row=>{
 function endRest(sourceKey){return mutate(sourceKey,row=>{row.rest=null;});}
 function finish(sourceKey,acceptPartial=false){return mutate(sourceKey,row=>{
  if(!row.startedAt||row.date!==formatDate())throw Error('请先开始今天的训练');
- if(!acceptPartial&&!row.exercises.every(x=>count(row,x)>=x.sets||row.skipped&&row.skipped[x.id]))throw Error('还有未完成的动作，请完成或明确跳过');
+ if(!acceptPartial&&!row.exercises.every(x=>count(row,x)+skippedCount(row,x)>=x.sets))throw Error('还有未完成的动作，请完成或明确跳过');
  row.finishedAt=row.finishedAt||Date.now();row.rest=null;
 });}
-module.exports={draft,date,addDays,read,preview,save,toggle,remove,fromTemplate,count,setActualSets,begin,completeSet,skipExercise,endRest,finish};
+module.exports={draft,date,addDays,read,preview,save,toggle,remove,fromTemplate,count,skippedCount,skipSet,setActualSets,begin,completeSet,skipExercise,endRest,finish};

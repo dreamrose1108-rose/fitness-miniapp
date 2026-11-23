@@ -24,7 +24,7 @@
   </view>
   <view class="session-body"><view class="session-title">{{item.title}}</view><view class="hint">{{item.planTitle}}</view></view>
   <block wx:if="{{!draft}}">
-   <view class="progress-count">实际完成 {{item.actualSets}} 组 · 计划 {{item.plannedSets}} 组<text wx:if="{{item.skippedCount}}"> · 跳过 {{item.skippedCount}} 个</text></view>
+   <view class="progress-count">实际完成 {{item.actualSets}} 组 · 计划 {{item.plannedSets}} 组<text wx:if="{{item.skippedSets}}"> · 跳过 {{item.skippedSets}} 组</text></view>
    <button wx:if="{{item.isToday && !item.finishedAt && !item.active}}" class="btn-primary session-start" data-key="{{item.sourceKey}}" bindtap="begin">{{item.startedAt ? '继续训练' : '开始训练'}}</button>
    <view wx:if="{{!item.isToday && !item.finishedAt}}" class="hint session-start">{{item.isPast ? '历史安排，仅供查看' : '尚未到训练日期，可先查看动作演示'}}</view>
   </block>
@@ -33,14 +33,14 @@
     <view class="exercise-info">
      <view class="exercise-name">{{eidx + 1}}. {{exercise.name}}</view>
      <view class="exercise-detail">{{exercise.sets}} 组 × {{exercise.repsMin}}{{exercise.repsMax > exercise.repsMin ? '～' + exercise.repsMax : ''}} 次{{exercise.eachSide ? '/侧' : ''}} · 休息 {{exercise.restSec}} 秒</view>
-     <view wx:if="{{!draft}}" class="exercise-detail">实际完成 {{exercise.doneSets}} 组 / 计划 {{exercise.sets}} 组{{exercise.skipped ? ' · 剩余跳过' : ''}}</view>
-     <picker wx:if="{{item.active && !item.finishedAt && !draft}}" mode="selector" range="{{setOptions}}" value="{{exercise.doneSets}}" data-key="{{item.sourceKey}}" data-id="{{exercise.id}}" bindchange="actualSets"><view class="actual-sets-picker"><text>实际完成组数</text><text>{{exercise.doneSets}} 组 · 修改 ▾</text></view></picker>
+     <view wx:if="{{!draft}}" class="exercise-detail">实际完成 {{exercise.doneSets}} 组 / 计划 {{exercise.sets}} 组 · 跳过 {{exercise.skippedSets}} 组</view>
      <view class="exercise-controls">
       <button size="mini" data-id="{{exercise.id}}" bindtap="movement">看演示</button>
       <block wx:if="{{item.active && !item.finishedAt && !draft}}">
-       <button wx:if="{{!exercise.done && !exercise.skipped}}" size="mini" class="set-complete" data-key="{{item.sourceKey}}" data-id="{{exercise.id}}" data-set="{{exercise.nextSet}}" bindtap="onSetTap" disabled="{{restTimer.visible}}">完成第 {{exercise.nextSet}} 组</button>
-       <button wx:if="{{!exercise.done}}" size="mini" data-key="{{item.sourceKey}}" data-id="{{exercise.id}}" bindtap="toggle">{{exercise.skipped ? '恢复此动作' : '跳过此动作'}}</button>
-       <text wx:if="{{exercise.done}}">已完成 ✓</text>
+       <button wx:if="{{!exercise.handled}}" size="mini" class="set-complete" data-key="{{item.sourceKey}}" data-id="{{exercise.id}}" data-set="{{exercise.nextSet}}" bindtap="onSetTap" disabled="{{restTimer.visible}}">完成本组（第 {{exercise.nextSet}} 组）</button>
+       <button wx:if="{{!exercise.handled}}" size="mini" data-key="{{item.sourceKey}}" data-id="{{exercise.id}}" data-set="{{exercise.nextSet}}" bindtap="skipSet" disabled="{{restTimer.visible}}">跳过本组</button>
+       <button wx:if="{{!exercise.handled || exercise.skipped}}" size="mini" data-key="{{item.sourceKey}}" data-id="{{exercise.id}}" bindtap="toggle">{{exercise.skipped ? '恢复剩余组' : '跳过剩余组'}}</button>
+       <text wx:if="{{exercise.handled}}">本动作已结束：完成 {{exercise.doneSets}} 组，跳过 {{exercise.skippedSets}} 组</text>
       </block>
      </view>
     </view>
