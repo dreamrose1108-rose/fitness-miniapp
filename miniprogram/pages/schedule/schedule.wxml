@@ -22,7 +22,7 @@
    <view wx:else class="date-label">{{item.dateLabel}}</view>
    <view class="session-badge">{{item.finishedAt ? '已结束' : item.startedAt ? '进行中' : '未开始'}}</view>
   </view>
-  <view class="session-body"><view class="session-eyebrow">{{item.isToday ? '今天练什么' : '本次训练内容'}}</view><view class="session-title">{{item.displayTitle}}</view><view class="session-overview">{{item.exercises.length}} 个动作 · 计划 {{item.plannedSets}} 组</view><view class="hint">计划：{{item.planTitle}} · {{item.title}}</view></view>
+  <view class="session-body"><view class="session-eyebrow">{{item.isToday ? '今天练什么' : '本次训练内容'}}</view><view class="session-title">{{item.displayTitle}}</view><view class="session-overview">{{item.exercises.length}} 个动作 · 计划 {{item.plannedSets}} 组</view><view class="hint">计划：{{item.planTitle}}</view></view>
   <block wx:if="{{!draft}}">
    <view class="progress-count">实际完成 {{item.actualSets}} 组 · 计划 {{item.plannedSets}} 组<text wx:if="{{item.skippedSets}}"> · 跳过 {{item.skippedSets}} 组</text></view>
    <button wx:if="{{item.isToday && !item.finishedAt && !item.active}}" class="btn-primary session-start" data-key="{{item.sourceKey}}" bindtap="begin">{{item.startedAt ? '继续训练' : '开始训练'}}</button>
