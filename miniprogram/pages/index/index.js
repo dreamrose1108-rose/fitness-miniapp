@@ -70,7 +70,13 @@ Page({
   },
 
   goTraining() {
-    wx.navigateTo({ url: '/pages/today-training/today-training' });
+    if (this._openingTraining) return;
+    this._openingTraining = true;
+    wx.navigateTo({
+      url: '/pages/schedule/schedule?today=1',
+      fail: () => wx.showToast({title:'训练页面打开失败，请重新进入小程序',icon:'none'}),
+      complete: () => { this._openingTraining = false; }
+    });
   },
 
   // 打卡统计（饮食/运动/体重任一记录即算打卡）

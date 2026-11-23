@@ -41,8 +41,8 @@ test('today page is empty when only future sessions exist; schedule retains them
 test('home today-training entry targets dedicated page',()=>{
  const source=fs.readFileSync(path.join(__dirname,'../miniprogram/pages/index/index.js'),'utf8');let definition,url;
  vm.runInNewContext(source,{getApp:()=>({}),require:()=>({}),Page:p=>definition=p,wx:{navigateTo:arg=>url=arg.url}});
- definition.goTraining();assert.equal(url,'/pages/today-training/today-training');
- const app=JSON.parse(fs.readFileSync(path.join(__dirname,'../miniprogram/app.json'),'utf8'));assert.ok(app.pages.includes(url.slice(1)));
+ definition.goTraining();assert.equal(url,'/pages/schedule/schedule?today=1');
+ const app=JSON.parse(fs.readFileSync(path.join(__dirname,'../miniprogram/app.json'),'utf8'));assert.ok(app.pages.includes(url.slice(1).split('?')[0]));
 });
 
 test('actual sets support correction, extra work and partial finish without changing plan',async()=>{
@@ -62,4 +62,8 @@ test('skip one advances the set without adding completion; 4 planned => 3 comple
  p.onSetTap(e(key,'0025',2));p.onHide();await p.onShow();assert.equal(p.data.rows[0].actualSets,1);assert.equal(p.data.rows[0].exercises[0].nextSet,3);
  p.skipRest();p.onSetTap(e(key,'0025',3));p.skipRest();p.onSetTap(e(key,'0025',4));assert.equal(p.data.rows[0].actualSets,3);assert.equal(p.data.rows[0].skippedSets,1);assert.equal(p.data.rows[0].ready,true);assert.equal(p.data.rows[0].exercises[0].done,false);
  schedule.finish(key);assert.equal(schedule.count(schedule.read()[0],four.days[0].exercises[0]),3);p.onUnload();
+});
+
+test('existing schedule route supports today-only entry and excludes future sessions',async()=>{
+ const h=setup(false);schedule.save({...plan,days:[...plan.days,{...plan.days[0],offset:1}]},formatDate());const p=h.create();p.onLoad({today:'1'});await p.onShow();assert.equal(p.data.todayOnly,true);assert.equal(p.data.rows.length,1);p.past();assert.equal(p.data.rows.length,1);
 });

@@ -41,9 +41,9 @@
       <view class="training-title">{{todayTraining.title}}</view>
       <view class="training-actions"><text wx:for="{{todayTraining.names}}" wx:key="*this">{{item}}</text></view>
       <view class="training-progress"><view style="width: {{todayTraining.total ? todayTraining.done / todayTraining.total * 100 : 0}}%"></view></view>
-      <view class="training-bottom"><text>{{todayTraining.done}} / {{todayTraining.total}} 个动作完成</text><view class="training-cta">{{todayTraining.finished ? '查看训练' : todayTraining.started ? '继续训练' : '开始训练'}} <text>↗</text></view></view>
+      <view class="training-bottom"><text>{{todayTraining.done}} / {{todayTraining.total}} 个动作完成</text><view class="training-cta" catchtap="goTraining">{{todayTraining.finished ? '查看训练' : todayTraining.started ? '继续训练' : '开始训练'}} <text>↗</text></view></view>
     </block>
-    <block wx:else><view class="training-top"><text class="training-plan">今天的运动时间</text><text class="status-pill">待安排</text></view><view class="training-title">从适合自己的节奏开始</view><view class="empty-copy">选择一个计划，开启今天的训练。</view><view class="training-bottom"><text>循序渐进，每一步都算数</text><view class="training-cta">去安排 <text>↗</text></view></view></block>
+    <block wx:else><view class="training-top"><text class="training-plan">今天的运动时间</text><text class="status-pill">待安排</text></view><view class="training-title">从适合自己的节奏开始</view><view class="empty-copy">选择一个计划，开启今天的训练。</view><view class="training-bottom"><text>循序渐进，每一步都算数</text><view class="training-cta" catchtap="goTraining">去安排 <text>↗</text></view></view></block>
   </view>
 
   <view class="section-heading"><text>日常小习惯</text><text class="section-note">照顾好自己，也是一种进步</text></view>

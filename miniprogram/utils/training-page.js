@@ -4,6 +4,8 @@ const {formatDate}=require('./date');
 module.exports=function createTrainingPage(todayOnly=false){return {
  data:{todayOnly,draft:null,rows:[],today:'',start:'',maxDate:'',overrides:{},error:'',busy:false,showPast:false,success:'',activeKey:'',restTimer:{visible:false,remain:0,total:0,label:''}},
  onLoad(options={}){
+  todayOnly=todayOnly||options.today==='1';this.setData({todayOnly});
+  if(todayOnly&&wx.setNavigationBarTitle)wx.setNavigationBarTitle({title:'今日训练'});
   const today=formatDate();this.setData({today,start:today,maxDate:schedule.addDays(today,365)});
   if(!todayOnly && options.preview==='1'){
    const input=getApp().globalData.pendingAITrainingPlan;
