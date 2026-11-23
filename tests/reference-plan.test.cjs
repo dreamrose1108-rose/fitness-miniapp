@@ -21,14 +21,25 @@ test('numeric limits reject invalid values rather than coercing them to plausibl
  assert.throws(()=>model.validateEntry({rest:'14'}));assert.throws(()=>model.validateEntry({reps:'51'}));
  assert.equal(model.complete({sets:3,reps:10,rest:90}),true);
 });
-test('local drafts and progress round trip and unknown actions are excluded',()=>{
+test('local drafts round trip; unknown actions excluded; empty fields auto-fill defaults',()=>{
  let value;global.wx={setStorageSync:(k,v)=>{value=JSON.parse(JSON.stringify(v));},getStorageSync:()=>value};
  model.save({'push:bench':{sets:'3',reps:'10',rest:'90'},'pull:cable-curl':{},fake:{sets:'3'}},{'push:bench':true,'pull:cable-curl':true,fake:true});
- const r=model.restore();assert.deepEqual(r.progress,{'push:bench':true});assert.equal(r.entries.fake,undefined);assert.equal(r.entries['pull:cable-curl'].sets,'');
+ const r=model.restore();
+ assert.deepEqual(r.progress,{'push:bench':true});
+ assert.equal(r.entries.fake,undefined);
+ // 空字段现在会被 fillDefaults 预填推荐值
+ assert.ok(r.entries['pull:cable-curl'].sets); // 不再为空
+ assert.ok(r.entries['pull:cable-curl'].reps);
+ assert.ok(r.entries['pull:cable-curl'].rest);
 });
-test('storage failures propagate and corrupt stored data fails closed',()=>{
+test('storage failures return defaults and corrupt stored data falls back to defaults',()=>{
  global.wx={getStorageSync:()=>({version:1,entries:{'push:bench':{sets:'bad'}}}),setStorageSync:()=>{throw Error('quota');}};
- assert.deepEqual(model.restore(),{entries:{},progress:{}});assert.throws(()=>model.save({}),/quota/);
+ const r=model.restore();
+ // 损坏数据回退到默认方案而非空
+ assert.ok(r.entries['push:bench'].sets);
+ assert.ok(r.entries['push:bench'].reps);
+ assert.deepEqual(r.progress,{});
+ assert.throws(()=>model.save({}),/quota/);
 });
 test('editing a completed action clears its completion and does not write until save',()=>{
  const fs=require('node:fs'),vm=require('node:vm');let def;let writes=0;
