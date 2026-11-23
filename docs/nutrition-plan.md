@@ -9,9 +9,3 @@
 - 蛋白和碳水按4 kcal/g，脂肪按9 kcal/g。每日克数取整；分餐用末餐补齐取整余量，确保餐次合计等于日目标。
 - 默认三餐30/40/30；加餐时25/35/30/10，比例为可解释的产品安排。
 - 仅用户点击应用后，经现有 userProfile update 保存 nutritionGoal/dailyCalorieTarget/proteinTarget/carbTarget/fatTarget。计算资料按 openid 存本机，不生成已摄入记录。失败不标记成功，不覆盖饮水目标。
-
-## 饮食模式选择
-- 均衡三餐为默认；旧版已保存资料回退到均衡方案。
-- 14:10 / 16:8 仅调整进食窗口和餐次标签，不二次削减热量；需确认额外适用范围。窗口限制在同一自然日，包含所有加餐，不限制饮水。
-- 5:2 目前是可选择查看的介绍，不生成/保存低能量日数值，现有云端结构也不具备分日热量目标。禁止将普通每天目标误标为 5:2，或用平均热量覆盖限制日。
-- 证据：https://www.bmj.com/content/389/bmj-2024-082007 （99 项随机试验的系统综述）；定义参考 https://www.healthquality.va.gov/guidelines/CD/diabetes/VADOD-Diabetes-CPG_Final_508.pdf 。不宣称轻断食普遍优于持续能量限制。
