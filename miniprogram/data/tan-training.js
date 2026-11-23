@@ -38,6 +38,6 @@ module.exports={
    {key:'goblet',name:'高脚杯深蹲',exerciseId:'1760',note:'采用腿日跟练简介版本，不混入网友整理的颈前深蹲。',defSets:3,defReps:15,defRest:75},
    {key:'rdl',name:'杠铃罗马尼亚硬拉',exerciseId:'0085',defSets:4,defReps:12,defRest:90},
    {key:'extension-back',name:'山羊挺身',exerciseId:'0489',defSets:3,defReps:15,defRest:60}
-  ]}
+  ]},{id:'pull-article',title:'拉日(公众号版)',subtitle:'背 · 肩后束 · 三头',source:'https://mp.weixin.qq.com/s/1EASU8XRjjEqBDu-vWnubA',actions:[{key:'pw-wall',name:'墙面肩胛推展',exerciseId:'9511',sets:2,reps:'力竭',warmup:true},{key:'pw-dip',name:'跪姿凳上肘屈伸',exerciseId:'9512',sets:2,reps:'力竭',warmup:true},{key:'pw-cable',name:'绳索肩胛下肌激活',exerciseId:'9513',sets:2,reps:25,warmup:true},{key:'pull-mid',name:'中距对握高位下拉(背宽)',exerciseId:'9514',sets:4,reps:12},{key:'pull-rev',name:'反手高位下拉(下背阔)',exerciseId:'9515',sets:4,reps:12},{key:'row-nar',name:'窄握对握绳索划船(下背阔)',exerciseId:'9516',sets:4,reps:12},{key:'tbar',name:'T杆划船(菱形肌)',exerciseId:'9517',sets:4,reps:12},{key:'fly-rev',name:'蝴蝶机反向飞鸟(肩后束)',exerciseId:'9518',sets:4,reps:12},{key:'dip-tri',name:'凳上臂屈伸(三头)',exerciseId:'9519',sets:4,reps:12},{key:'skull',name:'仰卧杠铃臂屈伸(三头)',exerciseId:'9520',sets:4,reps:12}]}
  ]
 };
