@@ -24,7 +24,7 @@
   </view>
   <view class="session-body"><view class="session-title">{{item.title}}</view><view class="hint">{{item.planTitle}}</view></view>
   <block wx:if="{{!draft}}">
-   <view class="progress-count">完成 {{item.doneCount}} / {{item.exercises.length}} 个动作<text wx:if="{{item.skippedCount}}"> · 跳过 {{item.skippedCount}} 个</text></view>
+   <view class="progress-count">实际完成 {{item.actualSets}} 组 · 计划 {{item.plannedSets}} 组<text wx:if="{{item.skippedCount}}"> · 跳过 {{item.skippedCount}} 个</text></view>
    <button wx:if="{{item.isToday && !item.finishedAt && !item.active}}" class="btn-primary session-start" data-key="{{item.sourceKey}}" bindtap="begin">{{item.startedAt ? '继续训练' : '开始训练'}}</button>
    <view wx:if="{{!item.isToday && !item.finishedAt}}" class="hint session-start">{{item.isPast ? '历史安排，仅供查看' : '尚未到训练日期，可先查看动作演示'}}</view>
   </block>
@@ -33,7 +33,8 @@
     <view class="exercise-info">
      <view class="exercise-name">{{eidx + 1}}. {{exercise.name}}</view>
      <view class="exercise-detail">{{exercise.sets}} 组 × {{exercise.repsMin}}{{exercise.repsMax > exercise.repsMin ? '～' + exercise.repsMax : ''}} 次{{exercise.eachSide ? '/侧' : ''}} · 休息 {{exercise.restSec}} 秒</view>
-     <view wx:if="{{!draft}}" class="exercise-detail">{{exercise.skipped ? '本次跳过' : '已完成 ' + exercise.doneSets + '/' + exercise.sets + ' 组'}}</view>
+     <view wx:if="{{!draft}}" class="exercise-detail">实际完成 {{exercise.doneSets}} 组 / 计划 {{exercise.sets}} 组{{exercise.skipped ? ' · 剩余跳过' : ''}}</view>
+     <picker wx:if="{{item.active && !item.finishedAt && !draft}}" mode="selector" range="{{setOptions}}" value="{{exercise.doneSets}}" data-key="{{item.sourceKey}}" data-id="{{exercise.id}}" bindchange="actualSets"><view class="actual-sets-picker"><text>实际完成组数</text><text>{{exercise.doneSets}} 组 · 修改 ▾</text></view></picker>
      <view class="exercise-controls">
       <button size="mini" data-id="{{exercise.id}}" bindtap="movement">看演示</button>
       <block wx:if="{{item.active && !item.finishedAt && !draft}}">
@@ -45,7 +46,7 @@
     </view>
    </view>
   </view>
-  <button wx:if="{{item.active && !item.finishedAt}}" class="btn-primary session-start" data-key="{{item.sourceKey}}" bindtap="finish" disabled="{{!item.ready}}">结束本次训练</button>
+  <button wx:if="{{item.active && !item.finishedAt}}" class="btn-primary session-start" data-key="{{item.sourceKey}}" bindtap="requestFinish">结束并核对组数</button>
   <view wx:if="{{!draft && !todayOnly}}" class="session-footer"><button size="mini" class="remove-btn" data-key="{{item.sourceKey}}" bindtap="remove">移除此日</button></view>
  </view>
  <button wx:if="{{draft}}" class="btn-primary save-btn" bindtap="save" loading="{{busy}}" disabled="{{busy}}">确认保存，进入训练日程</button>

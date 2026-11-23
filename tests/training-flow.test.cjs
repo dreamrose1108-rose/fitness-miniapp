@@ -44,3 +44,14 @@ test('home today-training entry targets dedicated page',()=>{
  definition.goTraining();assert.equal(url,'/pages/today-training/today-training');
  const app=JSON.parse(fs.readFileSync(path.join(__dirname,'../miniprogram/app.json'),'utf8'));assert.ok(app.pages.includes(url.slice(1)));
 });
+
+test('actual sets support correction, extra work and partial finish without changing plan',async()=>{
+ const h=setup(true),p=h.create();schedule.save(plan,formatDate());p.onLoad();await p.onShow();const key=p.data.rows[0].sourceKey;
+ assert.throws(()=>schedule.setActualSets(key,'0025',1),/开始/);p.begin(e(key));
+ p.actualSets({...e(key),detail:{value:'4'}});assert.equal(p.data.rows[0].actualSets,4);assert.equal(p.data.rows[0].exercises[0].sets,2);
+ p.actualSets({...e(key),detail:{value:'1'}});assert.equal(p.data.rows[0].exercises[0].done,false);assert.equal(schedule.count(schedule.read()[0],plan.days[0].exercises[0]),1);
+ assert.throws(()=>schedule.setActualSets(key,'0025',-1));assert.throws(()=>schedule.setActualSets(key,'0025',1.5));assert.throws(()=>schedule.setActualSets(key,'0025',51));
+ global.wx.showModal=opts=>{assert.match(opts.content,/1 \/ 2 组/);opts.success({confirm:false});};p.requestFinish(e(key));assert.equal(schedule.read()[0].finishedAt,undefined);
+ global.wx.showModal=opts=>opts.success({confirm:true});p.requestFinish(e(key));assert.ok(schedule.read()[0].finishedAt);assert.equal(p.data.rows[0].actualSets,1);assert.equal(p.data.rows[0].exercises[0].done,false);
+ assert.throws(()=>schedule.setActualSets(key,'0025',2));
+});

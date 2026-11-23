@@ -1,7 +1,7 @@
 const schedule=require('./training-schedule');
 const {formatDate}=require('./date');
 module.exports=function createTrainingPage(todayOnly=false){return {
- data:{todayOnly,draft:null,rows:[],today:'',start:'',maxDate:'',overrides:{},error:'',busy:false,showPast:false,success:'',activeKey:'',restTimer:{visible:false,remain:0,total:0,label:''}},
+ data:{setOptions:Array.from({length:51},(_,i)=>i+' 组'),todayOnly,draft:null,rows:[],today:'',start:'',maxDate:'',overrides:{},error:'',busy:false,showPast:false,success:'',activeKey:'',restTimer:{visible:false,remain:0,total:0,label:''}},
  onLoad(options={}){
   const today=formatDate();this.setData({today,start:today,maxDate:schedule.addDays(today,365)});
   if(!todayOnly && options.preview==='1'){
@@ -21,7 +21,7 @@ module.exports=function createTrainingPage(todayOnly=false){return {
   rows=rows.map(r=>{
    const exercises=r.exercises.map(x=>{const doneSets=schedule.count(r,x);return {...x,doneSets,nextSet:doneSets+1,done:doneSets>=x.sets,skipped:!!(r.skipped&&r.skipped[x.id]),setDots:Array.from({length:x.sets},(_,i)=>i<doneSets)};});
    const doneCount=exercises.filter(x=>x.done).length,skippedCount=exercises.filter(x=>x.skipped&&!x.done).length;
-   return {...r,exercises,doneCount,skippedCount,ready:doneCount+skippedCount===exercises.length,isToday:r.date===today,isPast:r.date<today,dateLabel:r.date===today?'今天':r.date,active:r.sourceKey===this.data.activeKey};
+   return {...r,exercises,doneCount,skippedCount,actualSets:exercises.reduce((sum,x)=>sum+x.doneSets,0),plannedSets:exercises.reduce((sum,x)=>sum+x.sets,0),ready:doneCount+skippedCount===exercises.length,isToday:r.date===today,isPast:r.date<today,dateLabel:r.date===today?'今天':r.date,active:r.sourceKey===this.data.activeKey};
   });
   if(todayOnly&&!rows.some(r=>r.sourceKey===this.data.activeKey)){this.clearTimer();this.setData({activeKey:'',restTimer:{visible:false}});}
   this.setData({rows,error:this._previewError||''});
@@ -29,7 +29,9 @@ module.exports=function createTrainingPage(todayOnly=false){return {
  begin(e){if(this.data.draft)return;try{const key=e.currentTarget.dataset.key;schedule.begin(key);this.setData({activeKey:key,success:'训练已开始，完成一组后点击下方按钮'});this.render();this.resumeTimer();}catch(e){this.setData({error:e.message});}},
  onSetTap(e){if(this.data.draft||this._setBusy)return;const {key,id,set}=e.currentTarget.dataset;if(key!==this.data.activeKey)return;this._setBusy=true;try{schedule.completeSet(key,id,Number(set));this.render();this.resumeTimer();}catch(e){this.setData({error:e.message});}finally{this._setBusy=false;}},
  toggle(e){if(this.data.draft)return;const {key,id}=e.currentTarget.dataset;if(key!==this.data.activeKey)return;try{schedule.skipExercise(key,id);this.render();this.resumeTimer();}catch(e){this.setData({error:e.message});}},
- finish(e){try{const row=schedule.finish(e.currentTarget.dataset.key);this.setData({activeKey:'',success:'训练已结束，已保存 '+row.exercises.filter(x=>schedule.count(row,x)>=x.sets).length+' 个完成动作；跳过动作不计完成'});this.clearTimer();this.setData({restTimer:{visible:false}});this.render();}catch(e){this.setData({error:e.message});}},
+ actualSets(e){const {key,id}=e.currentTarget.dataset;if(this.data.draft||key!==this.data.activeKey)return;try{schedule.setActualSets(key,id,Number(e.detail.value));this.render();this.resumeTimer();}catch(err){this.setData({error:err.message});}},
+ requestFinish(e){const key=e.currentTarget.dataset.key;if(key!==this.data.activeKey)return;const row=this.data.rows.find(r=>r.sourceKey===key);if(!row)return;wx.showModal({title:'核对实际完成组数',content:row.exercises.map(x=>x.name+'：'+x.doneSets+' / '+x.sets+' 组'+(x.skipped?'（剩余跳过）':'')).join('\n')+'\n共完成 '+row.actualSets+' 组。按实际记录结束训练？',confirmText:'确认结束',cancelText:'继续修改',success:r=>{if(r.confirm)this.finish(e);}});},
+ finish(e){try{const row=schedule.finish(e.currentTarget.dataset.key,true);this.setData({activeKey:'',success:'训练已结束，已保存 '+row.exercises.reduce((sum,x)=>sum+schedule.count(row,x),0)+' 组实际训练；未完成组数不会计入'});this.clearTimer();this.setData({restTimer:{visible:false}});this.render();}catch(e){this.setData({error:e.message});}},
  clearTimer(){if(this._timer){clearInterval(this._timer);this._timer=null;}},
  resumeTimer(){this.clearTimer();if(this._hidden||!this.data.activeKey)return;const tick=()=>{try{const row=schedule.read().find(r=>r.sourceKey===this.data.activeKey);const rest=row&&row.rest;const remain=rest?Math.max(0,Math.ceil((rest.until-Date.now())/1000)):0;this.setData({restTimer:remain?{...rest,visible:true,remain}:{visible:false}});if(!remain)this.clearTimer();}catch(e){this.clearTimer();this.setData({restTimer:{visible:false},error:e.message});}};tick();if(this.data.restTimer.visible)this._timer=setInterval(tick,1000);},
  skipRest(){try{schedule.endRest(this.data.activeKey);this.clearTimer();this.setData({restTimer:{visible:false}});}catch(e){this.setData({error:e.message});}},

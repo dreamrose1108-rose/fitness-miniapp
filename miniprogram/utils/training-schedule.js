@@ -32,7 +32,16 @@ function fromTemplate(plan){
  return draft({id:'template_'+plan.createdAt+'_'+plan.config.template,title:plan.title,notes:'四周安排；开始日期对应第一周第一个训练日。',days});
 }
 function mutate(sourceKey,fn){const entries=read(),row=entries.find(r=>r.sourceKey===sourceKey);if(!row)throw Error('训练安排已不存在');fn(row);wx.setStorageSync(key(),{version:1,entries});return row;}
-function count(row,exercise){return row.done&&row.done[exercise.id]?exercise.sets:Math.min(exercise.sets,Math.max(0,Number(row.completedSets&&row.completedSets[exercise.id])||0));}
+function count(row,exercise){const actual=row.completedSets&&row.completedSets[exercise.id];return actual!==undefined?Math.max(0,Number(actual)||0):(row.done&&row.done[exercise.id]?exercise.sets:0);}
+function setActualSets(sourceKey,id,value){
+ if(!Number.isInteger(value)||value<0||value>50)throw Error('实际组数需为 0～50 的整数');
+ return mutate(sourceKey,row=>{
+  if(!row.startedAt||row.date!==formatDate()||row.finishedAt)throw Error('请先开始今天的训练');
+  const ex=row.exercises.find(x=>x.id===id);if(!ex)throw Error('训练动作不存在');
+  row.completedSets={...row.completedSets,[id]:value};row.done={...row.done,[id]:value>=ex.sets};
+  row.skipped={...row.skipped,[id]:false};row.rest=null;
+ });
+}
 function begin(sourceKey){return mutate(sourceKey,row=>{
  if(row.date!==formatDate())throw Error('只能开始今天的训练；其他日期可查看安排');
  if(row.finishedAt)throw Error('这次训练已结束');
@@ -58,9 +67,9 @@ function skipExercise(sourceKey,id){return mutate(sourceKey,row=>{
  row.skipped={...row.skipped,[id]:!(row.skipped&&row.skipped[id])};row.rest=null;
 });}
 function endRest(sourceKey){return mutate(sourceKey,row=>{row.rest=null;});}
-function finish(sourceKey){return mutate(sourceKey,row=>{
+function finish(sourceKey,acceptPartial=false){return mutate(sourceKey,row=>{
  if(!row.startedAt||row.date!==formatDate())throw Error('请先开始今天的训练');
- if(!row.exercises.every(x=>count(row,x)>=x.sets||row.skipped&&row.skipped[x.id]))throw Error('还有未完成的动作，请完成或明确跳过');
+ if(!acceptPartial&&!row.exercises.every(x=>count(row,x)>=x.sets||row.skipped&&row.skipped[x.id]))throw Error('还有未完成的动作，请完成或明确跳过');
  row.finishedAt=row.finishedAt||Date.now();row.rest=null;
 });}
-module.exports={draft,date,addDays,read,preview,save,toggle,remove,fromTemplate,count,begin,completeSet,skipExercise,endRest,finish};
+module.exports={draft,date,addDays,read,preview,save,toggle,remove,fromTemplate,count,setActualSets,begin,completeSet,skipExercise,endRest,finish};

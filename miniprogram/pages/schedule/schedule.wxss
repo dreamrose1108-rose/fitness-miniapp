@@ -66,3 +66,5 @@
 .exercise-controls button{margin:0;font-size:24rpx;}
 .exercise-controls .set-complete{background:var(--color-primary);color:white;}
 .toolbar{flex-wrap:wrap;gap:12rpx;}
+
+.actual-sets-picker{display:flex;justify-content:space-between;gap:20rpx;margin:18rpx 0;padding:20rpx;border:1rpx solid var(--color-border);background:var(--color-primary-light);color:var(--color-primary);border-radius:14rpx;font-size:25rpx;}
