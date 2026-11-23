@@ -8,7 +8,7 @@ test('author follow-along lists have unique entries; video days no prescriptions
  for(const d of videoDays){assert.match(d.source,/jingxuan\.douyin\.com\/m\/video\/\d+$/);assert.equal(d.actions.length,5);for(const a of d.actions){keys.push(d.id+':'+a.key);assert.equal(a.sets,undefined);assert.equal(a.reps,undefined);if(a.exerciseId)assert.ok(library.get(a.exerciseId));}}
  const articleDays=model.catalog.days.filter(d=>/mp\.weixin\.qq\.com/.test(d.source));
  assert.equal(articleDays.length,2);
- for(const a of articleDays[0].actions){keys.push(articleDays[0].id+':'+a.key);if(a.exerciseId)assert.ok(library.get(a.exerciseId));if(a.sets)assert.ok(a.sets>=1&&a.sets<=6);}
+ for(const ad of articleDays){for(const a of ad.actions){keys.push(ad.id+':'+a.key);if(a.exerciseId)assert.ok(library.get(a.exerciseId));if(a.sets)assert.ok(a.sets>=1if(a.sets)assert.ok(a.sets>=1&&a.sets<=6);}if(a.sets)assert.ok(a.sets>=1&&a.sets<=6);}a.sets<=6);}}
  assert.equal(new Set(keys).size,35); // 15 video + 10 article
  assert.equal(videoDays[0].actions[4].exerciseId,null);
  assert.equal(videoDays[1].actions[3].name,'开肘下拉');
