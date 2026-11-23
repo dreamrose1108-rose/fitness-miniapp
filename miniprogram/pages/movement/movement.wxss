@@ -14,3 +14,13 @@
 .gif-overlay-hint {
   color: rgba(255,255,255,0.6); font-size: 24rpx; margin-top: 24rpx;
 }
+
+/* 无GIF时的搜索和相似推荐 */
+.note { display: flex; flex-direction: column; gap: 16rpx; }
+.ai-find-btn { background: var(--color-primary) !important; color: #fff !important; font-size: 26rpx; border-radius: 20rpx; margin: 8rpx 0; width: 50% !important; }
+.similar-list { margin-top: 8rpx; }
+.similar-title { font-size: 24rpx; color: var(--color-text-3); }
+.similar-item { font-size: 28rpx; color: var(--color-primary); padding: 12rpx 0; border-bottom: 1rpx solid var(--color-border); }
+.gif-search-result { margin-top: 12rpx; padding: 16rpx; background: var(--color-primary-light); border-radius: 12rpx; }
+.gif-search-title { font-size: 24rpx; color: var(--color-primary); font-weight: 600; display: block; margin-bottom: 8rpx; }
+.gif-search-link { font-size: 24rpx; color: var(--color-text-2); word-break: break-all; text-decoration: underline; }
