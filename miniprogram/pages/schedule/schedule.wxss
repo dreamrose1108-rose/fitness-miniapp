@@ -73,3 +73,8 @@
 .session-title{font-size:36rpx;line-height:1.5;}.session-overview{font-size:26rpx;margin:12rpx 0;color:var(--color-text-2);}
 .exercise-list{padding:20rpx;}.exercise-item{padding:26rpx;margin-bottom:20rpx;border:1rpx solid var(--color-border);border-radius:20rpx;background:var(--color-card);}.exercise-item:last-child{border-bottom:1rpx solid var(--color-border);}
 .exercise-info{min-width:0;}.exercise-heading{display:flex;justify-content:space-between;align-items:center;margin-bottom:14rpx;gap:12rpx;}.exercise-step{font-size:23rpx;font-weight:600;color:var(--color-primary);}.exercise-status{font-size:21rpx;padding:5rpx 14rpx;background:var(--color-primary-light);color:var(--color-primary);border-radius:20rpx;}.exercise-name{font-size:31rpx;font-weight:600;line-height:1.5;}.exercise-original{font-size:23rpx;color:var(--color-text-2);margin-top:8rpx;}.exercise-explanation{font-size:25rpx;color:var(--color-text-2);line-height:1.7;margin-top:12rpx;}.exercise-target{font-size:22rpx;color:var(--color-primary);margin:14rpx 0;}.exercise-detail{line-height:1.7;}
+
+/* Tinted training overview above neutral exercise cards, shared by both themes. */
+.session-body{margin:20rpx 20rpx 24rpx;padding:26rpx;border-radius:20rpx;background:var(--color-primary-light);border-left:6rpx solid var(--color-primary);}
+.session-body .hint{color:var(--color-text-2);margin-bottom:0;line-height:1.7;}
+.session-body .session-eyebrow{color:var(--color-primary);}
