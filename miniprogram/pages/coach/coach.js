@@ -42,7 +42,12 @@ Page({
 
   async onLoad() {
     if (!await app.login()) return;
-    await Promise.all([this.loadHistory(), this.loadTodaySnapshot()]);
+    await this.loadHistory();
+  },
+
+  async onShow() {
+    // 每次进入页面刷新速览（切 tab 回来也更新）
+    this.loadTodaySnapshot();
   },
 
   toggleSnapshot() {
