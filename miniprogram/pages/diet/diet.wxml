@@ -9,7 +9,7 @@
         <text class="sum-num">{{totalIntake}} <text class="sum-unit">kcal</text></text>
       </view>
       <view class="sum-right">
-        <text class="text-3">目标 {{target}}</text>
+        <text class="text-3">目标 {{target}}</text><text wx:if="{{targetLabel}}" class="text-2">{{targetLabel}}</text>
         <text class="remain">剩余 {{remain}}</text>
       </view>
     </view>

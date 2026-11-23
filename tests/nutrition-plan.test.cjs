@@ -14,3 +14,15 @@ test('time-restricted strategies change windows, not calorie estimates, and pres
  const base=m.estimate(form);for(const [strategy,end] of [['tre16','16:00']]){const p=m.estimate({...form,strategy,fastingSuitable:true,windowStart:'08:00',snack:true});assert.equal(p.calories,base.calories);assert.equal(p.eatingWindow,'08:00–'+end);assert.equal(p.meals[0].name,'第 1 餐');assert.equal(p.meals.reduce((n,x)=>n+x.calories,0),p.calories);}
  for(const change of [{strategy:'tre16'},{strategy:'tre16',fastingSuitable:true,windowStart:'23:00'},{strategy:'tre16',fastingSuitable:true,windowStart:'09:99'},{strategy:'fiveTwo'},{strategy:'unknown'},{strategy:'tre16',fastingSuitable:true,weight:40,height:180}])assert.throws(()=>m.estimate({...form,...change}));
 });
+const five={...form,weight:85,goal:'lose',strategy:'fiveTwo',risks:{pregnancy:'no',eatingDisorder:'no',medication:'no',chronicCondition:'no'},lowDays:[0,3],trainingReviewed:true};
+test('5:2 screens each risk and uses 5 maintenance days plus 2 separate low days',()=>{
+ const p=m.estimate(five);assert.equal(p.week.length,7);assert.equal(p.week.filter(x=>x.isLow).length,2);assert.equal(p.week.filter(x=>!x.isLow).length,5);assert.equal(p.calories,m.estimate({...five,strategy:'balanced',goal:'maintain'}).calories);assert.equal(p.weeklyCalories,p.calories*5+p.lowCalories*2);assert.throws(()=>m.patch(p));
+ for(const change of [{risks:{}},{risks:{...five.risks,medication:'yes'}},{risks:{...five.risks,chronicCondition:'unsure'}},{age:65},{weight:55},{goal:'gain'},{lowDays:[0,1]},{lowDays:[0,6]},{lowDays:[0,0]},{lowDays:[1]},{trainingReviewed:false}])assert.throws(()=>m.estimate({...five,...change}));
+});
+test('5:2 applying requires professional confirmation and keeps weekly goals out of cloud profile',async()=>{
+ let page,calls=0,stored;const app={globalData:{openid:'weekly-test'}};
+ vm.runInNewContext(fs.readFileSync('miniprogram/pages/nutrition-plan/nutrition-plan.js','utf8'),{Page:p=>page=p,getApp:()=>app,require:n=>n.includes('nutrition-plan')?m:{call:async()=>{calls++;return {updated:true};}},wx:{pageScrollTo(){},showToast(){},setStorageSync:(k,v)=>stored={k,v}}});
+ page.data=JSON.parse(JSON.stringify(page.data));page.owner='weekly-test';page.setData=v=>Object.assign(page.data,v);page.data.form={...five};page.generate();await page.apply();assert.equal(page.data.saved,false);assert.equal(stored,undefined);assert.equal(calls,0);
+ page.data.form.professionalConfirmed=true;await page.apply();assert.equal(page.data.saved,true);assert.equal(calls,0);assert.equal(stored.v.activeWeek.days.length,7);
+ global.getApp=()=>app;global.wx={getStorageSync:k=>k===stored.k?stored.v:null};const d=stored.v.activeWeek.days[0];assert.equal(m.activeDay(d.date).calories,d.calories);assert.equal(m.activeDay('2000-01-01'),null);app.globalData.openid='other';assert.equal(m.activeDay(d.date),null);
+});

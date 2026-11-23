@@ -13,7 +13,15 @@
 ## 饮食模式选择
 - 均衡三餐为默认；旧版已保存资料回退到均衡方案。
 - 16:8 仅调整进食窗口和餐次标签，不二次削减热量；需确认额外适用范围。窗口限制在同一自然日，包含所有加餐，不限制饮水。
-- 5:2 目前是可选择查看的介绍，不生成/保存低能量日数值，现有云端结构也不具备分日热量目标。禁止将普通每天目标误标为 5:2，或用平均热量覆盖限制日。
+- 5:2 已支持一周参考草案。按下方筛查及分日存储规则执行。
 - 证据：https://www.bmj.com/content/389/bmj-2024-082007 （99 项随机试验的系统综述）；定义参考 https://www.healthquality.va.gov/guidelines/CD/diabetes/VADOD-Diabetes-CPG_Final_508.pdf 。不宣称轻断食普遍优于持续能量限制。
 
 当前选项仅包含均衡三餐、16:8、5:2，不单列“轻断食”或14:10。
+
+## 5:2 参考草案与应用边界
+- 产品保守筛查范围：19–64岁、BMI≥25、减重目标；逐项回答孕哺/备孕、进食障碍/营养不良、用药/低血糖、慢性疾病，任一“是/不确定/未回答”不生成。这是自动筛查，不是医学许可，也不声称该阈值是统一临床标准。
+- 用户选择两个不连续的星期，周日与周一也算连续。需确认低能量日无高强度训练/重体力劳动。
+- 正常日采用维持估算。低能量日取维持估算25%，取整到10 kcal；低于500或超过800不自动生成。参考定义 https://www.bhf.org.uk/informationsupport/heart-matters-magazine/nutrition/weight/diets 。数值为专业复核草案，不保证营养充足。
+- 输出仅覆盖自生成日开始7个具体日期，显示每一天热量与营养素估算，不自动滚动执行。必须如实确认医生/营养师已复核后才允许应用；修改资料、风险或低能量日后清除确认。
+- 应用保存在本机按openid隔离的 nutritionEstimate:v1 的 activeWeek。不会把低能量目标写进云端固定目标。首页和饮食页按日期取周目标，过期或其他设备使用账号固定目标。应用均衡/16:8后，写入固定目标并替换本机记录，清除周覆盖。
+- 临床参考 https://www.nhs.uk/conditions/overweight-and-obesity/ 及 https://www.niddk.nih.gov/health-information/professionals/diabetes-discoveries-practice/fasting-safely-with-diabetes 。

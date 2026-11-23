@@ -1,5 +1,6 @@
 // pages/diet/diet.js — 饮食记录（云端食物库 + 离线降级 + 自定义食物）
 const app = getApp();
+const nutritionPlan = require('../../utils/nutrition-plan');
 const { uploadPhoto, readPhoto, deletePhoto } = require('../../utils/photos.js');
 const { call } = require('../../utils/cloud.js');
 const { formatDate } = require('../../utils/date.js');
@@ -17,6 +18,7 @@ Page({
     totalIntake: 0,
     target: 1800,
     nutritionTargets: null,
+    targetLabel: '',
     remain: 1800,
     progressPercent: 0,
     // 弹层
@@ -49,7 +51,9 @@ Page({
   async loadTarget() {
     try {
       const p = await call('userProfile', { action: 'get' });
-      if (p) this.setData({ target: p.dailyCalorieTarget || 1800, nutritionTargets: p.proteinTarget != null && p.carbTarget != null && p.fatTarget != null ? {protein:p.proteinTarget,carb:p.carbTarget,fat:p.fatTarget} : null }, this.updateSummary);
+      const weekly = nutritionPlan.activeDay(this.data.viewDate || formatDate());
+      const current = weekly ? {dailyCalorieTarget:weekly.calories,proteinTarget:weekly.protein,carbTarget:weekly.carb,fatTarget:weekly.fat} : p;
+      if (current) { const p = current; this.setData({targetLabel:weekly?'5:2 · '+weekly.type:'', target: p.dailyCalorieTarget || 1800, nutritionTargets: p.proteinTarget != null && p.carbTarget != null && p.fatTarget != null ? {protein:p.proteinTarget,carb:p.carbTarget,fat:p.fatTarget} : null }, this.updateSummary); }
     } catch (e) {}
   },
 
@@ -368,10 +372,10 @@ Page({
     const d = new Date(date + 'T12:00:00');
     const week = ['日','一','二','三','四','五','六'][d.getDay()];
     const label = date === today ? '今天' : `${d.getMonth()+1}月${d.getDate()}日 周${week}`;
-    this.setData({ viewDate: date, viewDateLabel: label }, () => this.loadRecords());
+    this.setData({ viewDate: date, viewDateLabel: label }, () => Promise.all([this.loadRecords(),this.loadTarget()]));
   },
   goToday() {
-    this.setData({ viewDate: '', viewDateLabel: '今天' }, () => this.loadRecords());
+    this.setData({ viewDate: '', viewDateLabel: '今天' }, () => Promise.all([this.loadRecords(),this.loadTarget()]));
   },
 
   // ===== 编辑记录分量 =====

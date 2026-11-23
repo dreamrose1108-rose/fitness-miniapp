@@ -1,5 +1,6 @@
 // pages/index/index.js — 首页：今日概览
 const app = getApp();
+const nutritionPlan = require('../../utils/nutrition-plan');
 const { call } = require('../../utils/cloud.js');
 const { formatDate } = require('../../utils/date.js');
 const schedule = require('../../utils/training-schedule.js');
@@ -14,6 +15,7 @@ Page({
     themeNames: ['猫咪奶茶', '自然森林'],
     summary: { intake: 0, burned: 0, net: 0, latestWeight: null },
     target: 1800,
+    targetLabel: '',
     intakePercent: 0,
     userInfo: {},
     streak: { todayChecked: false, streak: 0, totalDays: 0, achieved: [], next: null },
@@ -92,7 +94,9 @@ Page({
       const profile = await call('userProfile', { action: 'get' });
       if (profile) {
         this.setData({
-          target: profile.dailyCalorieTarget || 1800,
+          target: (nutritionPlan.activeDay(formatDate()) || {}).calories || profile.dailyCalorieTarget || 1800,
+          targetLabel: nutritionPlan.activeDay(formatDate()) ? '5:2 · '+nutritionPlan.activeDay(formatDate()).type : '',
+          intakePercent: Math.min(100,Math.round(this.data.summary.intake / ((nutritionPlan.activeDay(formatDate()) || {}).calories || profile.dailyCalorieTarget || 1800)*100)),
           userInfo: { nickname: profile.nickname }
         });
       }

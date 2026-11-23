@@ -11,7 +11,7 @@ function setup(call = async () => [], deletePhoto = async () => {}) {
   vm.runInNewContext(source, {
     getApp: () => ({ login: async () => 'user' }),
     Page: value => { page = value; },
-    require: name => name.includes('photos') ? {deletePhoto, readPhoto: async () => 'local-photo'} : name.includes('cloud') ? { call } : name.includes('date') ? { formatDate: () => '2026-11-19' } : {
+    require: name => name.includes('nutrition-plan') ? require('../miniprogram/utils/nutrition-plan') : name.includes('photos') ? {deletePhoto, readPhoto: async () => 'local-photo'} : name.includes('cloud') ? { call } : name.includes('date') ? { formatDate: () => '2026-11-19' } : {
       FOOD_DB: [{ name: '米饭', cat: '主食' }], FOOD_CATEGORIES: [], MEAL_TYPES: []
     },
     wx: { showModal: value => { modal = value; }, showToast() {}, cloud: { deleteFile: async () => {} } },

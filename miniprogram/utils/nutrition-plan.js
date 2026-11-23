@@ -1,16 +1,17 @@
+const {formatDate}=require('./date');
 // General adult estimate, not a therapeutic diet. See docs/nutrition-plan.md.
 const activity=[{label:'久坐为主，日常走动少',factor:1.2},{label:'日常经常走动或站立',factor:1.4},{label:'体力工作，日常活动多',factor:1.6}];
 const intensity=[{label:'轻度：散步、舒缓运动',met:3},{label:'中等：快走、一般健身',met:5},{label:'较高：跑步、较高强度运动',met:7}];
 const strategies=[
  {key:'balanced',name:'均衡三餐',tag:'日常基础方案',description:'规律安排三餐，可选加餐；不限制进食窗口。',note:'优先选择能长期坚持的方式，营养目标仍按个人需求估算。',hours:0},
  {key:'tre16',name:'16:8 限时进食',tag:'每日进食时间安排',description:'每天在 8 小时内安排饮食，剩余 16 小时不摄入热量。',note:'不是必须跳过早餐，也不是窗口内随意吃。可选择符合日常作息的开始时间。',hours:8},
- {key:'fiveTwo',name:'5:2 间歇性能量限制',tag:'每周饮食安排 · 需个别评估',description:'每周 5 天正常安排饮食，另外 2 个不连续的日子显著降低能量摄入。',note:'低能量日与普通每日目标不同，容易影响营养摄入、用药和训练恢复。本版提供方案说明，不自动生成或应用低能量日热量。',hours:0}
+ {key:'fiveTwo',name:'5:2 间歇性能量限制',tag:'每周饮食安排 · 需个别评估',description:'每周 5 天正常安排饮食，另外 2 个不连续的日子显著降低能量摄入。',note:'低能量日与普通每日目标不同，容易影响营养摄入、用药和训练恢复。先做适用性筛查，再生成一周参考草案；低能量日需专业确认后才可应用。',hours:0}
 ];
 function strategy(f){const s=strategies.find(x=>x.key===(f.strategy||'balanced'));if(!s)throw Error('请选择支持的饮食方案');return s;}
 function eatingWindow(f,s){if(!s.hours)return '';const v=f.windowStart||'08:00';if(!/^\d{2}:\d{2}$/.test(v))throw Error('请选择有效的开始时间');const [h,m]=v.split(':').map(Number);if(h>23||m>59||h*60+m+s.hours*60>=1440)throw Error('请将进食窗口安排在同一天内');return v+'–'+String(h+s.hours).padStart(2,'0')+':'+String(m).padStart(2,'0');}
 function number(v,min,max,label){if(String(v===undefined?'':v).trim()==='')throw Error('请填写'+label);const n=Number(v);if(!Number.isFinite(n)||n<min||n>max)throw Error(label+'需为 '+min+'～'+max);return n;}
 function estimate(f){
- const chosen=strategy(f);if(chosen.key==='fiveTwo')throw Error('5:2 需要个别评估，本版不自动生成低能量日目标；可选择均衡三餐或限时进食');
+ const chosen=strategy(f);if(chosen.key==='fiveTwo')return estimateWeek(f);
  if(f.suitability!=='adult')throw Error('本估算不适用于孕哺期、治疗饮食或进食障碍情况，请由医生或营养师制定目标');
  const age=number(f.age,19,78,'年龄'),height=number(f.height,120,230,'身高（厘米）'),weight=number(f.weight,35,250,'当前体重（公斤）');
  if(!Number.isInteger(age))throw Error('年龄请填写整数');
@@ -34,5 +35,27 @@ function estimate(f){
  const meals=names.map((name,i)=>{const meal={name,percent:Math.round(ratios[i]*100)};Object.keys(totals).forEach(k=>{meal[k]=i===names.length-1?totals[k]-used[k]:Math.round(totals[k]*ratios[i]);used[k]+=meal[k];});return meal;});
  return {version:1,strategy:chosen.key,strategyName:chosen.name,eatingWindow:window,calories,protein,carb,fat,resting:Math.round(resting),movement:Math.round(movement),maintenance:Math.round(maintenance),factor:daily.factor,adjustment:f.goal==='lose'?'维持热量减少 10%':f.goal==='gain'?'维持热量增加 5%':'保持估算维持热量',floorApplied:raw<floor,meals,goal:f.goal,createdAt:Date.now()};
 }
-function patch(p){return {nutritionGoal:p.goal,dailyCalorieTarget:p.calories,proteinTarget:p.protein,carbTarget:p.carb,fatTarget:p.fat};}
-module.exports={activity,intensity,strategies,strategy,eatingWindow,estimate,patch};
+const riskFields=['pregnancy','eatingDisorder','medication','chronicCondition'];
+const weekdays=['周一','周二','周三','周四','周五','周六','周日'];
+function dailyNutrition(calories){return {calories,protein:Math.round(calories*.25/4),carb:Math.round(calories*.45/4),fat:Math.round(calories*.30/9)};}
+function estimateWeek(f){
+ // A screening result is not medical clearance. Numerical output is a review draft.
+ const base=estimate({...f,strategy:'balanced',goal:'maintain'});
+ if(f.goal!=='lose')throw Error('5:2 参考草案仅用于减重目标；维持或增肌请选均衡方案');
+ if(Number(f.age)>64)throw Error('65 岁及以上需个体评估，不自动生成 5:2 草案');
+ const bmi=Number(f.weight)/(Number(f.height)/100)**2;
+ if(bmi<25)throw Error('本工具仅为 BMI ≥25 的成年人生成减重参考草案；其他情况请采用均衡方案或咨询营养师');
+ for(const k of riskFields){if(!f.risks||!['no','yes','unsure'].includes(f.risks[k]))throw Error('请完整回答 5:2 适用性问题');if(f.risks[k]!=='no')throw Error('存在不适用或不确定情况，需先由医生或营养师个别评估；不自动生成低能量日目标');}
+ const low=[...new Set((f.lowDays||[]).map(Number))].sort();
+ if(low.length!==2||low.some(x=>!Number.isInteger(x)||x<0||x>6))throw Error('请选择每周两个低能量日');
+ const gap=Math.abs(low[0]-low[1]);if(gap===1||gap===6)throw Error('两个低能量日不能连续，包括周日和周一');
+ if(f.trainingReviewed!==true)throw Error('请确认低能量日不安排高强度训练或重体力工作');
+ const normal=dailyNutrition(base.calories),lowCalories=Math.round(base.maintenance*.25/10)*10;
+ if(lowCalories<500||lowCalories>800)throw Error('你的需求不适合本工具的 5:2 参考范围，请由营养师制定低能量日');
+ const limited=dailyNutrition(lowCalories),start=formatDate(),parts=start.split('-').map(Number),startDate=new Date(parts[0],parts[1]-1,parts[2],12);
+ const week=Array.from({length:7},(_,i)=>{const d=new Date(startDate);d.setDate(d.getDate()+i);const day=(d.getDay()+6)%7,isLow=low.includes(day);return {date:formatDate(d),weekday:weekdays[day],isLow,type:isLow?'低能量日':'正常饮食日',...(isLow?limited:normal)};});
+ return {...base,strategy:'fiveTwo',strategyName:'5:2 一周参考草案',week,lowDays:low,start,end:week[6].date,lowCalories,weeklyCalories:week.reduce((n,d)=>n+d.calories,0),assessment:'未发现已填报的排除项；这不是医疗许可',professionalConfirmed:f.professionalConfirmed===true,meals:[],adjustment:'正常日采用维持热量；两个不连续低能量日按维持需求约 25% 估算，不再叠加减脂折扣',floorApplied:false,createdAt:Date.now()};
+}
+function activeDay(date){try{const owner=getApp().globalData.openid;if(!owner)return null;const saved=wx.getStorageSync('nutritionEstimate:v1:'+owner),week=saved&&saved.activeWeek;if(!week||week.confirmed!==true||!Array.isArray(week.days))return null;const day=week.days.find(x=>x.date===date);if(!day||!['calories','protein','carb','fat'].every(k=>Number.isFinite(day[k])&&day[k]>0))return null;return day;}catch(e){return null;}}
+function patch(p){if(p.strategy==='fiveTwo')throw Error('分日计划不能覆盖固定每日目标');return {nutritionGoal:p.goal,dailyCalorieTarget:p.calories,proteinTarget:p.protein,carbTarget:p.carb,fatTarget:p.fat};}
+module.exports={activity,intensity,strategies,strategy,eatingWindow,estimate,estimateWeek,activeDay,weekdays,riskFields,patch};
