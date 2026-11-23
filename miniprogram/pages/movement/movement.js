@@ -67,7 +67,7 @@ Page({
   wx.previewImage({urls:this.data.images,current:this.data.images[this.data.frame]});
  },
  closeGifOverlay(){this.setData({gifOverlay:false});},
- copySource(){const m=this.data.mediaInfo;wx.setClipboardData({data:(m.hasGif?[m.gifSource,'https://gymvisual.com/']:[m.photoSource,m.videoSource,m.videoLicenseUrl]).filter(Boolean).join('\n')});},
+ copySource(){const m=this.data.mediaInfo;wx.setClipboardData({data:(m.hasGif?[m.gifSource]:[m.photoSource,m.videoSource,m.videoLicenseUrl]).filter(Boolean).join('\n')});},
  favorite(){if(!this.data.item)return;try{const ids=library.toggleFavorite(this.data.item.id);this.setData({favorite:ids.includes(this.data.item.id)});}catch(e){wx.showToast({title:'收藏未保存，请重试',icon:'none'});}},
  record(){if(!this.data.item)return;this.stop();getApp().globalData.pendingExerciseId=this.data.item.id;wx.switchTab({url:'/pages/exercise/exercise',fail:()=>wx.showToast({title:'打开运动记录失败，请重试',icon:'none'})});},
  license(){this.setData({showLicense:!this.data.showLicense});}

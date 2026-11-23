@@ -1,15 +1,35 @@
 const test=require('node:test'),assert=require('node:assert/strict');
 const model=require('../miniprogram/utils/reference-plan.js');
 const library=require('../miniprogram/utils/exercise-library.js');
+test('all article exercises resolve to matching frontend and backend GIFs and original sources',()=>{
+ const gifs=require('../miniprogram/data/exercise-gifs');
+ const sources=require('../miniprogram/data/article-media');
+ const deployed=require('../cloudfunctions/record/exercise-gifs.json');
+ const mirror=require('../server/record/exercise-gifs.json');
+ assert.deepEqual(deployed,mirror);
+ assert.equal(deployed['9524'],'exercise-media/gif-v1/9525-pushTan2026.gif');
+ assert.equal(deployed['9526'],'exercise-media/gif-v1/9527-pushTan2026.gif');
+ assert.equal(deployed['9531'],'exercise-media/gif-v1/9532-pushTan2026.gif');
+ assert.equal(deployed['9521'],undefined);
+ for(const day of model.catalog.days.filter(d=>d.id.endsWith('-article'))){
+  for(const action of day.actions){
+   assert.ok(library.get(action.exerciseId),`${day.id}: ${action.name} missing`);
+   if(action.exerciseId==='9532'){assert.ok(!gifs.includes('9532'));assert.equal(deployed['9532'],undefined);continue;}
+   assert.ok(gifs.includes(action.exerciseId),`${action.exerciseId} frontend GIF missing`);
+   assert.match(deployed[action.exerciseId],/exercise-media\/gif-v1\/\d{4}-[A-Za-z0-9]+\.gif$/);
+   assert.equal(sources[action.exerciseId].source,day.source);
+  }
+ }
+});
 test('author follow-along lists have unique entries; video days no prescriptions, article day has them',()=>{
- assert.equal(model.catalog.days.length,5);const keys=[];
+ assert.equal(model.catalog.days.length,6);const keys=[];
  const videoDays=model.catalog.days.filter(d=>/jingxuan\.douyin\.com/.test(d.source));
  assert.equal(videoDays.length,3);
  for(const d of videoDays){assert.match(d.source,/jingxuan\.douyin\.com\/m\/video\/\d+$/);assert.equal(d.actions.length,5);for(const a of d.actions){keys.push(d.id+':'+a.key);assert.equal(a.sets,undefined);assert.equal(a.reps,undefined);if(a.exerciseId)assert.ok(library.get(a.exerciseId));}}
  const articleDays=model.catalog.days.filter(d=>/mp\.weixin\.qq\.com/.test(d.source));
- assert.equal(articleDays.length,2);
+ assert.equal(articleDays.length,3);
  for(const ad of articleDays){for(const a of ad.actions){keys.push(ad.id+':'+a.key);if(a.exerciseId)assert.ok(library.get(a.exerciseId));if(a.sets)assert.ok(a.sets>=1&&a.sets<=6);}}
- assert.equal(new Set(keys).size,35); // 15 video + 10 article
+ assert.equal(new Set(keys).size,46); // 15 video + 31 article
  assert.equal(videoDays[0].actions[4].exerciseId,null);
  assert.equal(videoDays[1].actions[3].name,'开肘下拉');
  assert.equal(videoDays[2].actions[2].name,'高脚杯深蹲');

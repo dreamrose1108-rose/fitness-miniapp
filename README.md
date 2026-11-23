@@ -70,3 +70,7 @@ record.savePhotoMeal 接收 photoFileID、date、mealType、items，校验照片
 视觉接口使用智谱官方视觉 MCP 对应的多模态模型，默认 glm-5.3-flash，可由 VISION_MODEL 覆盖；密钥从 VISION_API_KEY 或已有 LLM_API_KEY 读取，均只在云端配置。教练对话模型保持不变。
 
 验证（2026-11-20）：餐图识别、分量重算、确认保存、刷新恢复、重复提交不重复计入及照片读取均通过云端联调；临时餐食和照片已清理。测试命令：`node --test tests/*.test.cjs server/tests/*.test.cjs`。
+
+## 2026-11-23 动作映射修复
+
+补齐公众号推日动作目录、同步前后端 GIF 映射，并按实际画面修正八项错位。当前目录 1410 个动作、1354 个 GIF 标识；绳索锤式弯举的原文 GIF 待补，未绑定替代动作。详细核对范围及存储键对应关系见《动作素材核对记录.md》。本轮 89 项自动测试通过。
