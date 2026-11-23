@@ -46,3 +46,18 @@
 .remove-btn{font-size:22rpx;color:var(--color-danger);background:none;padding:8rpx 16rpx}
 .remove-btn::after{border:none}
 .save-btn{margin-top:24rpx}
+
+/* 组进度点 */
+.set-dots{display:flex;gap:8rpx;margin-top:8rpx}
+.set-dot{font-size:28rpx;color:var(--color-text-3);padding:4rpx 8rpx}
+.set-dot.done{color:var(--color-primary)}
+
+/* 组间休息倒计时 */
+.rest-overlay{position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,.75);z-index:999;display:flex;align-items:center;justify-content:center}
+.rest-card{background:#fff;border-radius:24rpx;padding:48rpx 64rpx;display:flex;flex-direction:column;align-items:center;min-width:400rpx}
+.rest-label{font-size:26rpx;color:var(--color-text-2);margin-bottom:16rpx}
+.rest-count{font-size:120rpx;font-weight:700;color:var(--color-primary);line-height:1}
+.rest-unit{font-size:24rpx;color:var(--color-text-3);margin-top:8rpx;margin-bottom:24rpx}
+.rest-bar{width:100%;height:10rpx;background:var(--color-bg);border-radius:5rpx;overflow:hidden;margin-bottom:24rpx}
+.rest-bar-fill{height:100%;background:var(--color-primary);border-radius:5rpx;transition:width 1s linear}
+.rest-skip-btn{background:var(--color-primary)!important;color:#fff!important;font-size:26rpx;border-radius:24rpx;padding:12rpx 40rpx}

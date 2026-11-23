@@ -65,12 +65,32 @@
           <view class="exercise-info">
             <view class="exercise-name">{{exercise.name}}</view>
             <view class="exercise-detail">{{exercise.sets}}×{{exercise.repsMin}}{{exercise.repsMax > exercise.repsMin ? '～' + exercise.repsMax : ''}}{{exercise.eachSide ? '/侧' : ''}} · 休{{exercise.restSec}}s</view>
+            <!-- 组进度点 -->
+            <view class="set-dots" wx:if="{{!draft && !exercise.done}}">
+              <view wx:for="{{exercise.setDots}}" wx:for-item="dot" wx:for-index="sidx" wx:key="sidx"
+                    class="set-dot {{dot ? 'done' : ''}}"
+                    data-key="{{item.sourceKey}}" data-id="{{exercise.id}}" data-set="{{sidx + 1}}" data-date="{{item.date}}"
+                    catchtap="onSetTap">{{dot ? '●' : '○'}}</view>
+            </view>
           </view>
         </view>
         <button wx:if="{{!draft}}" class="done-btn {{exercise.done ? 'is-done' : ''}}" size="mini"
                 data-key="{{item.sourceKey}}" data-id="{{exercise.id}}" bindtap="toggle">
-          {{exercise.done ? '取消' : '完成'}}
+          {{exercise.done ? '取消' : '跳过'}}
         </button>
+      </view>
+    </view>
+
+    <!-- 组间休息倒计时 -->
+    <view class="rest-overlay" wx:if="{{restTimer.visible}}">
+      <view class="rest-card">
+        <view class="rest-label">{{restTimer.label}}</view>
+        <view class="rest-count">{{restTimer.remain}}</view>
+        <view class="rest-unit">秒后开始下一组</view>
+        <view class="rest-bar">
+          <view class="rest-bar-fill" style="width: {{restTimer.total ? (restTimer.remain / restTimer.total) * 100 : 0}}%"></view>
+        </view>
+        <button class="rest-skip-btn" size="mini" bindtap="skipRest">跳过休息 💪</button>
       </view>
     </view>
 
