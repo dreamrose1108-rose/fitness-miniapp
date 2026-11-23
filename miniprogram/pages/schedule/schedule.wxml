@@ -31,6 +31,7 @@
     <view class="empty-title">还没有训练日程</view>
     <view class="hint">告诉 AI 教练你的目标、经验、器械和每周训练次数</view>
     <button class="btn-primary empty-btn" bindtap="coach">让 AI 制定计划</button>
+    <view class="hint" style="margin-top:16rpx">点击后跳转喵教练，AI 会自动开始生成计划</view>
   </view>
 
   <!-- 日程卡片 -->

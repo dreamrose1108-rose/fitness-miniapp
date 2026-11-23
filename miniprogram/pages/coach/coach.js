@@ -48,6 +48,13 @@ Page({
   async onShow() {
     // 每次进入页面刷新速览（切 tab 回来也更新）
     this.loadTodaySnapshot();
+    // 从训练日程空状态跳转过来 → 自动生成计划
+    if (getApp().globalData.autoGeneratePlan) {
+      getApp().globalData.autoGeneratePlan = false;
+      this.setData({ inputText: '帮我制定一个简单的三分化训练计划，每周3次，增肌目标，家里有哑铃和弹力带' }, () => {
+        this.onSend();
+      });
+    }
   },
 
   toggleSnapshot() {

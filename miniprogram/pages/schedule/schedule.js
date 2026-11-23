@@ -116,5 +116,5 @@ Page({
  movement(e){const id=e.currentTarget.dataset.id;if(this.data.rows.some(r=>r.exercises.some(x=>x.id===id)))wx.navigateTo({url:'/pages/movement/movement?id='+id});},
  past(){this.setData({showPast:!this.data.showPast});this.render();},
  calendar(){wx.navigateTo({url:'/pages/calendar/calendar'});},
- coach(){wx.switchTab({url:'/pages/coach/coach'});}
+ coach(){getApp().globalData.autoGeneratePlan=true;wx.switchTab({url:'/pages/coach/coach'});}
 });
