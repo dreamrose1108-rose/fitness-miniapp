@@ -35,17 +35,31 @@ Page({
     sendError: '',
     typing: false,        // 打字机渲染中
     scrollToId: '',
-    quickQuestions: [
-      '如何制定一周减脂计划？',
-      '减脂期应该怎么吃？',
-      '跑步和力量训练怎么搭配？',
-      '搜索谭成义三分化训练计划，附上来源'
-    ]
+    snapshotCollapsed: false,
+    todaySummary: { intake: 0, burned: 0, proteinG: 0 },
+    todayTraining: false
   },
 
   async onLoad() {
     if (!await app.login()) return;
-    await this.loadHistory();
+    await Promise.all([this.loadHistory(), this.loadTodaySnapshot()]);
+  },
+
+  toggleSnapshot() {
+    this.setData({ snapshotCollapsed: !this.data.snapshotCollapsed });
+  },
+
+  async loadTodaySnapshot() {
+    try {
+      const { formatDate } = require('../../utils/date.js');
+      const today = formatDate();
+      const summary = await call('record', { action: 'summary', type: 'diet', date: today }).catch(() => null);
+      if (summary) this.setData({ todaySummary: summary });
+      // 检查今日训练
+      const schedule = require('../../utils/training-schedule.js');
+      const entry = schedule.read().find(x => x.date === today);
+      this.setData({ todayTraining: !!entry });
+    } catch (e) { /* 速览失败不影响聊天 */ }
   },
 
   async loadHistory() {

@@ -1,6 +1,32 @@
 <view class="page coach-page">
-  <!-- 免责横幅（猫咪版） -->
-  <view class="disclaimer">🐾 卡路喵的建议仅供参考，不构成医疗诊断</view>
+  <!-- 今日速览（可收起） -->
+  <view class="today-snapshot {{snapshotCollapsed ? 'collapsed' : ''}}">
+    <view class="snapshot-header" bindtap="toggleSnapshot">
+      <text class="snapshot-title">📊 今日</text>
+      <text class="snapshot-toggle">{{snapshotCollapsed ? '展开' : '收起'}}</text>
+    </view>
+    <view class="snapshot-body" wx:if="{{!snapshotCollapsed}}">
+      <view class="snap-item">
+        <text class="snap-val">{{todaySummary.intake || 0}}</text>
+        <text class="snap-label">摄入 kcal</text>
+      </view>
+      <view class="snap-divider"></view>
+      <view class="snap-item">
+        <text class="snap-val protein">{{todaySummary.proteinG || 0}}g</text>
+        <text class="snap-label">蛋白质</text>
+      </view>
+      <view class="snap-divider"></view>
+      <view class="snap-item">
+        <text class="snap-val">{{todaySummary.burned || 0}}</text>
+        <text class="snap-label">消耗 kcal</text>
+      </view>
+      <view class="snap-divider"></view>
+      <view class="snap-item">
+        <text class="snap-val {{todayTraining ? 'ok' : ''}}">{{todayTraining ? '🏋️' : '—'}}</text>
+        <text class="snap-label">训练</text>
+      </view>
+    </view>
+  </view>
 
   <!-- 消息列表 -->
   <scroll-view
@@ -14,12 +40,32 @@
     <view class="welcome" wx:if="{{messages.length === 0}}">
       <view class="welcome-avatar"><image class="avatar-img" src="/images/coach-cat.png" mode="aspectFill" /></view>
       <text class="welcome-title">喵～我是你的猫咪教练</text>
-      <text class="welcome-desc">饮食、运动、减脂计划，喵都知道，随时问喵</text>
-      <view class="quick-questions">
-        <view
-          wx:for="{{quickQuestions}}" wx:key="*this"
-          class="quick-q" data-q="{{item}}" bindtap="onQuickQuestion"
-        >🐾 {{item}}</view>
+      <text class="welcome-desc">我能查你的真实数据、联网搜资料、制定训练计划</text>
+      <view class="quick-grid">
+        <view class="quick-chip" data-q="我今天吃了多少热量？" bindtap="onQuickQuestion">
+          <text class="quick-icon">🍚</text>
+          <text class="quick-text">今天吃了多少</text>
+        </view>
+        <view class="quick-chip" data-q="我今天蛋白质吃够了吗？" bindtap="onQuickQuestion">
+          <text class="quick-icon">🥚</text>
+          <text class="quick-text">蛋白质够吗</text>
+        </view>
+        <view class="quick-chip" data-q="帮我制定一个训练计划" bindtap="onQuickQuestion">
+          <text class="quick-icon">🏋️</text>
+          <text class="quick-text">制定训练计划</text>
+        </view>
+        <view class="quick-chip" data-q="我最近的体重趋势怎么样？" bindtap="onQuickQuestion">
+          <text class="quick-icon">⚖️</text>
+          <text class="quick-text">体重趋势</text>
+        </view>
+        <view class="quick-chip" data-q="推荐一个低卡晚餐" bindtap="onQuickQuestion">
+          <text class="quick-icon">🥗</text>
+          <text class="quick-text">推荐低卡晚餐</text>
+        </view>
+        <view class="quick-chip" data-q="搜索最新的减脂研究" bindtap="onQuickQuestion">
+          <text class="quick-icon">🔍</text>
+          <text class="quick-text">联网搜资料</text>
+        </view>
       </view>
     </view>
 
@@ -49,7 +95,8 @@
     </view>
   </scroll-view>
 
-  <view class="search-options"><button class="search-toggle {{webSearch ? 'selected' : ''}}" size="mini" bindtap="toggleSearch" disabled="{{thinking || typing}}">{{webSearch ? '✓ 联网搜索已开启' : '联网搜索'}}</button><text>也可直接说“搜索…”</text></view>
+  <view class="search-options"><button class="search-toggle {{webSearch ? 'selected' : ''}}" size="mini" bindtap="toggleSearch" disabled="{{thinking || typing}}">{{webSearch ? '✓ 联网搜索已开启' : '联网搜索'}}</button><text>也可直接说"搜索…"</text></view>
+
   <!-- 输入栏 -->
   <view class="input-bar safe-bottom">
     <input

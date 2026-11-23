@@ -144,3 +144,39 @@ page { height: 100%; overflow: hidden; }
 .source-meta{display:block;color:var(--color-text-2);font-size:21rpx;}
 
 .plan-draft{margin-top:24rpx;padding:20rpx;background:var(--color-primary-light);border-radius:16rpx}.plan-draft text{display:block;font-size:23rpx;margin:12rpx 0;color:var(--color-text-2)}.plan-draft button{font-size:24rpx;color:white;background:var(--color-primary);margin:10rpx 0 0}
+
+/* ===== 今日速览 ===== */
+.today-snapshot {
+  background: var(--color-card); border-bottom: 1rpx solid var(--color-border);
+  flex-shrink: 0;
+}
+.snapshot-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 16rpx 24rpx;
+}
+.snapshot-title { font-size: 26rpx; font-weight: 600; color: var(--color-text-2); }
+.snapshot-toggle { font-size: 22rpx; color: var(--color-text-3); }
+.snapshot-body {
+  display: flex; align-items: center; justify-content: space-around;
+  padding: 0 24rpx 20rpx;
+}
+.snap-item { display: flex; flex-direction: column; align-items: center; }
+.snap-val { font-size: 34rpx; font-weight: 700; color: var(--color-text); }
+.snap-val.protein { color: var(--color-primary); }
+.snap-val.ok { color: var(--color-primary); }
+.snap-label { font-size: 20rpx; color: var(--color-text-3); margin-top: 4rpx; }
+.snap-divider { width: 1rpx; height: 40rpx; background: var(--color-border); }
+
+/* ===== 快捷提问网格 ===== */
+.quick-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 16rpx;
+  width: 100%; margin-top: 32rpx; padding: 0 16rpx; box-sizing: border-box;
+}
+.quick-chip {
+  display: flex; flex-direction: column; align-items: center; gap: 6rpx;
+  background: var(--color-card); border: 1rpx solid var(--color-border);
+  border-radius: 16rpx; padding: 20rpx 12rpx;
+}
+.quick-chip:active { background: var(--color-primary-light); border-color: var(--color-primary); }
+.quick-icon { font-size: 36rpx; }
+.quick-text { font-size: 22rpx; color: var(--color-text-2); text-align: center; }
