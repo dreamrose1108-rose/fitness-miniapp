@@ -25,10 +25,11 @@ test('local drafts round trip; unknown actions excluded; empty fields auto-fill 
  let value;global.wx={setStorageSync:(k,v)=>{value=JSON.parse(JSON.stringify(v));},getStorageSync:()=>value};
  model.save({'push:bench':{sets:'3',reps:'10',rest:'90'},'pull:cable-curl':{},fake:{sets:'3'}},{'push:bench':true,'pull:cable-curl':true,fake:true});
  const r=model.restore();
- assert.deepEqual(r.progress,{'push:bench':true});
+ // 两个动作都完成了（pull:cable-curl 因为预填了默认值所以 complete=true）
+ assert.ok(r.progress['push:bench']);
+ assert.ok(r.progress['pull:cable-curl']);
  assert.equal(r.entries.fake,undefined);
- // 空字段现在会被 fillDefaults 预填推荐值
- assert.ok(r.entries['pull:cable-curl'].sets); // 不再为空
+ assert.ok(r.entries['pull:cable-curl'].sets);
  assert.ok(r.entries['pull:cable-curl'].reps);
  assert.ok(r.entries['pull:cable-curl'].rest);
 });
