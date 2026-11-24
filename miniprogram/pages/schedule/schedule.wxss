@@ -6,7 +6,7 @@
 .notice.ok{background:var(--color-primary-light);color:var(--color-primary)}
 .toolbar{display:flex;gap:12rpx;margin-bottom:20rpx}
 .toolbar button{flex:1;font-size:24rpx;border-radius:20rpx;margin:0}
-.empty-card{display:flex;flex-direction:column;align-items:center;padding:80rpx 40rpx}
+.empty-card{display:flex;flex-direction:column;align-items:center;padding:48rpx 24rpx}
 .empty-icon{font-size:80rpx;margin-bottom:20rpx}
 .empty-title{font-size:32rpx;font-weight:600;margin-bottom:8rpx}
 .empty-btn{margin-top:24rpx;width:60%!important}
@@ -71,18 +71,18 @@
 
 .session-eyebrow{font-size:23rpx;color:var(--color-primary);margin-bottom:12rpx;font-weight:600;}
 .session-title{font-size:36rpx;line-height:1.5;}.session-overview{font-size:26rpx;margin:12rpx 0;color:var(--color-text-2);}
-.exercise-list{padding:20rpx;}.exercise-item{padding:26rpx;margin-bottom:20rpx;border:1rpx solid var(--color-border);border-radius:20rpx;background:var(--color-card);}.exercise-item:last-child{border-bottom:1rpx solid var(--color-border);}
+.exercise-list{padding:16rpx;}.exercise-item{padding:20rpx;margin-bottom:14rpx;border:1rpx solid var(--color-border);border-radius:20rpx;background:var(--color-card);}.exercise-item:last-child{border-bottom:1rpx solid var(--color-border);}
 .exercise-info{min-width:0;}.exercise-heading{display:flex;justify-content:space-between;align-items:center;margin-bottom:14rpx;gap:12rpx;}.exercise-step{font-size:23rpx;font-weight:600;color:var(--color-primary);}.exercise-status{font-size:21rpx;padding:5rpx 14rpx;background:var(--color-primary-light);color:var(--color-primary);border-radius:20rpx;}.exercise-name{font-size:31rpx;font-weight:600;line-height:1.5;}.exercise-original{font-size:23rpx;color:var(--color-text-2);margin-top:8rpx;}.exercise-explanation{font-size:25rpx;color:var(--color-text-2);line-height:1.7;margin-top:12rpx;}.exercise-target{font-size:22rpx;color:var(--color-primary);margin:14rpx 0;}.exercise-detail{line-height:1.7;}
 
 /* Tinted training overview above neutral exercise cards, shared by both themes. */
-.session-body{margin:20rpx 20rpx 24rpx;padding:26rpx;border-radius:20rpx;background:var(--color-primary-light);border-left:6rpx solid var(--color-primary);}
+.session-body{margin:16rpx 16rpx 18rpx;padding:20rpx;border-radius:20rpx;background:var(--color-primary-light);border-left:6rpx solid var(--color-primary);}
 .session-body .hint{color:var(--color-text-2);margin-bottom:0;line-height:1.7;}
 .session-body .session-eyebrow{color:var(--color-primary);}
 
-.exercise-name{font-size:34rpx;font-weight:700;color:var(--color-text);}
+.exercise-name{font-size:30rpx;font-weight:700;color:var(--color-text);}
 .exercise-explanation{font-size:25rpx;color:var(--color-text-2);line-height:1.8;}
-.exercise-target{display:inline-block;padding:7rpx 13rpx;border-radius:8rpx;background:var(--color-primary-light);font-size:22rpx;margin:16rpx 0;}
-.exercise-prescription{display:flex;gap:12rpx;background:var(--color-bg);border-radius:12rpx;padding:18rpx 14rpx;margin:2rpx 0 18rpx;}
+.exercise-target{display:inline-block;padding:7rpx 13rpx;border-radius:8rpx;background:var(--color-primary-light);font-size:22rpx;margin:12rpx 0;}
+.exercise-prescription{display:flex;gap:12rpx;background:var(--color-bg);border-radius:12rpx;padding:14rpx;margin:2rpx 0 12rpx;}
 .exercise-prescription>view{flex:1;min-width:0;}.prescription-label{display:block;font-size:21rpx;color:var(--color-text-2);margin-bottom:8rpx;}.prescription-value{display:block;font-size:25rpx;font-weight:600;color:var(--color-text);line-height:1.5;}
 .exercise-result{display:flex;align-items:baseline;justify-content:space-between;gap:16rpx;flex-wrap:wrap;padding:4rpx 0 12rpx;}.result-completed{color:var(--color-primary);font-size:25rpx;font-weight:600;}.result-number{font-size:34rpx;font-weight:700;margin:0 4rpx;}.result-skipped{color:var(--color-text-2);font-size:23rpx;}
 

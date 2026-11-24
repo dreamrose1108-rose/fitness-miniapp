@@ -1,27 +1,27 @@
-.heading{font-size:38rpx;font-weight:650;margin:12rpx 0 16rpx}.intro,.note{color:var(--color-text-2);font-size:24rpx;line-height:1.8}.intro{margin-bottom:24rpx}.field{display:flex;justify-content:space-between;align-items:center;gap:16rpx;padding:24rpx 0;border-bottom:1rpx solid var(--color-border);font-size:26rpx}.field input{width:190rpx;height:72rpx;line-height:72rpx;min-width:0;flex-shrink:0;text-align:right;background:var(--color-bg);padding:0 14rpx;border-radius:10rpx}.stack{flex-direction:column;align-items:flex-start}.error{color:var(--color-danger);padding:20rpx;background:var(--color-card);margin-bottom:20rpx}.result-card{margin-top:30rpx;background:var(--color-primary-light)}.calories{font-size:62rpx;font-weight:650;color:var(--color-primary)}.calories text{font-size:24rpx;font-weight:400}.macros{display:flex;gap:12rpx;margin:25rpx 0}.macros>view{flex:1}.macros text{font-size:22rpx;color:var(--color-text-2)}.macros view view{font-size:32rpx;font-weight:600;margin-top:12rpx}.meal{padding:22rpx 0;border-bottom:1rpx solid var(--color-border)}.meal-title{font-size:29rpx;font-weight:600}.meal-title text{float:right;color:var(--color-primary)}.footer{padding:20rpx 8rpx 40rpx}radio-group{margin-top:20rpx;font-size:24rpx}
+.heading{font-size:38rpx;font-weight:650;margin:12rpx 0 16rpx}.intro,.note{color:var(--color-text-2);font-size:24rpx;line-height:1.65}.intro{margin-bottom:24rpx}.field{display:flex;justify-content:space-between;align-items:center;gap:16rpx;padding:16rpx 0;border-bottom:1rpx solid var(--color-border);font-size:26rpx}.field input{width:190rpx;height:72rpx;line-height:72rpx;min-width:0;flex-shrink:0;text-align:right;background:var(--color-bg);padding:0 14rpx;border-radius:10rpx}.stack{flex-direction:column;align-items:flex-start}.error{color:var(--color-danger);padding:20rpx;background:var(--color-card);margin-bottom:20rpx}.result-card{margin-top:30rpx;background:var(--color-primary-light)}.calories{font-size:62rpx;font-weight:650;color:var(--color-primary)}.calories text{font-size:24rpx;font-weight:400}.macros{display:flex;gap:12rpx;margin:16rpx 0}.macros>view{flex:1}.macros text{font-size:22rpx;color:var(--color-text-2)}.macros view view{font-size:32rpx;font-weight:600;margin-top:12rpx}.meal{padding:16rpx 0;border-bottom:1rpx solid var(--color-border)}.meal-title{font-size:29rpx;font-weight:600}.meal-title text{float:right;color:var(--color-primary)}.footer{padding:20rpx 8rpx 40rpx}radio-group{margin-top:20rpx;font-size:24rpx}
 
 .nutrition-page{padding-bottom:calc(150rpx + env(safe-area-inset-bottom));}
 .nutrition-navigation{position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;gap:20rpx;padding:18rpx 28rpx;padding-bottom:calc(18rpx + env(safe-area-inset-bottom));background:var(--color-card);border-top:1rpx solid var(--color-border);}
 .nutrition-navigation button{flex:1;min-width:0;margin:0;border-radius:40rpx;font-size:28rpx;line-height:1.5;padding:20rpx 10rpx;}.nutrition-navigation button::after{border:none;}.home-link{background:var(--color-primary-light);color:var(--color-primary);}.diet-link{background:var(--color-primary);color:#fff;}.nutrition-navigation button[disabled]{opacity:.5;}
 
-.strategy-option{padding:22rpx;border:2rpx solid var(--color-border);border-radius:16rpx;margin-top:18rpx;}.strategy-option.selected{border-color:var(--color-primary);background:var(--color-primary-light);}.strategy-title{font-size:28rpx;font-weight:600;display:flex;justify-content:space-between;gap:12rpx;}.strategy-title text{font-size:22rpx;flex-shrink:0;color:var(--color-primary);}.strategy-tag{font-size:21rpx;color:var(--color-primary);margin:8rpx 0;}.strategy-note{font-size:24rpx;line-height:1.8;margin-top:20rpx;color:var(--color-text-2);}.five-two{padding-top:26rpx;}.five-two .note{white-space:pre-line;}.window-result{font-size:28rpx;font-weight:600;color:var(--color-primary);margin:15rpx 0;}
+.strategy-option{padding:22rpx;border:2rpx solid var(--color-border);border-radius:16rpx;margin-top:12rpx;}.strategy-option.selected{border-color:var(--color-primary);background:var(--color-primary-light);}.strategy-title{font-size:28rpx;font-weight:600;display:flex;justify-content:space-between;gap:12rpx;}.strategy-title text{font-size:22rpx;flex-shrink:0;color:var(--color-primary);}.strategy-tag{font-size:21rpx;color:var(--color-primary);margin:8rpx 0;}.strategy-note{font-size:24rpx;line-height:1.65;margin-top:12rpx;color:var(--color-text-2);}.five-two{padding-top:26rpx;}.five-two .note{white-space:pre-line;}.window-result{font-size:28rpx;font-weight:600;color:var(--color-primary);margin:15rpx 0;}
 
 .weekday-choice{display:inline-flex;align-items:center;width:46%;font-size:24rpx;margin:10rpx 0;}.week-day{padding:22rpx 14rpx;border-bottom:1rpx solid var(--color-border);}.low-day{background:var(--color-primary-light);border-radius:12rpx;}.week-calories{font-size:32rpx;font-weight:600;color:var(--color-primary);margin-top:12rpx;}
 
 /* Tonal hierarchy within each theme. */
 .nutrition-page{--panel-soft:#faf2e7;--panel-emphasis:#f1e2ce;--panel-line:#dfcbb2;}
 .nutrition-page.theme-forest{--panel-soft:#f0f4ee;--panel-emphasis:#e0ece2;--panel-line:#c4d6c8;}
-.nutrition-page .card{border:1rpx solid var(--color-border);box-shadow:none;color:var(--color-text);margin-bottom:28rpx;}
+.nutrition-page .card{border:1rpx solid var(--color-border);box-shadow:none;color:var(--color-text);margin-bottom:16rpx;}
 .nutrition-page .section-strategy,.nutrition-page .section-meals{background:var(--panel-soft);}
 .nutrition-page .section-profile,.nutrition-page .section-activity{background:var(--color-card);}
 .nutrition-page .section-screening,.nutrition-page .section-basis{background:transparent;border-color:var(--panel-line);}
-.nutrition-page .card .card-title{color:var(--color-text);padding-bottom:18rpx;margin-bottom:18rpx;border-bottom:1rpx solid var(--panel-line);}
+.nutrition-page .card .card-title{color:var(--color-text);padding-bottom:12rpx;margin-bottom:12rpx;border-bottom:1rpx solid var(--panel-line);}
 .nutrition-page .card .note,.nutrition-page .strategy-note{color:var(--color-text-2);}
 .nutrition-page .field input{background:var(--panel-soft);color:var(--color-text);border:1rpx solid var(--color-border);}
-.nutrition-page .strategy-option{background:var(--color-card);border-color:var(--color-border);padding:24rpx;}
+.nutrition-page .strategy-option{background:var(--color-card);border-color:var(--color-border);padding:18rpx;}
 .nutrition-page .strategy-option.selected{background:var(--panel-emphasis);border-color:var(--color-primary);}
 .nutrition-page .strategy-title text,.nutrition-page .strategy-tag{color:var(--color-primary);}
-.nutrition-page .result-card{background:var(--panel-emphasis);border-color:var(--panel-line);padding:32rpx;}
+.nutrition-page .result-card{background:var(--panel-emphasis);border-color:var(--panel-line);padding:24rpx;}
 .nutrition-page .result-card .calories,.nutrition-page .result-card .window-result{color:var(--color-primary-dark);}
 .nutrition-page .result-card .macros>view{background:var(--color-card);padding:18rpx 8rpx;border-radius:14rpx;text-align:center;}
 .nutrition-page .result-card .macros text{color:var(--color-text-2);}
@@ -36,7 +36,7 @@
 .nutrition-page picker .field:not(.stack)>text:last-child{flex-shrink:0;}
 .nutrition-page .section-screening .weekday-choice{width:calc(50% - 12rpx);min-height:76rpx;padding:12rpx;border:1rpx solid var(--panel-line);border-radius:14rpx;background:var(--color-card);margin:8rpx 12rpx 8rpx 0;font-size:26rpx;color:var(--color-text);}
 .nutrition-page .section-screening checkbox-group{width:100%;}
-.nutrition-page .section-screening .field{padding:26rpx 0;gap:16rpx;}
+.nutrition-page .section-screening .field{padding:18rpx 0;gap:12rpx;}
 .nutrition-page .section-basis button{border:1rpx solid var(--panel-line);border-radius:14rpx;padding:12rpx 24rpx;line-height:1.6;font-weight:600;}
 .nutrition-page .section-screening checkbox-group{display:flex;flex-wrap:wrap;gap:12rpx;}
 .nutrition-page .section-screening .weekday-choice{width:calc(50% - 6rpx);margin:0;}

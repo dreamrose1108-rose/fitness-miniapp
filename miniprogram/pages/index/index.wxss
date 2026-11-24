@@ -68,9 +68,9 @@ page { background: #fff8f0; }
 .energy-number,.target-block view,.stat-value { color:#674a38; }
 .energy-tag { display:flex; align-items:center; gap:10rpx; border:0; background:#fff4e1; padding:9rpx 16rpx; }
 .hello { font-size:35rpx; }.profile-link { background:#fffdf9; }
-.cat-welcome { position:relative; display:flex; align-items:center; justify-content:space-between; min-height:190rpx; margin:0 0 24rpx; padding:10rpx 0; }
+.cat-welcome { position:relative; display:flex; align-items:center; justify-content:space-between; min-height:160rpx; margin:0 0 16rpx; padding:10rpx 0; }
 .welcome-copy { width:70%; z-index:2; }.welcome-label { display:block; font-size:20rpx; color:#ad8766; letter-spacing:2rpx; }.welcome-title { display:block; font-size:32rpx; font-weight:600; margin:12rpx 0 9rpx; }.welcome-note { display:block; font-size:22rpx; color:#9b816c; }
-.mascot { position:absolute; right:0; bottom:0; width:190rpx; height:190rpx; }
+.mascot { position:absolute; right:0; bottom:0; width:160rpx; height:160rpx; }
 .cat-body { position:absolute; left:50rpx; top:99rpx; width:102rpx; height:82rpx; background:#e7b679; border:3rpx solid #ba8754; border-radius:50rpx 50rpx 28rpx 28rpx; }
 .cat-body::after { content:''; position:absolute; background:#fff0d8; width:61rpx; height:60rpx; border-radius:50%; left:17rpx; top:15rpx; }
 .cat-tail { position:absolute; width:65rpx; height:62rpx; border:17rpx solid #dba362; border-left-color:transparent; border-top-color:transparent; border-radius:50%; right:0; bottom:10rpx; transform:rotate(-30deg); }
@@ -114,3 +114,16 @@ page { background: #fff8f0; }
 .home-page .header-actions { align-items:stretch; }
 .home-page .theme-button { display:flex;flex-direction:column;justify-content:center; }
 .home-page .training-bottom { flex-wrap:wrap; }
+
+/* Shared spacing rhythm for cat and forest themes. */
+.home-page .greeting{padding-bottom:20rpx;}
+.home-page .energy-card{padding:24rpx;}
+.home-page .energy-main{padding:18rpx 0;}
+.home-page .macro-row{margin-top:18rpx;padding-top:16rpx;}
+.home-page .quick-grid{padding:20rpx 0 8rpx;}
+.home-page .section-heading{margin:20rpx 0 12rpx;}
+.home-page .training-card{padding:22rpx;}
+.home-page .training-title{margin:12rpx 0;}
+.home-page .habit-card{padding:20rpx;}
+.home-page .habit-title{margin:16rpx 0 8rpx;}
+.home-page .streak-card{margin-top:16rpx;padding:20rpx;}

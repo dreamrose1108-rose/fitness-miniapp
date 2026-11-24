@@ -34,15 +34,15 @@ view, text, input, textarea, button, image {
   background: var(--color-card);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
-  padding: 28rpx;
-  margin-bottom: 24rpx;
+  padding: 24rpx;
+  margin-bottom: 16rpx;
 }
 
 .card-title {
   font-size: 30rpx;
   font-weight: 600;
   color: var(--color-text);
-  margin-bottom: 20rpx;
+  margin-bottom: 14rpx;
 }
 
 .flex-between {
