@@ -27,3 +27,16 @@
 .nutrition-page .result-card .macros text{color:var(--color-text-2);}
 .nutrition-page .section-meals .low-day{background:var(--panel-emphasis);border:1rpx solid var(--panel-line);}
 .nutrition-page .section-basis button{background:var(--color-card);color:var(--color-primary);margin-top:20rpx;}
+/* Separate headings, explanatory copy and interactive values without new hues. */
+.nutrition-page .card .card-title{font-size:32rpx;font-weight:700;color:var(--color-primary-dark);line-height:1.5;}
+.nutrition-page .field>text:first-child{font-weight:500;color:var(--color-text);line-height:1.65;}
+.nutrition-page .card .note,.nutrition-page .strategy-note{font-size:24rpx;font-weight:400;color:var(--color-text-2);}
+.nutrition-page picker .field>text:last-child{display:flex;align-items:center;justify-content:space-between;min-height:72rpx;padding:14rpx 22rpx;border:1rpx solid var(--panel-line);border-radius:14rpx;background:var(--color-card);color:var(--color-primary-dark);font-size:27rpx;font-weight:600;line-height:1.6;box-sizing:border-box;}
+.nutrition-page picker .field.stack>text:last-child{width:100%;}
+.nutrition-page picker .field:not(.stack)>text:last-child{flex-shrink:0;}
+.nutrition-page .section-screening .weekday-choice{width:calc(50% - 12rpx);min-height:76rpx;padding:12rpx;border:1rpx solid var(--panel-line);border-radius:14rpx;background:var(--color-card);margin:8rpx 12rpx 8rpx 0;font-size:26rpx;color:var(--color-text);}
+.nutrition-page .section-screening checkbox-group{width:100%;}
+.nutrition-page .section-screening .field{padding:26rpx 0;gap:16rpx;}
+.nutrition-page .section-basis button{border:1rpx solid var(--panel-line);border-radius:14rpx;padding:12rpx 24rpx;line-height:1.6;font-weight:600;}
+.nutrition-page .section-screening checkbox-group{display:flex;flex-wrap:wrap;gap:12rpx;}
+.nutrition-page .section-screening .weekday-choice{width:calc(50% - 6rpx);margin:0;}
