@@ -1,5 +1,6 @@
 // pages/coach/coach.js — AI 教练对话（打字机流式渲染）
 const app = getApp();
+const mealEditor=require('../../utils/meal-editor');
 const { call } = require('../../utils/cloud.js');
 
 let msgSeq = 0;
@@ -23,9 +24,12 @@ function fmtContent(raw) {
 function mealMeta(res){
  const d=res.mealDraft;if(!d||!d.id||!Array.isArray(d.items)||!d.items.length)return {};
  const now=new Date(),date=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
- const items=d.items.map(x=>({...x,candidates:x.candidates.map(f=>({...f,label:f.name+' · '+(f.portionLabel||f.quantity+(f.portionUnit||f.unit||''))+' · 约'+f.amount+f.amountUnit+' · '+f.kcal+' kcal'}))}));
- const choices=items.map(x=>x.candidates.length===1?0:-1);
- return {mealDraft:{...d,items},mealChoices:choices,mealDate:res.savedMeal?res.savedMeal.date:date,mealIndex:res.savedMeal?['breakfast','lunch','dinner','snack'].indexOf(res.savedMeal.mealType):0,mealReady:choices.every(x=>x>=0),savedMeal:res.savedMeal||null,mealSaving:false};
+ const items=d.items.map(x=>({...x,candidates:x.candidates.map(f=>({...f,label:f.name+' · '+(f.hint||f.portionUnit||f.unit||'参考份量')}))}));
+ const choices=res.savedMeal&&Array.isArray(res.savedMeal.choices)?res.savedMeal.choices:items.map(x=>x.candidates.length===1?0:-1);
+ const mealStates=items.map((x,i)=>choices[i]>=0?mealEditor.state(x.candidates[choices[i]],res.savedMeal&&res.savedMeal.edits&&res.savedMeal.edits[i]):null);
+ const mealReady=mealStates.every(x=>x&&x.result);
+ const mealTotal=mealReady?mealStates.reduce((sum,x)=>sum+x.result.kcal,0):null;
+ return {mealDraft:{...d,items},mealChoices:choices,mealDate:res.savedMeal?res.savedMeal.date:date,mealIndex:res.savedMeal?['breakfast','lunch','dinner','snack'].indexOf(res.savedMeal.mealType):0,mealReady,mealStates,mealTotal,savedMeal:res.savedMeal||null,mealSaving:false};
 }
 function searchMeta(res={}) {
   const sources=(Array.isArray(res.sources)?res.sources:[]).filter(x=>x&&typeof x.url==='string'&&/^https?:\/\/[^\s]+$/.test(x.url)).slice(0,5).map(x=>({id:x.id,title:String(x.title||x.url),url:x.url,site:String(x.site||''),date:String(x.date||'')}));
@@ -98,12 +102,16 @@ Page({
   },
 
   updateMeal(id,patch){this.setData({messages:this.data.messages.map(m=>m.id===Number(id)?{...m,...patch}:m)});},
-  chooseMealFood(e){const id=Number(e.currentTarget.dataset.message),m=this.data.messages.find(x=>x.id===id);if(!m||m.mealSaving||m.savedMeal)return;const choices=m.mealChoices.slice();choices[Number(e.currentTarget.dataset.item)]=Number(e.detail.value);this.updateMeal(id,{mealChoices:choices,mealReady:choices.every(x=>x>=0)});},
+  mealRecalculate(m,choices,states){const ready=states.every(x=>x&&x.result);this.updateMeal(m.id,{mealChoices:choices,mealStates:states,mealReady:ready,mealTotal:ready?states.reduce((sum,x)=>sum+x.result.kcal,0):null});},
+  chooseMealFood(e){const m=this.data.messages.find(x=>x.id===Number(e.currentTarget.dataset.message));if(!m||m.mealSaving||m.savedMeal)return;const i=Number(e.currentTarget.dataset.item),choice=Number(e.detail.value),candidate=m.mealDraft.items[i].candidates[choice];if(!candidate)return;const choices=m.mealChoices.slice(),states=m.mealStates.slice();choices[i]=choice;states[i]=mealEditor.state(candidate);this.mealRecalculate(m,choices,states);},
+  editMealQuantity(e){this.editMealPortion(e,false);},
+  chooseMealPortion(e){this.editMealPortion(e,true);},
+  editMealPortion(e,unitChange){const m=this.data.messages.find(x=>x.id===Number(e.currentTarget.dataset.message));if(!m||m.mealSaving||m.savedMeal)return;const i=Number(e.currentTarget.dataset.item),state=m.mealStates[i];if(!state)return;const candidate=m.mealDraft.items[i].candidates[m.mealChoices[i]];let edit={quantity:e.detail.value,portionId:state.portionId};if(unitChange){const option=state.options[Number(e.detail.value)];if(!option)return;edit={portionId:option.id,quantity:option.id==='base'?'100':'1'};}const states=m.mealStates.slice();states[i]=mealEditor.state(candidate,edit);this.mealRecalculate(m,m.mealChoices,states);},
   chooseMealDate(e){const m=this.data.messages.find(x=>x.id===Number(e.currentTarget.dataset.message));if(m&&!m.mealSaving&&!m.savedMeal)this.updateMeal(m.id,{mealDate:e.detail.value});},
   chooseMealType(e){const m=this.data.messages.find(x=>x.id===Number(e.currentTarget.dataset.message));if(m&&!m.mealSaving&&!m.savedMeal)this.updateMeal(m.id,{mealIndex:Number(e.detail.value)});},
   async saveMeal(e){const m=this.data.messages.find(x=>x.id===Number(e.currentTarget.dataset.message));if(!m||!m.mealDraft||!m.mealReady||m.mealSaving||m.savedMeal)return;
     this.updateMeal(m.id,{mealSaving:true});
-    try{const result=await call('record',{action:'saveCoachMeal',data:{draftId:m.mealDraft.id,choices:m.mealChoices,date:m.mealDate,mealType:['breakfast','lunch','dinner','snack'][m.mealIndex]}});this.updateMeal(m.id,{savedMeal:result,mealSaving:false,mealDate:result.date,mealIndex:['breakfast','lunch','dinner','snack'].indexOf(result.mealType)});this.loadTodaySnapshot();wx.showToast({title:'已保存到饮食记录'});}catch(err){this.updateMeal(m.id,{mealSaving:false});wx.showToast({title:err.message||'保存失败，请重试',icon:'none'});}
+    try{const result=await call('record',{action:'saveCoachMeal',data:{draftId:m.mealDraft.id,choices:m.mealChoices,edits:m.mealStates.map(x=>({quantity:x.quantity,portionId:x.portionId})),date:m.mealDate,mealType:['breakfast','lunch','dinner','snack'][m.mealIndex]}});this.updateMeal(m.id,mealMeta({mealDraft:m.mealDraft,savedMeal:result}));this.loadTodaySnapshot();wx.showToast({title:'已保存到饮食记录'});}catch(err){this.updateMeal(m.id,{mealSaving:false});wx.showToast({title:err.message||'保存失败，请重试',icon:'none'});}
   },
 
   previewPlan(e){const message=this.data.messages.find(x=>x.id===Number(e.currentTarget.dataset.message));if(!message||!message.trainingPlan)return;app.globalData.pendingAITrainingPlan=message.trainingPlan;wx.navigateTo({url:'/pages/schedule/schedule?preview=1'});},

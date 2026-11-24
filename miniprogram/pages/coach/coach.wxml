@@ -85,9 +85,16 @@
           <view class="coach-meal-title">核对并保存饮食</view>
           <text class="coach-meal-tip">请确认食物和份量；估算值可能与实际不同。</text>
           <view wx:for="{{item.mealDraft.items}}" wx:for-item="mealItem" wx:for-index="mealItemIndex" wx:key="phrase" class="coach-meal-item">
-            <text>{{mealItem.phrase}}</text>
+            <text>原描述：{{mealItem.phrase}}</text>
             <picker range="{{mealItem.candidates}}" range-key="label" value="{{item.mealChoices[mealItemIndex] < 0 ? 0 : item.mealChoices[mealItemIndex]}}" disabled="{{item.mealSaving || item.savedMeal}}" data-message="{{item.id}}" data-item="{{mealItemIndex}}" bindchange="chooseMealFood"><view class="coach-meal-choice">{{item.mealChoices[mealItemIndex] < 0 ? (item.savedMeal ? '已保存，可在饮食记录查看' : '请选择品种和大小 ›') : mealItem.candidates[item.mealChoices[mealItemIndex]].label}}</view></picker>
+            <view wx:if="{{item.mealStates[mealItemIndex]}}" class="meal-edit">
+              <view class="meal-edit-row"><input type="digit" maxlength="8" value="{{item.mealStates[mealItemIndex].quantity}}" disabled="{{item.mealSaving || item.savedMeal}}" data-message="{{item.id}}" data-item="{{mealItemIndex}}" bindinput="editMealQuantity" placeholder="数量，例如0.5"/><picker range="{{item.mealStates[mealItemIndex].options}}" range-key="label" value="{{item.mealStates[mealItemIndex].optionIndex}}" disabled="{{item.mealSaving || item.savedMeal}}" data-message="{{item.id}}" data-item="{{mealItemIndex}}" bindchange="chooseMealPortion"><view>{{item.mealStates[mealItemIndex].options[item.mealStates[mealItemIndex].optionIndex].label}} ▾</view></picker></view>
+              <text class="meal-edit-note">每单位约 {{item.mealStates[mealItemIndex].options[item.mealStates[mealItemIndex].optionIndex].amount}}{{mealItem.candidates[item.mealChoices[mealItemIndex]].amountUnit}} · {{item.mealStates[mealItemIndex].options[item.mealStates[mealItemIndex].optionIndex].note || '按所选食物的单位换算'}}</text>
+              <view wx:if="{{item.mealStates[mealItemIndex].result}}" class="meal-edit-result">约 {{item.mealStates[mealItemIndex].result.amount}}{{item.mealStates[mealItemIndex].result.amountUnit}} · {{item.mealStates[mealItemIndex].result.kcal}} 千卡</view><text wx:else class="meal-edit-note">请输入大于0的有效数量</text>
+            </view>
           </view>
+          <view wx:if="{{item.mealReady}}" class="meal-edit-result">当前合计：{{item.mealTotal}} 千卡</view>
+          <text class="coach-meal-tip">修改后的卡片为准，上方AI原回答不会随修改变化。</text>
           <view class="coach-meal-controls"><picker mode="date" value="{{item.mealDate}}" disabled="{{item.mealSaving || item.savedMeal}}" data-message="{{item.id}}" bindchange="chooseMealDate"><view>{{item.mealDate}} ▾</view></picker><picker range="{{mealLabels}}" value="{{item.mealIndex}}" disabled="{{item.mealSaving || item.savedMeal}}" data-message="{{item.id}}" bindchange="chooseMealType"><view>{{mealLabels[item.mealIndex]}} ▾</view></picker></view>
           <button size="mini" disabled="{{!item.mealReady || item.mealSaving || item.savedMeal}}" loading="{{item.mealSaving}}" data-message="{{item.id}}" bindtap="saveMeal">{{item.savedMeal ? '已保存到' + mealLabels[item.mealIndex] : item.mealSaving ? '保存中' : '确认保存到' + mealLabels[item.mealIndex]}}</button>
         </view>

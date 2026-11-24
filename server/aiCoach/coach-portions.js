@@ -11,7 +11,7 @@ async function calculate(openid,args){
  if(!option)return {error:'该食物不支持此份量单位，请使用search_food返回的portionId，不可自造克数'};
  const value=portions.calculate(food,option,String(args.quantity));
  if(!value)return {error:'数量无效，必须大于0且在合理范围内'};
- return {foodId:food._id,name:food.name,quantity:Number(args.quantity),...value,perPortion:option.amount,portionUnit:option.label,hint:option.hint,note:option.note,source:option.source||'',estimated:option.id!=='base',foodVersion:catalog.meta.version,portionVersion:VERSION,recordSaved:false};
+ return {foodSnapshot:{name:food.name,unit:food.unit,kcal:food.kcal,protein:food.protein,carb:food.carb,fat:food.fat},portionOptions:portions.options(food),portionId:option.id,foodId:food._id,name:food.name,quantity:Number(args.quantity),...value,perPortion:option.amount,portionUnit:option.label,hint:option.hint,note:option.note,source:option.source||'',estimated:option.id!=='base',foodVersion:catalog.meta.version,portionVersion:VERSION,recordSaved:false};
 }
 function number(text){
  if(text==='半')return 0.5;if(/^\d+(\.\d+)?$/.test(text))return Number(text);
@@ -34,7 +34,7 @@ async function ground(question,openid){
   for(const f of found.foods){
    const choices=portions.options(f).filter(o=>o.unit===req.unit||(o.id==='base'&&((req.unit==='克'&&o.unit==='g')||(req.unit==='毫升'&&o.unit==='ml'))));
    // No silent choice between small, medium and large.
-   for(const option of choices){const result=portions.calculate(f,option,String(req.quantity));if(result)candidates.push({name:f.name,foodId:f._id,portionId:option.id,quantity:req.quantity,...result,perPortion:option.amount,unit:option.label,hint:option.hint,note:option.note,estimated:option.id!=='base'});}
+   for(const option of choices){const result=portions.calculate(f,option,String(req.quantity));if(result)candidates.push({foodSnapshot:{name:f.name,unit:f.unit,kcal:f.kcal,protein:f.protein,carb:f.carb,fat:f.fat},portionOptions:portions.options(f),name:f.name,foodId:f._id,portionId:option.id,quantity:req.quantity,...result,perPortion:option.amount,unit:option.label,hint:option.hint,note:option.note,estimated:option.id!=='base'});}
    if(candidates.length>=6)break;
   }
   out.push({...req,candidates:candidates.slice(0,6),note:'候选不是实际摄入记录；品种、大小或做法不明确时须说明假设或询问，不能把多个候选累加。'});
