@@ -1,7 +1,7 @@
 <page-meta page-style="{{appThemeStyle}}" />
 <view class="page reference-page">
  <view class="eyebrow">公开课参考 / 有出处的动作清单</view><view class="heading">{{catalog.title}}</view>
- <view class="personal-save"><button class="btn-primary" bindtap="save">安排训练日期 · {{versionLabel}}</button><button bindtap="myPlans">查看我的训练日程 ›</button><view class="hint">按当前版本安排一轮推、拉、腿，默认间隔一天；下一步选择日期并确认保存，之后可开始训练、逐组记录。</view></view>
+ <view class="personal-save"><button class="btn-primary" bindtap="save">安排训练日期 · {{versionLabel}}</button><button bindtap="myPlans">查看我的训练安排 ›</button><view class="hint">按当前版本安排一轮推、拉、腿，默认间隔一天；下一步选择日期并确认保存，之后可开始训练、逐组记录。</view></view>
  <view class="notice">{{catalog.notice}}</view><view class="source" bindtap="overview">复制计划讲解原视频链接 ›</view>
  <view class="tabs"><button wx:for="{{catalog.days}}" wx:key="id" class="{{selected === index ? 'active' : ''}}" data-index="{{index}}" bindtap="choose">{{item.title}}</button></view>
  <view class="section"><view class="title">{{day.subtitle}}</view><text>{{rows.length}} 个动作</text></view>

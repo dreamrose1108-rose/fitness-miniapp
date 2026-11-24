@@ -1,6 +1,6 @@
 <page-meta page-style="{{appThemeStyle}}" />
 <view class="page">
-  <navigator url="/pages/schedule/schedule" class="card">训练日程 · 查看 AI 安排 ›</navigator>
+  <navigator url="/pages/schedule/schedule" class="card">我的训练安排 · 查看与开始训练 ›</navigator>
   <!-- 今日消耗汇总 -->
   <view class="card sum-card">
     <view class="flex-between">
@@ -18,7 +18,7 @@
   <!-- 运动类型网格 -->
   <view class="training-entry-row">
     <navigator url="/pages/plans/plans" class="card training-entry">
-      <view class="entry-title"><text>训练计划</text><text class="entry-arrow">›</text></view>
+      <view class="entry-title"><text>选择训练方案</text><text class="entry-arrow">›</text></view>
       <text class="entry-note">选模板 · 安排训练</text>
     </navigator>
     <navigator url="/pages/library/library" class="card training-entry">

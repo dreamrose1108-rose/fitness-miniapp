@@ -2,7 +2,7 @@
 <view class="memory-page">
  <view class="intro">教练记住的事</view>
  <view class="help">只保存你确认的长期信息。身高、体重、热量目标和当前计划仍从原记录读取；身体情况请核对后再保存。</view>
- <view class="help">阶段总结按最近14天记录实时更新，不把漏记当成没吃饭或没训练。训练日程目前来自本机，换设备可能不同。</view>
+ <view class="help">阶段总结按最近14天记录实时更新，不把漏记当成没吃饭或没训练。训练安排目前来自本机，换设备可能不同。</view>
  <view class="notice" wx:if="{{notice}}">{{notice}}</view>
  <view wx:if="{{loading}}" class="help">正在读取记忆…</view>
  <view wx:elif="{{error}}"><text>{{error}}</text><button bindtap="load">重试</button></view>
