@@ -81,6 +81,16 @@
         <view wx:if="{{item.searchLabel}}" class="search-label">{{item.searchLabel}}</view>
         <view wx:for="{{item.sources}}" wx:for-item="source" wx:for-index="sourceIndex" wx:key="url" class="search-source" data-message="{{item.id}}" data-index="{{sourceIndex}}" bindtap="copySource">[{{source.id}}] {{source.title}}<text class="source-meta">{{source.site}} {{source.date}}</text></view>
         <view wx:if="{{item.trainingPlan}}" class="plan-draft"><view>{{item.trainingPlan.title}}</view><text>{{item.trainingPlan.days.length}} 个训练日 · 尚未写入日程</text><button size="mini" data-message="{{item.id}}" bindtap="previewPlan">预览并保存到训练日程</button></view>
+        <view wx:if="{{item.mealDraft}}" id="meal-{{item.id}}" class="coach-meal-card">
+          <view class="coach-meal-title">核对并保存饮食</view>
+          <text class="coach-meal-tip">请确认食物和份量；估算值可能与实际不同。</text>
+          <view wx:for="{{item.mealDraft.items}}" wx:for-item="mealItem" wx:for-index="mealItemIndex" wx:key="phrase" class="coach-meal-item">
+            <text>{{mealItem.phrase}}</text>
+            <picker range="{{mealItem.candidates}}" range-key="label" value="{{item.mealChoices[mealItemIndex] < 0 ? 0 : item.mealChoices[mealItemIndex]}}" disabled="{{item.mealSaving || item.savedMeal}}" data-message="{{item.id}}" data-item="{{mealItemIndex}}" bindchange="chooseMealFood"><view class="coach-meal-choice">{{item.mealChoices[mealItemIndex] < 0 ? (item.savedMeal ? '已保存，可在饮食记录查看' : '请选择品种和大小 ›') : mealItem.candidates[item.mealChoices[mealItemIndex]].label}}</view></picker>
+          </view>
+          <view class="coach-meal-controls"><picker mode="date" value="{{item.mealDate}}" disabled="{{item.mealSaving || item.savedMeal}}" data-message="{{item.id}}" bindchange="chooseMealDate"><view>{{item.mealDate}} ▾</view></picker><picker range="{{mealLabels}}" value="{{item.mealIndex}}" disabled="{{item.mealSaving || item.savedMeal}}" data-message="{{item.id}}" bindchange="chooseMealType"><view>{{mealLabels[item.mealIndex]}} ▾</view></picker></view>
+          <button size="mini" disabled="{{!item.mealReady || item.mealSaving || item.savedMeal}}" loading="{{item.mealSaving}}" data-message="{{item.id}}" bindtap="saveMeal">{{item.savedMeal ? '已保存到' + mealLabels[item.mealIndex] : item.mealSaving ? '保存中' : '确认保存到' + mealLabels[item.mealIndex]}}</button>
+        </view>
         <text wx:if="{{typing && index === messages.length - 1 && item.role === 'assistant'}}" class="cursor"></text>
       </view>
       <view class="msg-avatar avatar-user" wx:if="{{item.role === 'user'}}">我</view>

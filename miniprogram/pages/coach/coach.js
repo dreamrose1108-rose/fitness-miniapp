@@ -20,15 +20,23 @@ function fmtContent(raw) {
     .replace(/\n{3,}/g, '\n\n');
 }
 
+function mealMeta(res){
+ const d=res.mealDraft;if(!d||!d.id||!Array.isArray(d.items)||!d.items.length)return {};
+ const now=new Date(),date=now.getFullYear()+'-'+String(now.getMonth()+1).padStart(2,'0')+'-'+String(now.getDate()).padStart(2,'0');
+ const items=d.items.map(x=>({...x,candidates:x.candidates.map(f=>({...f,label:f.name+' · '+(f.portionLabel||f.quantity+(f.portionUnit||f.unit||''))+' · 约'+f.amount+f.amountUnit+' · '+f.kcal+' kcal'}))}));
+ const choices=items.map(x=>x.candidates.length===1?0:-1);
+ return {mealDraft:{...d,items},mealChoices:choices,mealDate:res.savedMeal?res.savedMeal.date:date,mealIndex:res.savedMeal?['breakfast','lunch','dinner','snack'].indexOf(res.savedMeal.mealType):0,mealReady:choices.every(x=>x>=0),savedMeal:res.savedMeal||null,mealSaving:false};
+}
 function searchMeta(res={}) {
   const sources=(Array.isArray(res.sources)?res.sources:[]).filter(x=>x&&typeof x.url==='string'&&/^https?:\/\/[^\s]+$/.test(x.url)).slice(0,5).map(x=>({id:x.id,title:String(x.title||x.url),url:x.url,site:String(x.site||''),date:String(x.date||'')}));
   const labels={success:'已联网检索 · 点击来源复制链接',empty:'未找到相关网页',unavailable:'联网搜索暂不可用'};
-  return {sources,searchLabel:labels[res.searchStatus]||'',trainingPlan:res.trainingPlan&&Array.isArray(res.trainingPlan.days)?res.trainingPlan:null};
+  return {...mealMeta(res),sources,searchLabel:labels[res.searchStatus]||'',trainingPlan:res.trainingPlan&&Array.isArray(res.trainingPlan.days)?res.trainingPlan:null};
 }
 
 Page({
   data: {
     messages: [],
+    mealLabels:['早餐','午餐','晚餐','加餐'],
     webSearch: false,
     inputText: '',
     thinking: false,
@@ -87,6 +95,15 @@ Page({
       }));
       if (!this._hasSent && !this._unloaded) this.setData({ messages }, this.scrollToBottom);
     } catch (e) { /* 无历史不影响使用 */ }
+  },
+
+  updateMeal(id,patch){this.setData({messages:this.data.messages.map(m=>m.id===Number(id)?{...m,...patch}:m)});},
+  chooseMealFood(e){const id=Number(e.currentTarget.dataset.message),m=this.data.messages.find(x=>x.id===id);if(!m||m.mealSaving||m.savedMeal)return;const choices=m.mealChoices.slice();choices[Number(e.currentTarget.dataset.item)]=Number(e.detail.value);this.updateMeal(id,{mealChoices:choices,mealReady:choices.every(x=>x>=0)});},
+  chooseMealDate(e){const m=this.data.messages.find(x=>x.id===Number(e.currentTarget.dataset.message));if(m&&!m.mealSaving&&!m.savedMeal)this.updateMeal(m.id,{mealDate:e.detail.value});},
+  chooseMealType(e){const m=this.data.messages.find(x=>x.id===Number(e.currentTarget.dataset.message));if(m&&!m.mealSaving&&!m.savedMeal)this.updateMeal(m.id,{mealIndex:Number(e.detail.value)});},
+  async saveMeal(e){const m=this.data.messages.find(x=>x.id===Number(e.currentTarget.dataset.message));if(!m||!m.mealDraft||!m.mealReady||m.mealSaving||m.savedMeal)return;
+    this.updateMeal(m.id,{mealSaving:true});
+    try{const result=await call('record',{action:'saveCoachMeal',data:{draftId:m.mealDraft.id,choices:m.mealChoices,date:m.mealDate,mealType:['breakfast','lunch','dinner','snack'][m.mealIndex]}});this.updateMeal(m.id,{savedMeal:result,mealSaving:false,mealDate:result.date,mealIndex:['breakfast','lunch','dinner','snack'].indexOf(result.mealType)});this.loadTodaySnapshot();wx.showToast({title:'已保存到饮食记录'});}catch(err){this.updateMeal(m.id,{mealSaving:false});wx.showToast({title:err.message||'保存失败，请重试',icon:'none'});}
   },
 
   previewPlan(e){const message=this.data.messages.find(x=>x.id===Number(e.currentTarget.dataset.message));if(!message||!message.trainingPlan)return;app.globalData.pendingAITrainingPlan=message.trainingPlan;wx.navigateTo({url:'/pages/schedule/schedule?preview=1'});},
@@ -187,7 +204,7 @@ Page({
   scrollToBottom() {
     const msgs = this.data.messages;
     if (msgs.length) {
-      this.setData({ scrollToId: 'msg-' + msgs[msgs.length - 1].id });
+      this.setData({ scrollToId: (msgs[msgs.length - 1].mealDraft ? 'meal-' : 'msg-') + msgs[msgs.length - 1].id });
     }
   },
 
