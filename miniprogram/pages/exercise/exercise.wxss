@@ -18,7 +18,7 @@
 .duration-input { display: flex; align-items: center; font-size: 26rpx; color: var(--color-text-2); }
 .duration-input input {
   width: 140rpx; text-align: right; font-size: 32rpx;
-  border-bottom: 2rpx solid var(--color-border); margin-right: 12rpx; padding: 8rpx;
+  border-bottom: 2rpx solid var(--color-border); margin-right: 12rpx; padding: 0 8rpx; height: 72rpx; line-height: 70rpx; min-width: 0;
 }
 .estimate { padding: 16rpx 0; border-top: 1rpx solid var(--color-border); }
 .estimate-num { color: var(--color-primary); font-weight: 600; font-size: 30rpx; }
@@ -35,3 +35,5 @@
 .empty { display: flex; flex-direction: column; align-items: center; padding: 48rpx 0; gap: 16rpx; font-size: 24rpx; }
 .empty-icon { font-size: 64rpx; }
 .tip { text-align: center; font-size: 22rpx; color: var(--color-text-3); padding: 20rpx 0 40rpx; }
+
+.input-row > input { height:72rpx;line-height:72rpx;min-width:0;padding:0 16rpx;margin:12rpx 0;background:var(--color-bg);border-radius:10rpx;font-size:26rpx; }

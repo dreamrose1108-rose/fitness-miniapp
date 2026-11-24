@@ -108,7 +108,7 @@ page { height: 100%; overflow: hidden; }
   flex: 1; height: 76rpx; line-height: 76rpx;
   background: var(--color-bg); border-radius: 38rpx;
   padding: 0 30rpx; font-size: 28rpx; margin-right: 16rpx;
-  box-sizing: border-box; min-height: 0;
+  box-sizing: border-box; min-height: 76rpx; min-width: 0;
 }
 
 /* 打字机光标 */
