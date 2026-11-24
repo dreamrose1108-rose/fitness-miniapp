@@ -1,7 +1,7 @@
 <page-meta page-style="{{appThemeStyle}}" />
 <view class="page plans-page">
  <navigator url="/pages/schedule/schedule" class="template">我的训练日程 · 开始或继续训练 ›</navigator>
- <navigator wx:if="{{personalReference}}" url="/pages/reference-plan/reference-plan" class="template"><view class="template-top"><text class="tag">我的计划 · 已保存</text></view><view class="template-title">{{personalReference.title}}</view><view class="description">个人组次设置与完成进度 · 本机保存</view><view class="choose">继续查看 / 修改计划 ›</view></navigator>
+
  <view class="eyebrow">TRAINING / 训练计划</view>
  <view class="heading">{{stage === 0 ? '找到你的训练节奏' : stage === 1 ? '让计划适合你' : '按计划，练好每一次'}}</view>
  <view class="steps"><text class="{{stage === 0 ? 'current' : ''}}">01 选模板</text><text>—</text><text class="{{stage === 1 ? 'current' : ''}}">02 选部位与条件</text><text>—</text><text class="{{stage === 2 ? 'current' : ''}}">03 预览与排期</text></view>

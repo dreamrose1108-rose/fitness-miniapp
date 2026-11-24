@@ -44,7 +44,7 @@ module.exports=function createTrainingPage(todayOnly=false){return {
  finishSave(skip){try{this.saved(schedule.save(this.data.draft,this.data.start,this.data.overrides,skip));}catch(e){this.setData({error:e.message});}},
  saved(result){this.setData({draft:null,overrides:{},success:result.added?'已保存 '+result.added+' 个训练日。点击今天的“开始训练”进入逐组打卡。':'该计划已保存或日期已有安排，下方可查看现有日程。'});this.render();wx.pageScrollTo({scrollTop:0,duration:0});},
  remove(e){const key=e.currentTarget.dataset.key;wx.showModal({title:'移除这天的安排？',content:'同时移除本机组数和完成记录。其他日期不受影响。',success:r=>{if(r.confirm)try{schedule.remove(key);if(this.data.activeKey===key){this.clearTimer();this.setData({activeKey:'',restTimer:{visible:false}});}this.render();}catch(e){this.setData({error:e.message});}}});},
- movement(e){const id=e.currentTarget.dataset.id;if(this.data.rows.some(r=>r.exercises.some(x=>x.id===id)))wx.navigateTo({url:'/pages/movement/movement?id='+id});},
+ movement(e){const id=e.currentTarget.dataset.id;const exercise=this.data.rows.flatMap(r=>r.exercises).find(x=>x.id===id);if(!exercise)return;if(exercise.isReference&&!exercise.demoId){wx.setClipboardData({data:exercise.sourceUrl});return;}wx.navigateTo({url:'/pages/movement/movement?id='+encodeURIComponent(exercise.demoId||id)});},
  past(){this.setData({showPast:!this.data.showPast});this.render();},
  freeTraining(){wx.switchTab({url:'/pages/exercise/exercise'});},
  calendar(){wx.navigateTo({url:'/pages/calendar/calendar'});},

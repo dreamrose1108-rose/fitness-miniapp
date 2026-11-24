@@ -1,9 +1,8 @@
-const reference=require('../../utils/reference-plan.js');
 const planner=require('../../utils/training-plan.js');
 const schedule=require('../../utils/training-schedule.js');
 Page({
- async onShow(){if(getApp().applyTheme)getApp().applyTheme(this);if(!await getApp().login())return;this.setData({personalReference:reference.personal()});},
- data:{personalReference:null,stage:0,templates:planner.templates,focuses:planner.focuses,sources:planner.sources,showSources:false,template:'full',templateName:'全身训练',focus:'all',level:'beginner',equipment:'gym',days:3,dayOptions:[2,3],plan:null,saved:false,week:0,day:0,weekInfo:planner.weeks[0],weekSessions:[],session:null,rows:[],doneCount:0,totalCount:0,progress:{}},
+ onShow(){if(getApp().applyTheme)getApp().applyTheme(this);},
+ data:{stage:0,templates:planner.templates,focuses:planner.focuses,sources:planner.sources,showSources:false,template:'full',templateName:'全身训练',focus:'all',level:'beginner',equipment:'gym',days:3,dayOptions:[2,3],plan:null,saved:false,week:0,day:0,weekInfo:planner.weeks[0],weekSessions:[],session:null,rows:[],doneCount:0,totalCount:0,progress:{}},
  onLoad(){const stored=planner.restore();if(stored){const c=stored.plan.config,t=planner.templates.find(x=>x.id===c.template);this.setData({...c,templateName:t.name,dayOptions:t.days,plan:stored.plan,progress:stored.progress,saved:true,stage:2});this.render();}},
  selectTemplate(e){const t=planner.templates.find(x=>x.id===e.currentTarget.dataset.id);if(!t)return;this.setData({template:t.id,templateName:t.name,dayOptions:t.days,days:t.days.includes(this.data.days)?this.data.days:t.days[0],stage:1});},
  select(e){const {field,value}=e.currentTarget.dataset;if(!['focus','level','equipment','days'].includes(field))return;this.setData({[field]:field==='days'?Number(value):value});},

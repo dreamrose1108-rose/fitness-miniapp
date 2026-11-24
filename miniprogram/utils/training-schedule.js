@@ -1,7 +1,7 @@
 const library=require('./exercise-library');
 const {validate}=require('./training-draft-schema');
 const {formatDate}=require('./date');
-function draft(input){const clean=validate(input,id=>library.get(id));if(!/^[a-zA-Z0-9_-]{8,80}$/.test(input.id||''))throw Error('计划标识无效，请重新生成');return {...clean,id:input.id};}
+function draft(input){const clean=input&&input.source==='reference:tan'?require('./reference-schedule').validate(input):validate(input,id=>library.get(id));if(!/^[a-zA-Z0-9_-]{8,80}$/.test(input.id||''))throw Error('计划标识无效，请重新生成');return {...clean,id:input.id};}
 function date(value){if(!/^\d{4}-\d{2}-\d{2}$/.test(value||''))throw Error('日期无效');const [y,m,d]=value.split('-').map(Number),v=new Date(y,m-1,d,12);if(formatDate(v)!==value)throw Error('日期无效');return v;}
 function addDays(value,offset){const d=date(value);d.setDate(d.getDate()+offset);return formatDate(d);}
 function key(){const owner=getApp().globalData.openid;if(!owner)throw Error('请先登录');return 'trainingSchedule:v1:'+owner;}
