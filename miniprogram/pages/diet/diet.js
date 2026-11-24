@@ -1,3 +1,4 @@
+const feedback=require('../../utils/feedback');
 // pages/diet/diet.js — 饮食记录（云端食物库 + 离线降级 + 自定义食物）
 const app = getApp();
 const foodCatalog = require('../../utils/food-catalog/index.js');
@@ -138,21 +139,21 @@ Page({
     if (!this._foods && !this.data.usingLocalDb) {
       this.setData({ usingLocalDb: true });
     }
-    this.setData({ showPicker: true, keyword: '', activeCat: '全部', aiResult: null, aiSearchError: '', aiSearching: false }, this.filterFoods);
+    feedback.state(this,{ showPicker: true, keyword: '', activeCat: '全部', aiResult: null, aiSearchError: '', aiSearching: false }, this.filterFoods);
   },
 
   // AI 联网查询食物热量
   async aiFoodSearch() {
     const kw = this.data.keyword.trim();
     if (!kw || this.data.aiSearching) return;
-    this.setData({ aiSearching: true, aiResult: null, aiSearchError: '' });
+    feedback.state(this,{ aiSearching: true, aiResult: null, aiSearchError: '' });
     try {
       const result = await call('aiCoach', { action: 'searchFood', keyword: kw });
       if(this.data.keyword.trim() !== kw) return;
       if(!result || !Number.isFinite(result.kcal) || !['100g','100ml'].includes(result.unit) || !result.sources || !result.sources.length) throw Error('查询结果不完整，请稍后重试');
       this.setData({ aiResult: {...result, proteinLabel: result.protein == null ? '未提供' : result.protein+'g', carbLabel: result.carb == null ? '未提供' : result.carb+'g', fatLabel: result.fat == null ? '未提供' : result.fat+'g'} });
     } catch (e) {
-      if(this.data.keyword.trim() === kw) this.setData({ aiSearchError: e.message || '网络连接失败，请稍后重试' });
+      if(this.data.keyword.trim() === kw) feedback.state(this,{ aiSearchError: e.message || '网络连接失败，请稍后重试' });
     } finally {
       this.setData({ aiSearching: false });
     }
@@ -179,7 +180,7 @@ Page({
       this.loadCloudFoods(); // 刷新列表
     } catch (e) {
       this.setData({ aiSaving: false });
-      wx.showToast({ title: e.message || '保存失败', icon: 'none' });
+      feedback.error(e.message || '保存失败');
     }
   },
 
@@ -197,7 +198,7 @@ Page({
     this.setData({ activeCat: e.currentTarget.dataset.cat }, this.filterFoods);
   },
   onSearch(e) {
-    this.setData({ keyword: e.detail.value, aiResult: null, aiSearchError: '' }, this.filterFoods);
+    feedback.state(this,{ keyword: e.detail.value, aiResult: null, aiSearchError: '' }, this.filterFoods);
   },
 
   // 云端模式：条件由云函数处理；本地模式：前端过滤
@@ -235,9 +236,9 @@ Page({
           if (this._unloaded) { await deletePhoto(up.fileID); return; }
           this.setData({ pendingPhoto: up.fileID });
           app.globalData.pendingMealPhoto={...photoContext,fileID:up.fileID,localPath:filePath};
-          wx.navigateTo({url:'/pages/meal-review/meal-review',success:()=>this.setData({pendingPhoto:''}),fail:()=>{delete app.globalData.pendingMealPhoto;this.clearPendingPhoto();wx.showToast({title:'无法打开识别页面，请重试',icon:'none'});}});
+          wx.navigateTo({url:'/pages/meal-review/meal-review',success:()=>this.setData({pendingPhoto:''}),fail:()=>{delete app.globalData.pendingMealPhoto;this.clearPendingPhoto();feedback.error('无法打开识别页面，请重试');}});
         } catch (e) {
-          wx.showToast({ title: e.message || '照片上传失败', icon: 'none' });
+          feedback.error(e.message || '照片上传失败');
         } finally {
           wx.hideLoading();
           if (!this._unloaded) this.setData({ photoUploading: false });
@@ -263,7 +264,7 @@ Page({
       if (this.data.pendingPhoto === fid) this.setData({ pendingPhoto: '' });
       return true;
     } catch (e) {
-      wx.showToast({ title: '照片清理失败，请稍后重试', icon: 'none' });
+      feedback.error('照片清理失败，请稍后重试');
       return false;
     }
   },
@@ -290,7 +291,7 @@ Page({
   async submitPortion(){
     if(this.data.portionSaving||!this._portionContext)return;
     const result=this.data.mealEditItems?recordEditor.calculateItems(this._portionContext.record,this.data.mealEditItems):portions.calculate(this.data.portionFood,this.data.portionOptions[this.data.portionIndex],this.data.portionQuantity);
-    if(!result){wx.showToast({title:'请输入有效数量',icon:'none'});return;}
+    if(!result){feedback.error('请输入有效数量');return;}
     const {food,mealType,date,record}=this._portionContext;
     this.setData({portionSaving:true});
     try{
@@ -299,13 +300,13 @@ Page({
       this.setData({pendingPhoto:'',portionSaving:false});this.closePortion();this.closePicker();this.loadRecords();
       wx.showToast({title:'已添加'});
       if(food._id)call('foodLib',{action:'used',foodId:food._id}).catch(()=>{});
-    }catch(e){this.setData({portionSaving:false});wx.showToast({title:e.message||'保存失败，请重试',icon:'none'});}
+    }catch(e){this.setData({portionSaving:false});feedback.error(e.message||'保存失败，请重试');}
   },
 
   // 预览餐拍照片
   async previewPhoto(e) {
     try { const url = await readPhoto(e.currentTarget.dataset.fileid); wx.previewImage({ urls: [url] }); }
-    catch (e) { wx.showToast({ title: '图片加载失败', icon: 'none' }); }
+    catch (e) { feedback.error('图片加载失败'); }
   },
 
   // ===== 日期切换 =====
@@ -328,7 +329,7 @@ Page({
     try{if(Array.isArray(record.items)&&record.items.length){
       const items=recordEditor.initialItems(record);this._foodSelectionBusy=true;this._portionContext={record};
       this.setData({portionEditing:true,portionFood:{name:'修改餐食'},mealEditItems:items,portionSaving:false},this.updateMealItems);return;
-    }const state=recordEditor.initial(record);this._foodSelectionBusy=true;this._portionContext={record,food:state.basis.food};this.setData({mealEditItems:null,portionEditing:true,portionFood:state.basis.food,portionOptions:state.basis.options,portionIndex:state.basis.options.findIndex(o=>o.id===state.portionId),portionQuantity:state.quantity,portionSaving:false},this.updatePortion);}catch(err){wx.showToast({title:err.message||'无法编辑此记录',icon:'none'});}
+    }const state=recordEditor.initial(record);this._foodSelectionBusy=true;this._portionContext={record,food:state.basis.food};this.setData({mealEditItems:null,portionEditing:true,portionFood:state.basis.food,portionOptions:state.basis.options,portionIndex:state.basis.options.findIndex(o=>o.id===state.portionId),portionQuantity:state.quantity,portionSaving:false},this.updatePortion);}catch(err){feedback.error(err.message||'无法编辑此记录');}
   },
 
   async onDelete(e) {
@@ -342,7 +343,7 @@ Page({
       await call('record', { action: 'remove', type: 'diet', id });
       // 顺带清理该记录绑定的照片（失败不影响删除结果）
       if (record && record.photoFileID) {
-        await deletePhoto(record.photoFileID).catch(() => { wx.showToast({ title: '记录已删除，照片清理失败', icon: 'none' }); });
+        await deletePhoto(record.photoFileID).catch(() => { feedback.error('记录已删除，照片清理失败'); });
       }
       wx.showToast({ title: '已删除' });
       this.loadRecords();
@@ -353,7 +354,7 @@ Page({
   openCustomForm() {
     // 离线模式下不支持自定义（依赖云端存储）
     if (this.data.usingLocalDb) {
-      wx.showToast({ title: '离线模式暂不支持自定义食物', icon: 'none' });
+      feedback.error('离线模式暂不支持自定义食物');
       return;
     }
     this.setData({ showCustomForm: true, cfName: '', cfKcal: '', cfCatIndex: 6 });
@@ -367,8 +368,8 @@ Page({
     if (this.data.cfSubmitting) return;
     const name = (this.data.cfName || '').trim();
     const kcal = Number(this.data.cfKcal);
-    if (!name) { wx.showToast({ title: '请输入名称', icon: 'none' }); return; }
-    if (!Number.isFinite(kcal) || kcal <= 0) { wx.showToast({ title: '请输入有效热量', icon: 'none' }); return; }
+    if (!name) { feedback.error('请输入名称'); return; }
+    if (!Number.isFinite(kcal) || kcal <= 0) { feedback.error('请输入有效热量'); return; }
     this.setData({ cfSubmitting: true });
     try {
       await call('foodLib', {

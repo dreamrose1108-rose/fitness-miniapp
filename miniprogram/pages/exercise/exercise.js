@@ -1,3 +1,4 @@
+const feedback=require('../../utils/feedback');
 // pages/exercise/exercise.js — 运动记录
 const app = getApp();
 const { call } = require('../../utils/cloud.js');
@@ -72,7 +73,7 @@ Page({
 
   async onSubmit() {
     if (this.data.submitting) return;
-    if (!this.data.selected || !Number.isFinite(this.data.duration) || this.data.duration <= 0 || !Number.isFinite(this.data.estimatedKcal) || this.data.estimatedKcal < 0) { wx.showToast({ title: '请选择运动并填写有效时长与消耗', icon: 'none' }); return; }
+    if (!this.data.selected || !Number.isFinite(this.data.duration) || this.data.duration <= 0 || !Number.isFinite(this.data.estimatedKcal) || this.data.estimatedKcal < 0) { feedback.error('请选择运动并填写有效时长与消耗'); return; }
     this.setData({ submitting: true });
     try {
       await call('record', {

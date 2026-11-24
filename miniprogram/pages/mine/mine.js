@@ -1,3 +1,4 @@
+const feedback=require('../../utils/feedback');
 // pages/mine/mine.js — 我的：目标设置与隐私
 const app = getApp();
 const { call } = require('../../utils/cloud.js');
@@ -30,13 +31,13 @@ Page({
         const isNum = field !== 'nickname';
         const value = isNum ? Number(res.content) : res.content.trim();
         if (isNum && (!Number.isFinite(value) || value <= 0)) {
-          wx.showToast({ title: '请输入有效数字', icon: 'none' });
+          feedback.error('请输入有效数字');
           return;
         }
-        if (!isNum && !value) { wx.showToast({ title: '请输入昵称', icon: 'none' }); return; }
+        if (!isNum && !value) { feedback.error('请输入昵称'); return; }
         try {
           const saved = await call('userProfile', { action: 'update', [field]: value });
-          if (!saved || saved.updated !== true) { wx.showToast({ title: '资料未保存，请重试', icon: 'none' }); return; }
+          if (!saved || saved.updated !== true) { feedback.error('资料未保存，请重试'); return; }
           wx.showToast({ title: '已保存' });
           this.loadProfile();
         } catch (err) {}

@@ -1,3 +1,4 @@
+const feedback=require('../../utils/feedback');
 const planner=require('../../utils/training-plan.js');
 const schedule=require('../../utils/training-schedule.js');
 Page({
@@ -9,13 +10,13 @@ Page({
  templates(){this.setData({stage:0});},
  settings(){this.setData({stage:1});},
  upgrade(){if(!this.data.plan)return;this.setData({...this.data.plan.config});this.generate();},
- generate(){try{const plan=planner.generate(this.data);this.setData({plan,progress:{},saved:false,stage:2,week:0,day:0});this.render();wx.pageScrollTo({scrollTop:0,duration:0});}catch(e){wx.showToast({title:e.message,icon:'none',duration:2500});}},
- save(){try{planner.save(this.data.plan,this.data.progress);this.setData({saved:true});this.schedule();}catch(e){wx.showToast({title:'保存失败，请检查存储空间',icon:'none'});}},
- schedule(){try{getApp().globalData.pendingAITrainingPlan=schedule.fromTemplate(this.data.plan);wx.navigateTo({url:'/pages/schedule/schedule?preview=1'});}catch(e){wx.showToast({title:e.message||'无法生成日程',icon:'none'});}},
+ generate(){try{const plan=planner.generate(this.data);this.setData({plan,progress:{},saved:false,stage:2,week:0,day:0});this.render();wx.pageScrollTo({scrollTop:0,duration:0});}catch(e){feedback.error(e.message);}},
+ save(){try{planner.save(this.data.plan,this.data.progress);this.setData({saved:true});this.schedule();}catch(e){feedback.error('保存失败，请检查存储空间');}},
+ schedule(){try{getApp().globalData.pendingAITrainingPlan=schedule.fromTemplate(this.data.plan);wx.navigateTo({url:'/pages/schedule/schedule?preview=1'});}catch(e){feedback.error(e.message||'无法生成日程');}},
  pickWeek(e){const week=Number(e.currentTarget.dataset.index);if(week>=0&&week<4){this.setData({week});this.render();}},
  pickDay(e){const day=Number(e.currentTarget.dataset.index);if(day>=0&&day<7){this.setData({day});this.render();}},
  render(){const {plan,week,day,progress}=this.data;if(!plan)return;const weekInfo=plan.weeks[week],weekSessions=weekInfo.sessions,session=weekSessions[day];const rows=session.exercises.map(x=>({...x,key:week+':'+day+':'+x.id,done:!!progress[week+':'+day+':'+x.id]}));let totalCount=0,doneCount=0;weekSessions.forEach(s=>s.exercises.forEach(x=>{totalCount++;if(progress[week+':'+s.day+':'+x.id])doneCount++;}));this.setData({session,rows,weekInfo,weekSessions,totalCount,doneCount});},
- toggleDone(e){if(!this.data.saved){wx.showToast({title:'先保存计划，再记录完成情况',icon:'none'});return;}const key=e.currentTarget.dataset.key;if(!this.data.rows.some(x=>x.key===key))return;const progress={...this.data.progress,[key]:!this.data.progress[key]};try{planner.save(this.data.plan,progress);this.setData({progress});this.render();}catch(e){wx.showToast({title:'进度未保存，请重试',icon:'none'});}},
+ toggleDone(e){if(!this.data.saved){wx.showToast({title:'先保存计划，再记录完成情况',icon:'none'});return;}const key=e.currentTarget.dataset.key;if(!this.data.rows.some(x=>x.key===key))return;const progress={...this.data.progress,[key]:!this.data.progress[key]};try{planner.save(this.data.plan,progress);this.setData({progress});this.render();}catch(e){feedback.error('进度未保存，请重试');}},
  movement(e){const id=e.currentTarget.dataset.id;if(!this.data.rows.some(x=>x.id===id))return;wx.navigateTo({url:'/pages/movement/movement?id='+encodeURIComponent(id)});},
  sources(){this.setData({showSources:!this.data.showSources});},
  copySource(e){const source=planner.sources[Number(e.currentTarget.dataset.index)];if(source)wx.setClipboardData({data:source.url});}

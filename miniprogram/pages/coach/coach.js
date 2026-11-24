@@ -1,3 +1,4 @@
+const feedback=require('../../utils/feedback');
 // pages/coach/coach.js — AI 教练对话（打字机流式渲染）
 const app = getApp();
 const mealEditor=require('../../utils/meal-editor');
@@ -105,7 +106,7 @@ Page({
     } catch (e) { /* 无历史不影响使用 */ }
   },
 
-  viewSavedMeal(e){const m=this.data.messages.find(x=>x.id===Number(e.currentTarget.dataset.message));if(!m||!m.savedMeal)return;app.globalData.pendingDietView={date:m.savedMeal.date,mealType:m.savedMeal.mealType};wx.switchTab({url:'/pages/diet/diet',fail:()=>{delete app.globalData.pendingDietView;wx.showToast({title:'打开失败，请重试',icon:'none'});}});},
+  viewSavedMeal(e){const m=this.data.messages.find(x=>x.id===Number(e.currentTarget.dataset.message));if(!m||!m.savedMeal)return;app.globalData.pendingDietView={date:m.savedMeal.date,mealType:m.savedMeal.mealType};wx.switchTab({url:'/pages/diet/diet',fail:()=>{delete app.globalData.pendingDietView;feedback.error('打开失败，请重试');}});},
   async refreshSavedMeals(){if(!this.data.messages.some(m=>m.savedMeal))return;try{const rows=await call('record',{action:'list',type:'coach',limit:100});const byId=new Map(rows.filter(x=>x.mealDraft&&x.savedMeal).map(x=>[x.mealDraft.id,x.savedMeal]));if(!this._unloaded)this.setData({messages:this.data.messages.map(m=>m.savedMeal&&m.mealDraft&&byId.has(m.mealDraft.id)?{...m,savedMeal:byId.get(m.mealDraft.id)}:m)});}catch(e){}},
   updateMeal(id,patch){this.setData({messages:this.data.messages.map(m=>m.id===Number(id)?{...m,...patch}:m)});},
   mealRecalculate(m,choices,states){const ready=states.every(x=>x&&x.result);this.updateMeal(m.id,{mealChoices:choices,mealStates:states,mealReady:ready,mealTotal:ready?states.reduce((sum,x)=>sum+x.result.kcal,0):null});},
@@ -117,7 +118,7 @@ Page({
   chooseMealType(e){const m=this.data.messages.find(x=>x.id===Number(e.currentTarget.dataset.message));if(m&&!m.mealSaving&&!m.savedMeal)this.updateMeal(m.id,{mealIndex:Number(e.detail.value)});},
   async saveMeal(e){const m=this.data.messages.find(x=>x.id===Number(e.currentTarget.dataset.message));if(!m||!m.mealDraft||!m.mealReady||m.mealSaving||m.savedMeal)return;
     this.updateMeal(m.id,{mealSaving:true});
-    try{const result=await call('record',{action:'saveCoachMeal',data:{draftId:m.mealDraft.id,choices:m.mealChoices,edits:m.mealStates.map(x=>({quantity:x.quantity,portionId:x.portionId})),date:m.mealDate,mealType:['breakfast','lunch','dinner','snack'][m.mealIndex]}});this.updateMeal(m.id,mealMeta({mealDraft:m.mealDraft,savedMeal:result}));this.loadTodaySnapshot();wx.showToast({title:'已保存到饮食记录'});}catch(err){this.updateMeal(m.id,{mealSaving:false});wx.showToast({title:err.message||'保存失败，请重试',icon:'none'});}
+    try{const result=await call('record',{action:'saveCoachMeal',data:{draftId:m.mealDraft.id,choices:m.mealChoices,edits:m.mealStates.map(x=>({quantity:x.quantity,portionId:x.portionId})),date:m.mealDate,mealType:['breakfast','lunch','dinner','snack'][m.mealIndex]}});this.updateMeal(m.id,mealMeta({mealDraft:m.mealDraft,savedMeal:result}));this.loadTodaySnapshot();wx.showToast({title:'已保存到饮食记录'});}catch(err){this.updateMeal(m.id,{mealSaving:false});feedback.error(err.message||'保存失败，请重试');}
   },
 
   previewPlan(e){const message=this.data.messages.find(x=>x.id===Number(e.currentTarget.dataset.message));if(!message||!message.trainingPlan)return;app.globalData.pendingAITrainingPlan=message.trainingPlan;wx.navigateTo({url:'/pages/schedule/schedule?preview=1'});},
@@ -136,7 +137,7 @@ Page({
     this._hasSent = true;
 
     const userMsg = { id: ++msgSeq, role: 'user', content: text };
-    this.setData({
+    feedback.state(this,{
       messages: [...this.data.messages, userMsg],
       inputText: '',
       sendError: '',
@@ -163,7 +164,7 @@ Page({
     } catch (e) {
       if (this._unloaded) return;
       const reason = e && e.message ? e.message : '连接失败，请稍后重试';
-      this.setData({ thinking: false, sendError: reason, inputText: text }, this.scrollToBottom);
+      feedback.state(this,{ thinking: false, sendError: reason, inputText: text }, this.scrollToBottom);
     }
   },
 

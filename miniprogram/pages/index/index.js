@@ -1,3 +1,4 @@
+const feedback=require('../../utils/feedback');
 // pages/index/index.js — 首页：今日概览
 const app = getApp();
 const themes = require('../../utils/theme');
@@ -36,7 +37,7 @@ Page({
     const index=Number(e.detail.value),theme=themes.themeIds[index];
     if(!theme)return;
     try { wx.setStorageSync('homeTheme:v1',theme);themes.apply(this); }
-    catch(e){wx.showToast({title:'主题保存失败，请重试',icon:'none'});}
+    catch(e){feedback.error('主题保存失败，请重试');}
   },
   showThemeCredit() {
     wx.showActionSheet({itemList:['查看图片来源（复制链接）','查看 CC BY 3.0 许可（复制链接）'],success:r=>wx.setClipboardData({data:r.tapIndex===0?'https://commons.wikimedia.org/wiki/File:Jang_Won-young_of_Ive,_March_27,_2025.png':'https://creativecommons.org/licenses/by/3.0/'})});
@@ -78,7 +79,7 @@ Page({
     this._openingTraining = true;
     wx.navigateTo({
       url: '/pages/schedule/schedule?today=1',
-      fail: () => wx.showToast({title:'训练页面打开失败，请重新进入小程序',icon:'none'}),
+      fail: () => feedback.error('训练页面打开失败，请重新进入小程序'),
       complete: () => { this._openingTraining = false; }
     });
   },
@@ -124,7 +125,7 @@ Page({
         if (!res.confirm || !res.content) return;
         const weight = Number(res.content);
         if (!Number.isFinite(weight) || weight <= 0) {
-          wx.showToast({ title: '请输入有效数字', icon: 'none' });
+          feedback.error('请输入有效数字');
           return;
         }
         try {

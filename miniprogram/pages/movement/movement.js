@@ -1,3 +1,4 @@
+const feedback=require('../../utils/feedback');
 const library=require('../../utils/exercise-library.js');
 const media=require('../../utils/exercise-media.js');
 const {call}=require('../../utils/cloud.js');
@@ -35,10 +36,10 @@ Page({
    if(urlMatch){
     this.setData({gifSearchResult:urlMatch[0]});
    }else{
-    wx.showToast({title:'AI 未能找到合适的演示链接',icon:'none'});
+    feedback.error('AI 未能找到合适的演示链接');
    }
   }catch(e){
-   wx.showToast({title:'搜索失败，请重试',icon:'none'});
+   feedback.error('搜索失败，请重试');
   }
   this.setData({searchingGif:false});
  },
@@ -50,13 +51,13 @@ Page({
  },
  onShow(){if(getApp().applyTheme)getApp().applyTheme(this);this.hidden=false;if(this.data.mediaInfo)this.loadMedia();},
  onHide(){this.hidden=true;this.stop();if(this.data.video)wx.createVideoContext('movementVideo',this).pause();},onUnload(){this.hidden=true;this.stop();this.requestId=(this.requestId||0)+1;},
- async loadMedia(force=false){if(!this.data.mediaInfo)return;const requestId=this.requestId=(this.requestId||0)+1;this.stop();this.setData({loading:true,gif:'',gifLoaded:false,mediaError:'',videoError:false,loadedFrames:{}});try{if(!await getApp().login())throw Error('login');const result=await media.load([this.data.item.id],force===true);if(requestId!==this.requestId||this.hidden)return;const item=result[0];if(!item||(!item.images.length&&!item.video))throw Error('missing');this.setData({gif:item.gif||'',images:item.gif?[]:item.images,video:item.gif?'':item.video,frame:0});}catch(e){if(requestId===this.requestId&&!this.hidden)this.setData({mediaError:'演示暂时加载失败，请点击重试'});}finally{if(requestId===this.requestId&&!this.hidden)this.setData({loading:false});}},
+ async loadMedia(force=false){if(!this.data.mediaInfo)return;const requestId=this.requestId=(this.requestId||0)+1;this.stop();this.setData({loading:true,gif:'',gifLoaded:false,mediaError:'',videoError:false,loadedFrames:{}});try{if(!await getApp().login())throw Error('login');const result=await media.load([this.data.item.id],force===true);if(requestId!==this.requestId||this.hidden)return;const item=result[0];if(!item||(!item.images.length&&!item.video))throw Error('missing');this.setData({gif:item.gif||'',images:item.gif?[]:item.images,video:item.gif?'':item.video,frame:0});}catch(e){if(requestId===this.requestId&&!this.hidden)feedback.state(this,{mediaError:'演示暂时加载失败，请点击重试'});}finally{if(requestId===this.requestId&&!this.hidden)this.setData({loading:false});}},
  gifLoaded(){this.setData({gifLoaded:true});},
- gifFailed(){this.setData({gifLoaded:false,mediaError:'动图加载失败，请重试'});},
+ gifFailed(){feedback.state(this,{gifLoaded:false,mediaError:'动图加载失败，请重试'});},
  retry(){this.loadMedia(true);},
  imageLoaded(e){this.setData({['loadedFrames.'+e.currentTarget.dataset.index]:true});},
- imageFailed(){this.stop();this.setData({mediaError:'图片未加载完成，请重试'});},
- videoFailed(){this.setData({videoError:true});},
+ imageFailed(){this.stop();feedback.state(this,{mediaError:'图片未加载完成，请重试'});},
+ videoFailed(){feedback.state(this,{videoError:true});},
  changeFrame(e){this.setData({frame:e.detail.current});},
  step(e){this.stop();const count=this.data.images.length;if(count)this.setData({frame:(this.data.frame+Number(e.currentTarget.dataset.delta)+count)%count});},
  stop(){if(this.timer)clearInterval(this.timer);this.timer=null;this.setData({playing:false});},
@@ -68,7 +69,7 @@ Page({
  },
  closeGifOverlay(){this.setData({gifOverlay:false});},
  copySource(){const m=this.data.mediaInfo;wx.setClipboardData({data:(m.hasGif?[m.gifSource]:[m.photoSource,m.videoSource,m.videoLicenseUrl]).filter(Boolean).join('\n')});},
- favorite(){if(!this.data.item)return;try{const ids=library.toggleFavorite(this.data.item.id);this.setData({favorite:ids.includes(this.data.item.id)});}catch(e){wx.showToast({title:'收藏未保存，请重试',icon:'none'});}},
- record(){if(!this.data.item)return;this.stop();getApp().globalData.pendingExerciseId=this.data.item.id;wx.switchTab({url:'/pages/exercise/exercise',fail:()=>wx.showToast({title:'打开运动记录失败，请重试',icon:'none'})});},
+ favorite(){if(!this.data.item)return;try{const ids=library.toggleFavorite(this.data.item.id);this.setData({favorite:ids.includes(this.data.item.id)});}catch(e){feedback.error('收藏未保存，请重试');}},
+ record(){if(!this.data.item)return;this.stop();getApp().globalData.pendingExerciseId=this.data.item.id;wx.switchTab({url:'/pages/exercise/exercise',fail:()=>feedback.error('打开运动记录失败，请重试')});},
  license(){this.setData({showLicense:!this.data.showLicense});}
 });

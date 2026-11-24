@@ -6,7 +6,7 @@ function setup(todayOnly=false){
  let storage={},definition;const exported={exports:{}};const timers=new Map(),app={globalData:{openid:'test',pendingAITrainingPlan:plan},login:async()=>true};
  const wx={getStorageSync:k=>storage[k]?JSON.parse(JSON.stringify(storage[k])):undefined,setStorageSync:(k,v)=>storage[k]=JSON.parse(JSON.stringify(v)),pageScrollTo(){},showModal(){},navigateTo(){}};
  global.wx=wx;global.getApp=()=>app;
- vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../miniprogram/utils/training-page.js'),'utf8'),{require:n=>n.includes('training-schedule')?schedule:n.includes('training-labels')?require('../miniprogram/utils/training-labels'):{formatDate},module:exported,getApp:()=>app,wx,setInterval:fn=>{timers.set(1,fn);return 1;},clearInterval:id=>timers.delete(id)});
+ vm.runInNewContext(fs.readFileSync(path.join(__dirname,'../miniprogram/utils/training-page.js'),'utf8'),{require:n=>n.includes('feedback')?require('./feedback-harness.cjs')():n.includes('training-schedule')?schedule:n.includes('training-labels')?require('../miniprogram/utils/training-labels'):{formatDate},module:exported,getApp:()=>app,wx,setInterval:fn=>{timers.set(1,fn);return 1;},clearInterval:id=>timers.delete(id)});
  definition=exported.exports(todayOnly);
  const create=()=>{const p={...definition,data:JSON.parse(JSON.stringify(definition.data)),setData(v){Object.assign(this.data,v);}};return p;};return {create,timers,app};
 }

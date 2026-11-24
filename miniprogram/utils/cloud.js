@@ -1,3 +1,4 @@
+const feedback=require('./feedback');
 // utils/cloud.js — 云函数调用封装（HTTP 版）
 // wx.cloud 无环境授权（-601034），改走 HTTP 网关 + token 鉴权
 // DEV_MODE=true 时走本地模拟数据，不调云端（省资源点）
@@ -122,7 +123,7 @@ async function call(name, data = {}) {
     const r = await post(ROUTES[name] || ('/fit-' + name), payload);
     if (r && r.code === 0) return r.data;
     const msg = (r && r.msg) || '请求失败';
-    wx.showToast({ title: msg, icon: 'none' });
+    feedback.error(msg);
     throw new Error(msg);
   } catch (err) {
     if (err && err.errMsg && /request:fail/i.test(err.errMsg)) {
@@ -168,11 +169,7 @@ function reportRequestError(err, path) {
     LOGIN_REJECTED: '服务端未完成登录，请联系开发者排查。',
     NETWORK: '手机未能连接接口，请切换 Wi-Fi 或移动网络重试。'
   };
-  wx.showModal({
-    title: '连接诊断 N1',
-    content: (tips[code] || '服务端请求失败。') + '\n错误编号：' + code + '\n接口：' + (path || 'unknown'),
-    showCancel: false,
-    complete: () => { diagnosticOpen = false; }
-  });
+  feedback.error((tips[code] || '服务端请求失败。') + '\n错误编号：' + code + '\n接口：' + (path || 'unknown'), '连接异常');
+  diagnosticOpen = false;
 }
 module.exports = { call, rawPost, getToken, BASE, classifyError, reportRequestError };
