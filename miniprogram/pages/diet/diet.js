@@ -1,6 +1,7 @@
 // pages/diet/diet.js — 饮食记录（云端食物库 + 离线降级 + 自定义食物）
 const app = getApp();
 const foodCatalog = require('../../utils/food-catalog/index.js');
+const portions = require('../../utils/food-portions');
 const foodCache = require('../../utils/food-cache');
 const nutritionPlan = require('../../utils/nutrition-plan');
 const { uploadPhoto, readPhoto, deletePhoto } = require('../../utils/photos.js');
@@ -25,6 +26,7 @@ Page({
     progressPercent: 0,
     // 弹层
     showPicker: false,
+    portionFood:null,portionOptions:[],portionIndex:0,portionQuantity:'100',portionResult:null,portionSaving:false,
     categories: FOOD_CATEGORIES,
     activeCat: '全部',
     keyword: '',
@@ -280,77 +282,31 @@ Page({
     }
   },
 
-  // 选中食物 → 输入分量 → 计算热量（含照片绑定）
+  // Select food, then review a measurable quantity or a household portion.
   selectFood(e) {
-    if (this._foodSelectionBusy) return;
-    this._foodSelectionBusy = true;
-    const food = e.currentTarget.dataset.food;
-    const mealType = this.data.activeMeal;
-    const date = formatDate();
-    const isLiquid = food.unit === '100ml';
-    wx.showModal({
-      title: food.name,
-      content: '',
-      editable: true,
-      placeholderText: `请输入分量(${isLiquid ? 'ml' : 'g'})`,
-      success: async (res) => {
-        if (!res.confirm) { this._foodSelectionBusy = false; return; }
-        if (!res.content) {
-          this._foodSelectionBusy = false;
-          // 确认但没输入分量：视为取消，清理照片
-          this.clearPendingPhoto();
-          return;
-        }
-        // 兼容用户输入"30克""30g""30 克"等带单位写法，提取纯数字
-        const amountStr = String(res.content).replace(/[克gGkK\s,，。．]/g, '');
-        const amount = Number(amountStr);
-        if (!Number.isFinite(amount) || amount <= 0 || !Number.isFinite(food.kcal * amount / 100)) {
-          this._foodSelectionBusy = false;
-          wx.showToast({ title: '请输入有效分量', icon: 'none' });
-          this.clearPendingPhoto();
-          return;
-        }
-        // kcal 表中按 100g/100ml 计，实际 = kcal × 分量/100
-        const kcal = Math.round(food.kcal * amount / 100);
-        // 三大营养素（克）= 食物每100g含量 × 分量/100；无数据时不写（汇总按 0 计）
-        const macro = {};
-        [['protein', 'proteinG'], ['carb', 'carbG'], ['fat', 'fatG']].forEach(([src, dst]) => {
-          if (food[src] !== undefined && food[src] !== null && Number.isFinite(Number(food[src]))) {
-            macro[dst] = Math.round(Number(food[src]) * amount) / 100;
-          }
-        });
-        try {
-          await call('record', {
-            action: 'add', type: 'diet',
-            data: Object.assign({
-              date,
-              mealType,
-              foodName: food.name,
-              amount,
-              kcal,
-              photoFileID: this.data.pendingPhoto || ''
-            }, macro)
-          });
-          wx.showToast({ title: '已添加' });
-          this.setData({ pendingPhoto: '' }); // 已落库，照片归属记录，不再清理
-          this._foodSelectionBusy = false;
-          this.closePicker();
-          this.loadRecords();
-          // 异步回传使用热度（失败不打扰用户）
-          if (food._id) {
-            call('foodLib', { action: 'used', foodId: food._id }).catch(() => {});
-          }
-        } catch (err) {
-          this._foodSelectionBusy = false;
-          this.clearPendingPhoto();
-        }
-      },
-      fail: () => {
-        this._foodSelectionBusy = false;
-        // 弹层被中断：清理待绑定照片
-        this.clearPendingPhoto();
-      }
-    });
+    if(this._foodSelectionBusy)return;
+    const food=e.currentTarget.dataset.food;if(!food)return;
+    this._foodSelectionBusy=true;
+    this._portionContext={food,mealType:this.data.activeMeal,date:this.data.viewDate||formatDate()};
+    this.setData({portionFood:food,portionOptions:portions.options(food),portionIndex:0,portionQuantity:'100',portionSaving:false},this.updatePortion);
+  },
+  updatePortion(){const option=this.data.portionOptions[this.data.portionIndex];this.setData({portionResult:option?portions.calculate(this.data.portionFood,option,this.data.portionQuantity):null});},
+  onPortionQuantity(e){if(this.data.portionSaving)return;this.setData({portionQuantity:e.detail.value},this.updatePortion);},
+  onPortionUnit(e){if(this.data.portionSaving)return;const index=Number(e.currentTarget.dataset.index);if(!this.data.portionOptions[index])return;this.setData({portionIndex:index,portionQuantity:index===0?'100':'1'},this.updatePortion);},
+  closePortion(){if(this.data.portionSaving)return;this._foodSelectionBusy=false;this._portionContext=null;this.setData({portionFood:null,portionResult:null});},
+  showPortionSource(){const option=this.data.portionOptions[this.data.portionIndex];if(option&&option.source)wx.setClipboardData({data:option.source});},
+  async submitPortion(){
+    if(this.data.portionSaving||!this._portionContext)return;
+    const result=portions.calculate(this.data.portionFood,this.data.portionOptions[this.data.portionIndex],this.data.portionQuantity);
+    if(!result){wx.showToast({title:'请输入有效数量',icon:'none'});return;}
+    const {food,mealType,date}=this._portionContext;
+    this.setData({portionSaving:true});
+    try{
+      await call('record',{action:'add',type:'diet',data:{date,mealType,foodName:food.name,...result,photoFileID:this.data.pendingPhoto||''}});
+      this.setData({pendingPhoto:'',portionSaving:false});this.closePortion();this.closePicker();this.loadRecords();
+      wx.showToast({title:'已添加'});
+      if(food._id)call('foodLib',{action:'used',foodId:food._id}).catch(()=>{});
+    }catch(e){this.setData({portionSaving:false});wx.showToast({title:e.message||'保存失败，请重试',icon:'none'});}
   },
 
   // 预览餐拍照片
@@ -381,7 +337,7 @@ Page({
       title: `修改「${record.foodName}」`,
       content: '',
       editable: true,
-      placeholderText: `当前 ${record.amount}g，输入新分量(g)`,
+      placeholderText: `当前 ${record.amount}${record.amountUnit||'g'}，输入新分量(${record.amountUnit||'g'})`,
       success: async res => {
         if (!res.confirm || !res.content) return;
         const newAmount = Number(String(res.content).replace(/[克gG\s]/g, ''));
@@ -400,6 +356,9 @@ Page({
               mealType: record.mealType,
               foodName: record.foodName,
               amount: newAmount,
+              amountUnit: record.amountUnit || 'g',
+              portionLabel: '',
+              ...Object.fromEntries(['proteinG','carbG','fatG'].filter(k=>record[k]!=null).map(k=>[k,Math.round(record[k]*newAmount/record.amount*100)/100])),
               kcal: newKcal,
               photoFileID: record.photoFileID || ''
             }

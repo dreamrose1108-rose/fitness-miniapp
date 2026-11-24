@@ -55,9 +55,12 @@ exports.main = async (event) => {
         const numeric = type === 'body' ? ['weight'] : type === 'diet' ? ['amount', 'kcal', 'proteinG', 'carbG', 'fatG'] : libraryRecord ? ['duration','kcalBurned'] : ['met', 'duration', 'kcalBurned'];
         for (const key of numeric) {
           const value = input[key];
+          if(type==='diet' && ['proteinG','carbG','fatG'].includes(key) && value===undefined)continue;
           if (typeof value !== 'number' || !Number.isFinite(value) || value < 0 || (value === 0 && !['kcal', 'kcalBurned', 'proteinG', 'carbG', 'fatG'].includes(key))) return { code: -1, msg: '请输入有效数值' };
         }
-        const fields = type === 'body' ? ['date','weight','fatRate'] : type === 'diet' ? ['date','mealType','foodName','amount','kcal','photoFileID','proteinG','carbG','fatG'] : libraryRecord ? ['date','name','duration','kcalBurned','exerciseId','calorieSource'] : ['date','name','met','duration','kcalBurned'];
+        const fields = type === 'body' ? ['date','weight','fatRate'] : type === 'diet' ? ['date','mealType','foodName','amount','kcal','photoFileID','proteinG','carbG','fatG','amountUnit','portionLabel'] : libraryRecord ? ['date','name','duration','kcalBurned','exerciseId','calorieSource'] : ['date','name','met','duration','kcalBurned'];
+        if(type==='diet' && input.amountUnit!==undefined && !['g','ml'].includes(input.amountUnit))return {code:-1,msg:'分量单位无效'};
+        if(type==='diet' && input.portionLabel!==undefined && (typeof input.portionLabel!=='string'||input.portionLabel.length>40))return {code:-1,msg:'份量描述无效'};
         const data = { openid, createdAt: Date.now() };
         fields.forEach(key => { if (input[key] !== undefined) data[key] = input[key]; });
         if (data.fatRate !== undefined && (typeof data.fatRate !== 'number' || !Number.isFinite(data.fatRate) || data.fatRate <= 0 || data.fatRate >= 100)) return { code: -1, msg: '体脂率无效' };

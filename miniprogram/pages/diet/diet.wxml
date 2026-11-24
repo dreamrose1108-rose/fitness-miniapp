@@ -62,7 +62,7 @@
         </view>
         <view class="food-info" data-id="{{item._id}}" bindtap="onEditRecord">
           <text class="food-name">{{item.foodName}}</text>
-          <text class="food-amount text-3">{{item.amount}}g · {{item.mealLabel}} · 点击修改</text>
+          <text class="food-amount text-3">{{item.portionLabel ? item.portionLabel + ' · 约' : ''}}{{item.amount}}{{item.amountUnit || 'g'}} · {{item.mealLabel}} · 点击修改</text>
         </view>
         <view><text class="food-kcal">{{item.kcal}} kcal</text><text wx:if="{{item.estimated}}" class="photo-ai-note">照片估算 · 已确认</text></view>
         <text class="del" data-id="{{item._id}}" bindtap="onDelete">✕</text>
@@ -162,5 +162,19 @@
       <button class="cf-cancel" bindtap="closeCustomForm">取消</button>
       <button class="cf-ok" bindtap="submitCustom" disabled="{{cfSubmitting}}">{{cfSubmitting ? '保存中...' : '保存'}}</button>
     </view>
+  </view>
+
+  <view wx:if="{{portionFood}}" class="mask portion-mask" bindtap="closePortion"></view>
+  <view wx:if="{{portionFood}}" class="portion-panel">
+    <view class="picker-head"><text class="picker-title">{{portionFood.name}}</text><text class="picker-close" bindtap="closePortion">返回</text></view>
+    <text class="portion-help">吃了多少？选择单位，再填写数量</text>
+    <view class="portion-units"><button wx:for="{{portionOptions}}" wx:key="id" class="portion-unit {{portionIndex === index ? 'selected' : ''}}" data-index="{{index}}" bindtap="onPortionUnit" disabled="{{portionSaving}}">{{item.label}}</button></view>
+    <view class="portion-input-row"><input type="digit" value="{{portionQuantity}}" bindinput="onPortionQuantity" disabled="{{portionSaving}}" placeholder="例如 1 或 0.5" maxlength="8"/><text>{{portionOptions[portionIndex].label}}</text></view>
+    <view wx:if="{{portionIndex > 0}}" class="portion-help">每{{portionOptions[portionIndex].label}}约 {{portionOptions[portionIndex].amount}}{{portionResult.amountUnit || (portionFood.unit === '100ml' ? 'ml' : 'g')}} · {{portionOptions[portionIndex].hint}}</view>
+    <view wx:if="{{portionIndex > 0}}" class="portion-help">{{portionOptions[portionIndex].note}}。这是份量估算，实际大小可能不同。</view>
+    <text wx:if="{{portionOptions.length === 1}}" class="portion-help">这款食物暂无可靠的个数换算，先按克记录。</text>
+    <view class="portion-summary" wx:if="{{portionResult}}">{{portionIndex > 0 ? '约 ' : ''}}{{portionResult.amount}}{{portionResult.amountUnit}} · {{portionResult.kcal}} kcal</view>
+    <text wx:if="{{portionOptions[portionIndex].source}}" class="portion-source" bindtap="showPortionSource">查看份量参考（复制链接）</text>
+    <button class="cf-ok" bindtap="submitPortion" disabled="{{!portionResult || portionSaving}}" loading="{{portionSaving}}">{{portionSaving ? '保存中' : '确认添加'}}</button>
   </view>
 </view>
