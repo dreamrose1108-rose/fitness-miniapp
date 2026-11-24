@@ -105,7 +105,7 @@
             <text class="pf-name">{{item.name}}</text>
             <text wx:if="{{item.source === 'custom'}}" class="pf-badge">自定义</text>
           </view>
-          <text class="pf-cat text-3">{{item.cat}} · {{item.unit}}</text><text wx:if="{{item.sourceLabel}}" class="pf-source">{{item.sourceLabel}}</text>
+          <text class="pf-cat text-3">{{item.cat}} · {{item.unit}}</text><text wx:if="{{item.sourceLabel}}" class="pf-source">{{item.sourceLabel}}</text><text wx:if="{{item.detail}}" class="pf-detail">{{item.detail}}</text>
         </view>
         <text class="pf-kcal">{{item.kcal}} kcal</text>
       </view>

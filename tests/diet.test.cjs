@@ -11,7 +11,7 @@ function setup(call = async () => [], deletePhoto = async () => {}) {
   vm.runInNewContext(source, {
     getApp: () => ({ login: async () => 'user' }),
     Page: value => { page = value; },
-    require: name => name.includes('food-catalog') ? require('../shared/food-catalog') : name.includes('nutrition-plan') ? require('../miniprogram/utils/nutrition-plan') : name.includes('photos') ? {deletePhoto, readPhoto: async () => 'local-photo'} : name.includes('cloud') ? { call } : name.includes('date') ? { formatDate: () => '2026-11-19' } : {
+    require: name => name.includes('food-cache') ? {read:()=>null,write:()=>true} : name.includes('food-catalog') ? require('../shared/food-catalog') : name.includes('nutrition-plan') ? require('../miniprogram/utils/nutrition-plan') : name.includes('photos') ? {deletePhoto, readPhoto: async () => 'local-photo'} : name.includes('cloud') ? { call } : name.includes('date') ? { formatDate: () => '2026-11-19' } : {
       FOOD_DB: require('../shared/food-catalog').foods, FOOD_CATEGORIES: [], MEAL_TYPES: []
     },
     wx: { showModal: value => { modal = value; }, showToast() {}, cloud: { deleteFile: async () => {} } },
@@ -36,7 +36,7 @@ test('迟到的云端目录不能覆盖后一次同步',async()=>{
   const first=h.page.loadCloudFoods(),second=h.page.loadCloudFoods();
   pending[1]({foods:[{_id:'new',name:'新的测试食物',kcal:10,source:'official'}],version:'new'});await second;
   pending[0]({foods:[{_id:'old',name:'旧的测试食物',kcal:10,source:'official'}],version:'old'});await first;
-  assert.equal(h.page.data.foodVersion,'new');assert.ok(h.page.data.cloudFoods.some(f=>f._id==='new'));assert.ok(!h.page.data.cloudFoods.some(f=>f._id==='old'));
+  assert.equal(h.page.data.foodVersion,require('../shared/food-catalog').meta.version);assert.ok(h.page._foods.some(f=>f._id==='new'));assert.ok(!h.page._foods.some(f=>f._id==='old'));
 });
 
 test('提交期间禁止重复选择和关闭，并保留最初餐次', async () => {

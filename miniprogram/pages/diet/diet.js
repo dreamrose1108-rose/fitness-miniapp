@@ -1,6 +1,7 @@
 // pages/diet/diet.js — 饮食记录（云端食物库 + 离线降级 + 自定义食物）
 const app = getApp();
 const foodCatalog = require('../../utils/food-catalog/index.js');
+const foodCache = require('../../utils/food-cache');
 const nutritionPlan = require('../../utils/nutrition-plan');
 const { uploadPhoto, readPhoto, deletePhoto } = require('../../utils/photos.js');
 const { call } = require('../../utils/cloud.js');
@@ -32,7 +33,6 @@ Page({
     filteredTotal: 0,
     foodVisible: 100,
     foodVersion: foodCatalog.meta.version,
-    cloudFoods: [],        // 云端拉取的食物（官方+自定义）
     usingLocalDb: false,   // 云端不可用时降级内置库
     aiSearching: false,
     aiResult: null,
@@ -83,26 +83,28 @@ Page({
   // 拉取云端食物库；失败则降级本地内置库
   async loadCloudFoods() {
     const owner = (app.globalData || {}).openid || '';
-    const cacheKey = 'foodCatalog:v1:' + owner;
     const request = this._catalogRequest = (this._catalogRequest || 0) + 1;
     let cached = [];
-    if (owner) try { const saved = wx.getStorageSync(cacheKey); if (saved && Array.isArray(saved.foods)) cached = saved.foods; } catch (e) {}
-    this.setData({cloudFoods: foodCatalog.merge(cached), usingLocalDb: true}, this.filterFoods);
+    const saved = foodCache.read(owner);
+    if (saved) cached = saved.foods;
+    this._foods = foodCatalog.merge(cached);
+    this.setData({usingLocalDb:true,foodVersion:foodCatalog.meta.version}, this.filterFoods);
     try {
       const snapshot = await call('foodLib', { action: 'catalog' });
       if (this._unloaded || this._catalogRequest !== request || ((app.globalData || {}).openid || '') !== owner) return;
       if (!snapshot || !Array.isArray(snapshot.foods)) throw Error('invalid food catalog');
       const foods = foodCatalog.merge(snapshot.foods, snapshot.available === false ? foodCatalog.merge(cached) : FOOD_DB);
-      this.setData({cloudFoods: foods, usingLocalDb: snapshot.available === false, foodVersion: snapshot.version || foodCatalog.meta.version}, this.filterFoods);
-      if (owner && snapshot.available !== false) try { wx.setStorageSync(cacheKey, {version:snapshot.version,foods}); } catch (e) { /* 缓存满不影响当前查询 */ }
+      this._foods = foods;
+      this.setData({usingLocalDb:snapshot.available === false,foodVersion:foodCatalog.meta.version}, this.filterFoods);
+      if (snapshot.available !== false) foodCache.write(owner, {version:foodCatalog.meta.version,foods});
     } catch (e) { /* 保留当前账号缓存与完整内置库 */ }
   },
 
   activeFoodSource() {
-    return this.data.cloudFoods.length ? this.data.cloudFoods : FOOD_DB;
+    return this._foods || FOOD_DB;
   },
   showFoodSource() {
-    wx.showModal({title:'食物数据来源',content:'公共库含食药署2015版食品营养数据（历史版，非最新版）和原有云端参考值。数据按每100g可食部分整理，饮品以条目单位为准。实际品牌、品种和烹调方法可能不同。\n来源：卫生福利部食品药物管理署；政府资料开放授权条款第1版。',confirmText:'复制来源',success:r=>{if(r.confirm)wx.setClipboardData({data:'https://data.gov.tw/dataset/8543\nhttps://data.gov.tw/license'});}});
+    wx.showModal({title:'食物数据来源',content:'公共库已升级TFND 2025 UPDATE1（公开镜像，经第二份数据核对），2015条目已替换。原有未注明版本的补充条目单独标识。按每100g可食部分，注意生熟及处理方式；饮品以条目单位为准。\n来源：卫生福利部食品药物管理署；政府资料开放授权条款第1版。',confirmText:'复制来源',success:r=>{if(r.confirm)wx.setClipboardData({data:'https://data.gov.tw/dataset/8543\nhttps://m-calc.com/veggie-nutrition\nhttps://data.gov.tw/license'});}});
   },
   loadMoreFoods() { this.setData({foodVisible:this.data.foodVisible+100}); this.filterFoods(true); },
 
@@ -127,7 +129,7 @@ Page({
 
   // 打开选择器：优先用已缓存的云端数据，未拉到则现场降级
   openPicker() {
-    if (this.data.cloudFoods.length === 0 && !this.data.usingLocalDb) {
+    if (!this._foods && !this.data.usingLocalDb) {
       this.setData({ usingLocalDb: true });
     }
     this.setData({ showPicker: true, keyword: '', activeCat: '全部', aiResult: null, aiSearching: false }, this.filterFoods);

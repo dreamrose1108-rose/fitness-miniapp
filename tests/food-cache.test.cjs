@@ -1,0 +1,7 @@
+const test=require('node:test');
+const assert=require('node:assert/strict');
+const vm=require('node:vm');
+const fs=require('node:fs');
+function setup(){const data=new Map();let fail=false;const context={module:{exports:{}},wx:{getStorageSync:k=>data.get(k),setStorageSync:(k,v)=>{if(fail)throw Error('quota');data.set(k,v);},removeStorageSync:k=>data.delete(k)}};vm.runInNewContext(fs.readFileSync('miniprogram/utils/food-cache.js','utf8'),context);return {cache:context.module.exports,data,fail:()=>fail=true};}
+test('chunked food snapshots round trip with owner isolation and incomplete chunk rejection',()=>{const {cache,data}=setup();const foods=Array.from({length:451},(_,i)=>({_id:String(i),name:'食物'+i}));assert.equal(cache.write('a',{version:'new',foods}),true);assert.equal(cache.read('a').foods.length,451);assert.equal(cache.read('b'),null);const m=data.get('foodCatalog:v1:a');assert.equal(m.parts,3);data.delete('foodCatalog:v1:a:'+m.revision+':1');assert.equal(cache.read('a'),null);});
+test('legacy snapshots migrate and failed writes retain last complete snapshot',()=>{const {cache,data,fail}=setup();data.set('foodCatalog:v1:a',{version:'old',foods:[{name:'旧'}]});assert.equal(cache.read('a').version,'old');assert.equal(cache.write('a',{version:'new',foods:[{name:'新'}]}),true);fail();assert.equal(cache.write('a',{version:'broken',foods:[{name:'失败'}]}),false);assert.equal(cache.read('a').version,'new');assert.equal(cache.read('a').foods[0].name,'新');});
