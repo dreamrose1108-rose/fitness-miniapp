@@ -60,6 +60,7 @@ Page({
   async onShow() {if(getApp().applyTheme)getApp().applyTheme(this);
     // 每次进入页面刷新速览（切 tab 回来也更新）
     this.loadTodaySnapshot();
+    this.refreshSavedMeals();
     // 从训练日程空状态跳转过来 → 自动生成计划
     if (getApp().globalData.autoGeneratePlan) {
       getApp().globalData.autoGeneratePlan = false;
@@ -101,6 +102,8 @@ Page({
     } catch (e) { /* 无历史不影响使用 */ }
   },
 
+  viewSavedMeal(e){const m=this.data.messages.find(x=>x.id===Number(e.currentTarget.dataset.message));if(!m||!m.savedMeal)return;app.globalData.pendingDietView={date:m.savedMeal.date,mealType:m.savedMeal.mealType};wx.switchTab({url:'/pages/diet/diet',fail:()=>{delete app.globalData.pendingDietView;wx.showToast({title:'打开失败，请重试',icon:'none'});}});},
+  async refreshSavedMeals(){if(!this.data.messages.some(m=>m.savedMeal))return;try{const rows=await call('record',{action:'list',type:'coach',limit:100});const byId=new Map(rows.filter(x=>x.mealDraft&&x.savedMeal).map(x=>[x.mealDraft.id,x.savedMeal]));if(!this._unloaded)this.setData({messages:this.data.messages.map(m=>m.savedMeal&&m.mealDraft&&byId.has(m.mealDraft.id)?{...m,savedMeal:byId.get(m.mealDraft.id)}:m)});}catch(e){}},
   updateMeal(id,patch){this.setData({messages:this.data.messages.map(m=>m.id===Number(id)?{...m,...patch}:m)});},
   mealRecalculate(m,choices,states){const ready=states.every(x=>x&&x.result);this.updateMeal(m.id,{mealChoices:choices,mealStates:states,mealReady:ready,mealTotal:ready?states.reduce((sum,x)=>sum+x.result.kcal,0):null});},
   chooseMealFood(e){const m=this.data.messages.find(x=>x.id===Number(e.currentTarget.dataset.message));if(!m||m.mealSaving||m.savedMeal)return;const i=Number(e.currentTarget.dataset.item),choice=Number(e.detail.value),candidate=m.mealDraft.items[i].candidates[choice];if(!candidate)return;const choices=m.mealChoices.slice(),states=m.mealStates.slice();choices[i]=choice;states[i]=mealEditor.state(candidate);this.mealRecalculate(m,choices,states);},

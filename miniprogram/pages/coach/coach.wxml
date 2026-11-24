@@ -96,7 +96,9 @@
           <view wx:if="{{item.mealReady}}" class="meal-edit-result">当前合计：{{item.mealTotal}} 千卡</view>
           <text class="coach-meal-tip">修改后的卡片为准，上方AI原回答不会随修改变化。</text>
           <view class="coach-meal-controls"><picker mode="date" value="{{item.mealDate}}" disabled="{{item.mealSaving || item.savedMeal}}" data-message="{{item.id}}" bindchange="chooseMealDate"><view>{{item.mealDate}} ▾</view></picker><picker range="{{mealLabels}}" value="{{item.mealIndex}}" disabled="{{item.mealSaving || item.savedMeal}}" data-message="{{item.id}}" bindchange="chooseMealType"><view>{{mealLabels[item.mealIndex]}} ▾</view></picker></view>
-          <button size="mini" disabled="{{!item.mealReady || item.mealSaving || item.savedMeal}}" loading="{{item.mealSaving}}" data-message="{{item.id}}" bindtap="saveMeal">{{item.savedMeal ? '已保存到' + mealLabels[item.mealIndex] : item.mealSaving ? '保存中' : '确认保存到' + mealLabels[item.mealIndex]}}</button>
+          <button size="mini" disabled="{{!item.mealReady || item.mealSaving || item.savedMeal}}" loading="{{item.mealSaving}}" data-message="{{item.id}}" bindtap="saveMeal">{{item.savedMeal ? (item.savedMeal.status === 'deleted' ? '饮食记录已删除' : item.savedMeal.status === 'partial' ? '部分记录已删除' : '已保存到' + mealLabels[item.mealIndex]) : item.mealSaving ? '保存中' : '确认保存到' + mealLabels[item.mealIndex]}}</button>
+          <text wx:if="{{item.savedMeal && item.savedMeal.status === 'deleted'}}" class="coach-meal-tip">这份卡片对应的记录已删除，当前不计入摄入。如需重新记录，请发起新的饮食计算。</text>
+          <button wx:if="{{item.savedMeal}}" size="mini" data-message="{{item.id}}" bindtap="viewSavedMeal">查看 {{item.mealDate}} {{mealLabels[item.mealIndex]}}记录 ›</button>
         </view>
         <text wx:if="{{typing && index === messages.length - 1 && item.role === 'assistant'}}" class="cursor"></text>
       </view>

@@ -101,8 +101,8 @@ exports.main = async (event) => {
         const order = type === 'coach'
           ? `(data->>'createdAt')::bigint DESC`
           : `data->>'date' DESC, (data->>'createdAt')::bigint DESC`;
-        const docs = await listDocs(table, where, order, Math.min(Math.max(Number(limit)||50,1),100));
-        if(type==='coach')docs.reverse();
+        let docs = await listDocs(table, where, order, Math.min(Math.max(Number(limit)||50,1),100));
+        if(type==='coach'){docs=await require('./coach-meal-status').annotate(docs,openid);docs.reverse();}
         return { code: 0, data: docs, msg: 'ok' };
       }
 

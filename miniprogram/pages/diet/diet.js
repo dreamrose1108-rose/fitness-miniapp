@@ -52,6 +52,9 @@ Page({
 
   async onShow() {if(getApp().applyTheme)getApp().applyTheme(this);
     if (!await app.login()) return;
+    const target=app.globalData&&app.globalData.pendingDietView;
+    const labels={breakfast:'早餐',lunch:'午餐',dinner:'晚餐',snack:'加餐'};
+    if(target&&labels[target.mealType]&&/^\d{4}-\d{2}-\d{2}$/.test(target.date)){delete app.globalData.pendingDietView;this.setData({viewDate:target.date,viewDateLabel:target.date===formatDate()?'今天':target.date,activeMeal:target.mealType,activeMealLabel:labels[target.mealType]});}
     await Promise.all([this.loadRecords(), this.loadTarget(), this.loadCloudFoods()]);
   },
 
