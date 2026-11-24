@@ -67,10 +67,7 @@
   font-size: 25rpx; color: var(--color-text-2); background: var(--color-bg); border-radius: 32rpx;
 }
 .cat-item.active { background: var(--color-primary); color: #fff; }
-.search {
-  background: var(--color-bg); border-radius: 16rpx; padding: 18rpx 24rpx;
-  font-size: 26rpx; margin-bottom: 12rpx;
-}
+
 .food-list { flex: 1; }
 .picker-food {
   display: flex; justify-content: space-between; align-items: center;
@@ -86,7 +83,7 @@
 }
 
 .search-row { display: flex; align-items: center; margin-bottom: 12rpx; }
-.search { flex: 1; background: var(--color-bg); border-radius: 16rpx; padding: 18rpx 24rpx; font-size: 26rpx; }
+
 .add-custom-btn {
   margin-left: 16rpx; font-size: 25rpx; color: var(--color-primary);
   background: var(--color-primary-light); border-radius: 32rpx; padding: 14rpx 24rpx; flex-shrink: 0;
@@ -148,3 +145,12 @@
 .date-nav { display: flex; align-items: center; gap: 16rpx; margin-bottom: 16rpx; }
 .date-nav-btn { background: var(--color-card); border: 1rpx solid var(--color-border); border-radius: 24rpx; padding: 12rpx 28rpx; font-size: 28rpx; color: var(--color-text); }
 .date-nav-today { color: var(--color-primary); font-size: 26rpx; }
+
+/* Native input needs an explicit content height; vertical padding clips text. */
+.picker-head,.cat-bar,.search-row{flex-shrink:0;}
+.search-row{gap:16rpx;align-items:center;}
+.search{flex:1;min-width:0;height:76rpx;min-height:76rpx;line-height:76rpx;padding:0 24rpx;margin:0;background:var(--color-bg);border-radius:18rpx;font-size:26rpx;color:var(--color-text);}
+.search-placeholder{color:var(--color-text-2);}
+.add-custom-btn{margin-left:0;height:76rpx;display:flex;align-items:center;justify-content:center;padding:0 24rpx;}
+.food-list{height:0;min-height:0;flex:1;}
+.picker{padding-bottom:calc(24rpx + env(safe-area-inset-bottom));}
