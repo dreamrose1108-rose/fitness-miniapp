@@ -27,7 +27,7 @@ Page({
     progressPercent: 0,
     // 弹层
     showPicker: false,
-    portionFood:null,portionOptions:[],portionIndex:0,portionQuantity:'100',portionResult:null,portionSaving:false,
+    mealEditItems:null,portionFood:null,portionOptions:[],portionIndex:0,portionQuantity:'100',portionResult:null,portionSaving:false,
     categories: FOOD_CATEGORIES,
     activeCat: '全部',
     keyword: '',
@@ -292,8 +292,14 @@ Page({
     const food=e.currentTarget.dataset.food;if(!food)return;
     this._foodSelectionBusy=true;
     this._portionContext={food,mealType:this.data.activeMeal,date:this.data.viewDate||formatDate()};
-    this.setData({portionFood:food,portionOptions:portions.options(food),portionIndex:0,portionQuantity:'100',portionSaving:false,portionEditing:false},this.updatePortion);
+    this.setData({portionFood:food,portionOptions:portions.options(food),portionIndex:0,portionQuantity:'100',portionSaving:false,portionEditing:false,mealEditItems:null},this.updatePortion);
   },
+  updateMealItems(){
+    const result=recordEditor.calculateItems(this._portionContext.record,this.data.mealEditItems);
+    this.setData({portionResult:result,mealEditItems:this.data.mealEditItems.map((item,index)=>({...item,kcal:result?result.items[index].kcal:null,grams:result?result.items[index].grams:null}))});
+  },
+  onMealItemQuantity(e){if(this.data.portionSaving)return;const index=Number(e.currentTarget.dataset.index);const items=this.data.mealEditItems.map(item=>({...item}));if(!items[index])return;items[index].quantity=e.detail.value;this.setData({mealEditItems:items},this.updateMealItems);},
+  onMealItemUnit(e){if(this.data.portionSaving)return;const index=Number(e.currentTarget.dataset.index),unitIndex=Number(e.detail.value);const items=this.data.mealEditItems.map(item=>({...item}));if(!items[index]||!items[index].options[unitIndex])return;items[index].unitIndex=unitIndex;items[index].portionId=items[index].options[unitIndex].id;items[index].quantity=unitIndex===0?'100':'1';this.setData({mealEditItems:items},this.updateMealItems);},
   updatePortion(){const option=this.data.portionOptions[this.data.portionIndex];this.setData({portionResult:option?portions.calculate(this.data.portionFood,option,this.data.portionQuantity):null});},
   onPortionQuantity(e){if(this.data.portionSaving)return;this.setData({portionQuantity:e.detail.value},this.updatePortion);},
   onPortionUnit(e){if(this.data.portionSaving)return;const index=Number(e.currentTarget.dataset.index);if(!this.data.portionOptions[index])return;this.setData({portionIndex:index,portionQuantity:index===0?'100':'1'},this.updatePortion);},
@@ -301,12 +307,12 @@ Page({
   showPortionSource(){const option=this.data.portionOptions[this.data.portionIndex];if(option&&option.source)wx.setClipboardData({data:option.source});},
   async submitPortion(){
     if(this.data.portionSaving||!this._portionContext)return;
-    const result=portions.calculate(this.data.portionFood,this.data.portionOptions[this.data.portionIndex],this.data.portionQuantity);
+    const result=this.data.mealEditItems?recordEditor.calculateItems(this._portionContext.record,this.data.mealEditItems):portions.calculate(this.data.portionFood,this.data.portionOptions[this.data.portionIndex],this.data.portionQuantity);
     if(!result){wx.showToast({title:'请输入有效数量',icon:'none'});return;}
     const {food,mealType,date,record}=this._portionContext;
     this.setData({portionSaving:true});
     try{
-      if(record){await call('record',{action:'updateDiet',data:{id:record._id,revision:record.editRevision||0,quantity:this.data.portionQuantity,portionId:this.data.portionOptions[this.data.portionIndex].id}});this._foodSelectionBusy=false;this._portionContext=null;this.setData({portionSaving:false,portionFood:null,portionResult:null});await this.loadRecords();wx.showToast({title:'已修改'});return;}
+      if(record){await call('record',{action:'updateDiet',data:{id:record._id,revision:record.editRevision||0,...(this.data.mealEditItems?{itemEdits:this.data.mealEditItems.map(({index,quantity,portionId})=>({index,quantity,portionId}))}:{quantity:this.data.portionQuantity,portionId:this.data.portionOptions[this.data.portionIndex].id})}});this._foodSelectionBusy=false;this._portionContext=null;this.setData({portionSaving:false,portionFood:null,portionResult:null});await this.loadRecords();wx.showToast({title:'已修改'});return;}
       await call('record',{action:'add',type:'diet',data:{date,mealType,foodName:food.name,...result,photoFileID:this.data.pendingPhoto||''}});
       this.setData({pendingPhoto:'',portionSaving:false});this.closePortion();this.closePicker();this.loadRecords();
       wx.showToast({title:'已添加'});
@@ -337,7 +343,10 @@ Page({
   onEditRecord(e) {
     if(this._foodSelectionBusy)return;
     const record=this.data.allRecords.find(r=>r._id===e.currentTarget.dataset.id);if(!record)return;
-    try{const state=recordEditor.initial(record);this._foodSelectionBusy=true;this._portionContext={record,food:state.basis.food};this.setData({portionEditing:true,portionFood:state.basis.food,portionOptions:state.basis.options,portionIndex:state.basis.options.findIndex(o=>o.id===state.portionId),portionQuantity:state.quantity,portionSaving:false},this.updatePortion);}catch(err){wx.showToast({title:err.message||'无法编辑此记录',icon:'none'});}
+    try{if(Array.isArray(record.items)&&record.items.length){
+      const items=recordEditor.initialItems(record);this._foodSelectionBusy=true;this._portionContext={record};
+      this.setData({portionEditing:true,portionFood:{name:'修改餐食'},mealEditItems:items,portionSaving:false},this.updateMealItems);return;
+    }const state=recordEditor.initial(record);this._foodSelectionBusy=true;this._portionContext={record,food:state.basis.food};this.setData({mealEditItems:null,portionEditing:true,portionFood:state.basis.food,portionOptions:state.basis.options,portionIndex:state.basis.options.findIndex(o=>o.id===state.portionId),portionQuantity:state.quantity,portionSaving:false},this.updatePortion);}catch(err){wx.showToast({title:err.message||'无法编辑此记录',icon:'none'});}
   },
 
   async onDelete(e) {

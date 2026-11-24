@@ -90,3 +90,11 @@ test('家用份量按可食重量计算并保留选择，提交失败不丢输�
 });
 
 test('editing a saved food updates in place and failed save retains record and editor',async()=>{const calls=[];const h=setup(async(name,data)=>{calls.push(data);if(data.action==='updateDiet')throw Error('network');return [];});h.page.data.allRecords=[{_id:'r1',foodName:'饺子（猪肉）',amount:150,amountUnit:'g',kcal:348,portionLabel:'6个'}];h.page.onEditRecord({currentTarget:{dataset:{id:'r1'}}});assert.equal(h.page.data.portionQuantity,'6');h.page.onPortionQuantity({detail:{value:'3'}});assert.equal(h.page.data.portionResult.kcal,174);await h.page.submitPortion();assert.equal(calls[0].action,'updateDiet');assert.equal(calls[0].data.quantity,'3');assert.equal(h.page.data.allRecords[0].amount,150);assert.ok(h.page.data.portionFood);assert.equal(h.page.data.portionSaving,false);assert.ok(!calls.some(x=>x.action==='remove'));});
+test('photo editor changes only selected item, submits quantities and retains failed edits',async()=>{
+ let submitted;const h=setup(async(name,data)=>{if(data.action==='updateDiet'){submitted=data;throw Error('retry');}return [];});
+ h.page.data.allRecords=[{_id:'photo',foodName:'米饭、鸡腿',amount:300,kcal:500,items:[{name:'米饭',grams:100,kcal:120},{name:'鸡腿',grams:200,kcal:380}]}];
+ h.page.onEditRecord({currentTarget:{dataset:{id:'photo'}}});h.page.onMealItemQuantity({currentTarget:{dataset:{index:0}},detail:{value:'50'}});assert.equal(h.page.data.portionResult.kcal,440);assert.equal(h.page.data.portionResult.items[1].grams,200);
+ await h.page.submitPortion();assert.equal(submitted.data.itemEdits[0].quantity,'50');assert.equal(submitted.data.itemEdits[1].quantity,'200');assert.equal(h.page.data.mealEditItems[0].quantity,'50');assert.equal(h.page.data.portionSaving,false);
+ h.page.onMealItemQuantity({currentTarget:{dataset:{index:0}},detail:{value:''}});assert.equal(h.page.data.portionResult,null);
+ h.page.closePortion();h.page.selectFood(foodEvent);assert.equal(h.page.data.mealEditItems,null);assert.equal(h.page.data.portionResult.kcal,100);
+});
