@@ -11,7 +11,7 @@ function setup(call = async () => [], deletePhoto = async () => {}) {
   vm.runInNewContext(source, {
     getApp: () => ({ login: async () => 'user' }),
     Page: value => { page = value; },
-    require: name => name.includes('food-portions') ? require('../miniprogram/utils/food-portions') : name.includes('food-cache') ? {read:()=>null,write:()=>true} : name.includes('food-catalog') ? require('../shared/food-catalog') : name.includes('nutrition-plan') ? require('../miniprogram/utils/nutrition-plan') : name.includes('photos') ? {deletePhoto, readPhoto: async () => 'local-photo'} : name.includes('cloud') ? { call } : name.includes('date') ? { formatDate: () => '2026-11-19' } : {
+    require: name => name.includes('record-editor') ? require('../miniprogram/utils/record-editor') : name.includes('food-portions') ? require('../miniprogram/utils/food-portions') : name.includes('food-cache') ? {read:()=>null,write:()=>true} : name.includes('food-catalog') ? require('../shared/food-catalog') : name.includes('nutrition-plan') ? require('../miniprogram/utils/nutrition-plan') : name.includes('photos') ? {deletePhoto, readPhoto: async () => 'local-photo'} : name.includes('cloud') ? { call } : name.includes('date') ? { formatDate: () => '2026-11-19' } : {
       FOOD_DB: require('../shared/food-catalog').foods, FOOD_CATEGORIES: [], MEAL_TYPES: []
     },
     wx: { showModal: value => { modal = value; }, showToast() {}, cloud: { deleteFile: async () => {} } },
@@ -88,3 +88,5 @@ test('家用份量按可食重量计算并保留选择，提交失败不丢输�
  assert.equal(h.page.data.portionResult.amount,59);await h.page.submitPortion();
  assert.equal(saved.portionLabel,'0.5个（中）');assert.equal(saved.amount,59);assert.equal(saved.kcal,53);assert.equal(saved.proteinG,0.65);assert.equal(saved.amountUnit,'g');
 });
+
+test('editing a saved food updates in place and failed save retains record and editor',async()=>{const calls=[];const h=setup(async(name,data)=>{calls.push(data);if(data.action==='updateDiet')throw Error('network');return [];});h.page.data.allRecords=[{_id:'r1',foodName:'饺子（猪肉）',amount:150,amountUnit:'g',kcal:348,portionLabel:'6个'}];h.page.onEditRecord({currentTarget:{dataset:{id:'r1'}}});assert.equal(h.page.data.portionQuantity,'6');h.page.onPortionQuantity({detail:{value:'3'}});assert.equal(h.page.data.portionResult.kcal,174);await h.page.submitPortion();assert.equal(calls[0].action,'updateDiet');assert.equal(calls[0].data.quantity,'3');assert.equal(h.page.data.allRecords[0].amount,150);assert.ok(h.page.data.portionFood);assert.equal(h.page.data.portionSaving,false);assert.ok(!calls.some(x=>x.action==='remove'));});

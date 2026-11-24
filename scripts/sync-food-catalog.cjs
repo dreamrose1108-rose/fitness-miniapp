@@ -12,5 +12,5 @@ for(const target of ['cloudfunctions/foodLib','cloudfunctions/aiCoach','server/a
 console.log('Synchronized catalog:',crypto.createHash('sha256').update(fs.readFileSync(path.join(source,'catalog.json'))).digest('hex'));
 
 for(const target of ['miniprogram/utils','cloudfunctions/aiCoach','server/aiCoach','cloudfunctions/record','server/record']){
- for(const file of ['food-portions.js','food-portion-presets.js','meal-editor.js',...(target.endsWith('aiCoach')?['coach-portions.js']:[])])fs.copyFileSync(path.join(root,'shared/food-portions',file),path.join(root,target,file));
+ for(const file of ['food-portions.js','food-portion-presets.js','meal-editor.js','record-editor.js',...(target.endsWith('aiCoach')?['coach-portions.js']:[])])fs.copyFileSync(path.join(root,'shared/food-portions',file),path.join(root,target,file));
 }
