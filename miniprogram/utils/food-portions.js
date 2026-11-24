@@ -1,3 +1,4 @@
+const presets=require('./food-portion-presets');
 const cnf=id=>'https://food-nutrition.canada.ca/cnf-fce/serving-portion?id='+id;
 function options(food){
  const base=food.unit==='100ml'?'ml':'g';
@@ -13,6 +14,7 @@ function options(food){
  else if(/^(白吐司|白土司|白面包|切片白面包)$/.test(n)){sizes=[['参考',35,'普通切片']];unit='片';source='https://www.canada.ca/content/dam/hc-sc/migration/hc-sc/fn-an/alt_formats/hpfb-dgpsa/pdf/food-guide-aliment/serving_grain-cereal_portion-eng.pdf';note='普通白面包切片参考，厚度及品牌会有差异';}
  else if(/^(米饭|米饭（熟）|米饭\(熟\)|白米饭|白米饭（熟）|白饭|糙米饭|糙米饭（熟）)$/.test(n)){sizes=[['参考',n.includes('糙')?195:186,'普通参考碗']];unit='碗';source='https://www.studenthealth.gov.hk/sc_chi/resources/resources_bl/files/caloric_value_common_food.pdf';note='熟饭参考碗，盛放量与碗大小会有差异';}
  if(sizes)for(const [size,amount,hint] of sizes)out.push({id:size,label:size==='参考'?unit:unit+'（'+size+'）',unit,size,amount,hint,source,note});
+ if(out.length===1)out.push(...presets.extra(food));
  return out;
 }
 function calculate(food,option,value){
