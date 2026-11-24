@@ -5,7 +5,7 @@
 </view>
 <view wx:if="{{form.strategy === 'fiveTwo'}}" class="card section-screening"><view class="card-title">5:2 个别情况筛查</view><view class="note">仅为 19～64 岁、BMI ≥25、以减重为目标且未报告排除项的人生成一周参考草案。该产品筛查不能代替诊疗。</view>
 <picker wx:for="{{riskQuestions}}" wx:key="key" range="{{riskOptions}}" value="{{riskIndexes[item.key] || 0}}" data-key="{{item.key}}" bindchange="riskChange" disabled="{{saving}}"><view class="field stack"><text>{{item.label}}</text><text>{{riskOptions[riskIndexes[item.key] || 0]}} ▾</text></view></picker>
-<view class="field stack"><text>选择两个不连续的低能量日</text><checkbox-group bindchange="lowDays"><label wx:for="{{weekdays}}" wx:key="*this" class="weekday-choice"><checkbox value="{{index}}" checked="{{form.lowDays[0] == index || form.lowDays[1] == index}}" disabled="{{saving}}" />{{item}}</label></checkbox-group></view>
+<view class="field stack"><text>选择两个不连续的低能量日</text><checkbox-group class="weekday-grid" bindchange="lowDays"><label wx:for="{{weekdays}}" wx:key="*this" class="weekday-choice"><checkbox value="{{index}}" checked="{{form.lowDays[0] == index || form.lowDays[1] == index}}" disabled="{{saving}}" />{{item}}</label></checkbox-group></view>
 <view class="field stack"><text>低能量日不安排高强度训练或重体力工作</text><switch checked="{{form.trainingReviewed}}" data-field="trainingReviewed" bindchange="assessmentSwitch" disabled="{{saving}}" /></view></view>
 <block><view class="card section-profile"><view class="card-title">你的基础资料</view><view class="note">请填写当前情况，不要使用目标体重。首次估算需自行确认资料。</view>
 <view class="field"><text>年龄 · 岁</text><input type="number" value="{{form.age}}" data-field="age" bindinput="edit" placeholder="19～78" disabled="{{saving}}" /></view>

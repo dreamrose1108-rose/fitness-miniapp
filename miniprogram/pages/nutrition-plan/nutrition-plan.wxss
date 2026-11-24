@@ -40,3 +40,7 @@
 .nutrition-page .section-basis button{border:1rpx solid var(--panel-line);border-radius:14rpx;padding:12rpx 24rpx;line-height:1.6;font-weight:600;}
 .nutrition-page .section-screening checkbox-group{display:flex;flex-wrap:wrap;gap:12rpx;}
 .nutrition-page .section-screening .weekday-choice{width:calc(50% - 6rpx);margin:0;}
+
+.nutrition-page .section-screening .weekday-grid{display:grid;grid-template-columns:1fr 1fr;gap:12rpx;width:100%;}
+.nutrition-page .section-screening .weekday-grid .weekday-choice{width:100%;margin:0;}
+.nutrition-page .section-screening .weekday-grid .weekday-choice{box-sizing:border-box;min-width:0;}
