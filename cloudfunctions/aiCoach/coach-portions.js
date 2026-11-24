@@ -1,7 +1,7 @@
 const portions=require('./food-portions');
 const catalog=require('./food-catalog/index.js');
 const service=require('./food-service');
-const VERSION='2026-11-24-household-v2';
+const VERSION='2026-11-24-household-v3';
 function describe(f){return {id:f._id,name:f.name,kcalPer100:f.kcal,unit:f.unit,portions:portions.options(f),detail:f.detail};}
 async function calculate(openid,args){
  const snapshot=await service.load(openid);
@@ -20,10 +20,10 @@ function number(text){
  return digits[text];
 }
 function requests(question){
- const aliases={'饺子':'饺子','饭':'米饭（熟）','米饭':'米饭（熟）','白米饭':'米饭（熟）','白饭':'米饭（熟）'};
+ const aliases={'鸡蛋':'鸡蛋平均值','水煮蛋':'鸡蛋（煮）','水煮鸡蛋':'鸡蛋（煮）','白煮蛋':'鸡蛋（煮）','茶叶蛋':'茶叶蛋平均值','卤蛋':'卤蛋平均值','饺子':'饺子','饭':'米饭（熟）','米饭':'米饭（熟）','白米饭':'米饭（熟）','白饭':'米饭（熟）'};
  const names=[...new Set([...Object.keys(aliases),...catalog.foods.flatMap(f=>[f.name,...(f.aliases||[])])])].sort((a,b)=>b.length-a.length);
- const re=/(半|\d+(?:\.\d+)?|[一二两三四五六七八九十]{1,3})\s*(个|碗|份|片|根|块|串|只|把|勺|杯|克|毫升|g|ml)\s*(半)?\s*(?:的)?\s*/g;
- const out=[];let m;while((m=re.exec(question))&&out.length<5){if(m.index>0&&/[-\d.]/.test(question[m.index-1]))continue;const tail=question.slice(re.lastIndex);const name=names.find(n=>tail.startsWith(n));if(!name)continue;const quantity=number(m[1])+(m[3]?0.5:0);if(quantity>0)out.push({keyword:aliases[name]||name,quantity,unit:m[2],phrase:m[0]+name});}
+ const re=/(半|\d+(?:\.\d+)?|[一二两三四五六七八九十]{1,3})\s*(个|枚|碗|份|片|根|块|串|只|把|勺|杯|克|毫升|g|ml)\s*(半)?\s*(?:的)?\s*/g;
+ const out=[];let m;while((m=re.exec(question))&&out.length<5){if(m.index>0&&/[-\d.]/.test(question[m.index-1]))continue;const tail=question.slice(re.lastIndex);const name=names.find(n=>tail.startsWith(n));if(!name)continue;const quantity=number(m[1])+(m[3]?0.5:0);if(quantity>0)out.push({keyword:aliases[name]||name,quantity,unit:m[2]==='枚'?'个':m[2],phrase:m[0]+name});}
  return out;
 }
 async function ground(question,openid){

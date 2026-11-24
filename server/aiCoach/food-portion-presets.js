@@ -1,6 +1,10 @@
 const HK='https://www.studenthealth.gov.hk/sc_chi/resources/resources_bl/files/caloric_value_common_food.pdf';
 // Explicit names only: no substring matches that would confuse dry ingredients, juice or mixed dishes.
 const groups=[
+ ['鸡蛋|鸡蛋平均值|鸡蛋(白壳)|鸡蛋(黄壳)|鸡蛋（白壳）|鸡蛋（黄壳）','个',52.7,'大鸡蛋去壳可食部分参考；使用该条目的生蛋营养数据，熟蛋请选择对应做法；大小不同请调整数量或克数','https://food-nutrition.canada.ca/cnf-fce/serving-portion?id=125'],
+ ['鸡蛋白平均值|鸡蛋白(白壳)|鸡蛋白(黄壳)','个',33,'一枚大鸡蛋的生蛋白，不含蛋黄','https://food-nutrition.canada.ca/cnf-fce/serving-portion?id=126'],
+ ['鸡蛋黄平均值|鸡蛋黄(白壳)|鸡蛋黄(黄壳)','个',16.1,'一枚大鸡蛋的生蛋黄，不含蛋白','https://food-nutrition.canada.ca/cnf-fce/serving-portion?id=127'],
+ ['卤蛋|卤蛋平均值|鸡卤蛋(市售)|鸡卤蛋(现煮)|茶叶蛋|茶叶蛋平均值|茶叶蛋(市售)|茶叶蛋(浸泡隔夜)','个',50,'按去壳熟鸡蛋约50g作份量估算，卤制脱水及大小会有差异；采用当前条目的营养数据'],
  ['燕麦粥|燕麦片（熟）','碗',234,'约240ml中碗，煮熟后',HK],
  ['意大利面（熟）|意大利粉（熟）|通心粉（熟）','碗',140,'熟面，不含汤汁',HK],
  ['荞麦面（熟）','碗',114,'熟面，不含汤汁',HK],
