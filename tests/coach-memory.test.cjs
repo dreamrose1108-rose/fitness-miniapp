@@ -1,0 +1,22 @@
+const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),vm=require('node:vm');
+function load(one){const module={exports:{}};vm.runInNewContext(fs.readFileSync('cloudfunctions/aiCoach/coach-memory.js','utf8'),{module,require:n=>n==='crypto'?require('crypto'):{one,str:x=>JSON.stringify(x),jsonb:JSON.stringify},Date});return module.exports;}
+test('memory requires confirmation, validates category, size and revision, scoped SQL with readback',async()=>{
+ let state=null;const queries=[];const m=load(async sql=>{queries.push(sql);if(sql.startsWith('UPDATE')){state=JSON.parse(sql.split("'{coachMemory}',")[1].split(',true) WHERE')[0]);return null;}return [state?JSON.stringify(state):null];});
+ await assert.rejects(m.change('owner',{key:'diet',value:'不吃牛肉',operation:'save',revision:0}),/确认/);
+ const saved=await m.change('owner',{key:'diet',value:'不吃牛肉',operation:'save',revision:0,confirmed:true});assert.equal(saved.items[0].value,'不吃牛肉');assert.equal(saved.revision,1);assert.ok(saved.historyAfter>0);assert.ok(queries.every(q=>q.includes('openid')&&q.includes('owner')));assert.match(queries.find(q=>q.startsWith('UPDATE')),/revision.*=0/);assert.ok(queries.some(q=>q.includes('writeId')));
+ await assert.rejects(m.change('owner',{key:'diet',value:'新内容',operation:'save',revision:0,confirmed:true}),/刷新/);
+ const removed=await m.change('owner',{key:'diet',operation:'delete',revision:1,confirmed:true});assert.equal(removed.items.length,0);assert.equal(removed.revision,2);assert.ok(removed.historyAfter>=saved.historyAfter);assert.ok(!JSON.stringify(state).includes('不吃牛肉'));
+ assert.throws(()=>m.draft({key:'password',operation:'save',value:'x'}),/类型/);assert.throws(()=>m.draft({key:'diet',operation:'save',value:'x'.repeat(161)}),/160/);
+});
+test('missing profile and lost concurrent write fail instead of claiming success',async()=>{
+ await assert.rejects(load(async()=>null).read('owner'),/资料/);let calls=0;const m=load(async()=>++calls===1?[null]:null);await assert.rejects(m.change('owner',{key:'goal',value:'减脂',operation:'save',revision:0,confirmed:true}),/刷新/);
+});
+test('context uses confirmed memory and real record counts, bounded plan context',async()=>{
+ let count=0;const m=load(async()=>++count===1?[JSON.stringify({revision:1,historyAfter:123,items:[{key:'diet',value:'少辣'}]})]:['12','4','3']);const c=await m.context('owner');assert.equal(c.memory.historyAfter,123);assert.equal(c.summary.dietRecordedDays,4);assert.equal(c.summary.exerciseRecords,3);assert.match(c.summary.note,/不等于/);const rows=m.planContext([{date:'bad'},{date:'2026-11-24',title:'x'.repeat(100),finished:true,exerciseCount:99}]);assert.equal(rows.length,1);assert.equal(rows[0].title.length,60);assert.equal(rows[0].exerciseCount,8);
+});
+test('frontend keeps edit when save fails and requires confirmation to forget',async()=>{
+ let page,modal;const module={exports:{}};vm.runInNewContext(fs.readFileSync('miniprogram/pages/coach-memory/coach-memory.js','utf8'),{module,Page:p=>page=p,require:()=>({call:async()=>{throw Error('network');}}),getApp:()=>({}),wx:{showToast(){},showModal:x=>modal=x}});page.setData=function(x){Object.assign(this.data,x);};page.data.rows=[{key:'diet',value:'不吃牛肉',saved:true}];page.data.loading=false;await page.save({currentTarget:{dataset:{index:0}}});assert.equal(page.data.rows[0].value,'不吃牛肉');assert.equal(page.data.saving,false);page.forget({currentTarget:{dataset:{index:0}}});assert.match(modal.title,/忘记/);
+});
+test('deployment copies identical and old messages excluded after memory changes',()=>{for(const name of ['index.js','coach-memory.js'])assert.equal(fs.readFileSync('cloudfunctions/aiCoach/'+name,'utf8'),fs.readFileSync('server/aiCoach/'+name,'utf8'));const source=fs.readFileSync('cloudfunctions/aiCoach/index.js','utf8');assert.ok(source.includes("(data->>'createdAt')::bigint>${historyAfter}"));assert.ok(source.includes('let historyAfter=Date.now(),memoryRevision=-1'));assert.ok(source.includes('memoryDraft:outputSafe?memoryDraft:null'));});
+
+test('in-flight answers from older memory revision cannot reenter history',()=>{const source=fs.readFileSync('cloudfunctions/aiCoach/index.js','utf8');assert.ok(source.includes("COALESCE((data->>'memoryRevision')::int,0)=${memoryRevision}"));assert.ok(source.includes("jsonb({ memoryRevision,openid, role: 'user'"));assert.ok(source.includes("jsonb({ memoryRevision,memoryDraft:"));});

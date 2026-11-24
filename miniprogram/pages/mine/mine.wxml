@@ -39,6 +39,8 @@
     </view>
   </view>
 
+  <navigator url="/pages/coach-memory/coach-memory" class="card flex-between"><view><view class="card-title">教练偏好与记忆（可选）</view><text class="text-2">饮食偏好、器械、作息与身体注意事项</text></view><text>›</text></navigator>
+
   <!-- 数据与隐私 -->
   <view class="card">
     <view class="card-title">数据与隐私</view>

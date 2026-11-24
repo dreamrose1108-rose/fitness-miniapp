@@ -1,5 +1,6 @@
 <page-meta page-style="{{appThemeStyle}}" />
 <view class="page coach-page">
+  <view class="memory-entry" bindtap="openMemory">🧠 教练记忆 <text>查看、修改与忘记 ›</text></view>
   <!-- 今日速览（可收起） -->
   <view class="today-snapshot {{snapshotCollapsed ? 'collapsed' : ''}}">
     <view class="snapshot-header" bindtap="toggleSnapshot">
@@ -80,6 +81,7 @@
         <text selectable>{{item.content}}</text>
         <view wx:if="{{item.searchLabel}}" class="search-label">{{item.searchLabel}}</view>
         <view wx:for="{{item.sources}}" wx:for-item="source" wx:for-index="sourceIndex" wx:key="url" class="search-source" data-message="{{item.id}}" data-index="{{sourceIndex}}" bindtap="copySource">[{{source.id}}] {{source.title}}<text class="source-meta">{{source.site}} {{source.date}}</text></view>
+        <view wx:if="{{item.memoryDraft}}" class="plan-draft"><view>{{item.memoryDraft.operation === 'delete' ? '待确认忘记' : '待确认记忆'}} · {{item.memoryDraft.label}}</view><text>{{item.memoryDraft.value}}</text><button size="mini" data-message="{{item.id}}" bindtap="reviewMemory">核对并管理记忆</button></view>
         <view wx:if="{{item.trainingPlan}}" class="plan-draft"><view>{{item.trainingPlan.title}}</view><text>{{item.trainingPlan.days.length}} 个训练日 · 尚未写入日程</text><button size="mini" data-message="{{item.id}}" bindtap="previewPlan">预览并保存到训练日程</button></view>
         <view wx:if="{{item.mealDraft}}" id="meal-{{item.id}}" class="coach-meal-card">
           <view class="coach-meal-title">核对并保存饮食</view>

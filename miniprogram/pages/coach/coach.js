@@ -34,7 +34,7 @@ function mealMeta(res){
 function searchMeta(res={}) {
   const sources=(Array.isArray(res.sources)?res.sources:[]).filter(x=>x&&typeof x.url==='string'&&/^https?:\/\/[^\s]+$/.test(x.url)).slice(0,5).map(x=>({id:x.id,title:String(x.title||x.url),url:x.url,site:String(x.site||''),date:String(x.date||'')}));
   const labels={success:'已联网检索 · 点击来源复制链接',empty:'未找到相关网页',unavailable:'联网搜索暂不可用'};
-  return {...mealMeta(res),sources,searchLabel:labels[res.searchStatus]||'',trainingPlan:res.trainingPlan&&Array.isArray(res.trainingPlan.days)?res.trainingPlan:null};
+  return {...mealMeta(res),memoryDraft:res.memoryDraft||null,sources,searchLabel:labels[res.searchStatus]||'',trainingPlan:res.trainingPlan&&Array.isArray(res.trainingPlan.days)?res.trainingPlan:null};
 }
 
 Page({
@@ -70,6 +70,9 @@ Page({
     }
   },
 
+  openMemory(){wx.navigateTo({url:'/pages/coach-memory/coach-memory'});},
+  reviewMemory(e){const msg=this.data.messages.find(x=>x.id===Number(e.currentTarget.dataset.message));if(!msg||!msg.memoryDraft)return;app.globalData.pendingMemoryDraft=msg.memoryDraft;this.openMemory();},
+  trainingContext(){try{const today=require('../../utils/date').formatDate();return require('../../utils/training-schedule').read().filter(x=>x.date>=today).slice(0,14).map(x=>({date:x.date,title:x.title,planTitle:x.planTitle,finished:!!x.finishedAt,exerciseCount:(x.exercises||[]).length}));}catch(_){return [];}},
   toggleSnapshot() {
     this.setData({ snapshotCollapsed: !this.data.snapshotCollapsed });
   },
@@ -141,7 +144,7 @@ Page({
     }, this.scrollToBottom);
 
     try {
-      const res = await call('aiCoach', { question: text, webSearch:this.data.webSearch });
+      const res = await call('aiCoach', { question: text, webSearch:this.data.webSearch,trainingContext:this.trainingContext() });
       if (this._unloaded) return;
       const chunks = res && Array.isArray(res.chunks) ? res.chunks.filter(c => typeof c === 'string' && c.length) : [];
       const answer = res && typeof res.answer === 'string' ? res.answer : chunks.join('');
