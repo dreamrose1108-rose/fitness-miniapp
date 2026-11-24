@@ -5,5 +5,7 @@ test('global theme applies palette, chrome and refreshes existing page',()=>{
  const page={data:{},setData(v){Object.assign(this.data,v);}};
  theme.apply(page);assert.equal(page.data.theme,'cat');assert.ok(page.data.appThemeStyle.includes('--color-bg:#fff8f0'));assert.equal(nav.at(-1).backgroundColor,'#fff8f0');
  stored='forest';theme.apply(page);assert.equal(page.data.theme,'forest');assert.ok(page.data.appThemeStyle.includes('--color-primary:#2e7d5b'));assert.equal(tab.at(-1).selectedColor,'#2e7d5b');
+ stored='wonyoung';theme.apply(page);assert.equal(page.data.theme,'wonyoung');assert.equal(page.data.themeIndex,2);assert.equal(tab.at(-1).selectedColor,'#a64b70');assert.ok(page.data.appThemeStyle.includes('--color-bg:#fff7fa'));
+ stored='cat';theme.apply(page);assert.equal(page.data.themeIndex,0);assert.equal(tab.at(-1).selectedColor,'#8b613f');
  stored='invalid';assert.equal(theme.read(),'cat');global.wx.getStorageSync=()=>{throw Error('unavailable');};assert.equal(theme.read(),'cat');
 });

@@ -127,3 +127,29 @@ page { background: #fff8f0; }
 .home-page .habit-card{padding:20rpx;}
 .home-page .habit-title{margin:16rpx 0 8rpx;}
 .home-page .streak-card{margin-top:16rpx;padding:20rpx;}
+
+/* Wonyoung: portrait cover with a quiet rose palette. */
+.theme-wonyoung{background:var(--color-bg);color:var(--color-text);}
+.wonyoung-cover{position:relative;height:340rpx;overflow:hidden;border-radius:24rpx;margin:0 0 16rpx;background:#f6e8ec;}
+.wonyoung-photo{position:absolute;right:0;top:0;width:56%;height:100%;}
+.wonyoung-shade{position:absolute;inset:0;background:linear-gradient(90deg,#f6e8ec 12%,rgba(246,232,236,.96) 35%,rgba(246,232,236,0) 69%);}
+.wonyoung-copy{position:absolute;left:26rpx;top:42rpx;width:52%;}
+.wonyoung-copy text{display:block;}
+.wonyoung-kicker{font-size:18rpx;letter-spacing:2rpx;color:var(--color-primary);}
+.wonyoung-title{font-size:44rpx;font-weight:600;line-height:1.45;white-space:pre-line;margin:18rpx 0;color:var(--color-text);}
+.wonyoung-note{font-size:22rpx;line-height:1.6;color:var(--color-text-2);max-width:230rpx;}
+.theme-wonyoung .energy-card{background:linear-gradient(135deg,#f7e4ec,#fceff4);border:1rpx solid var(--color-border);box-shadow:none;}
+.theme-wonyoung .energy-number,.theme-wonyoung .target-block view,.theme-wonyoung .stat-value,.theme-wonyoung .macro-value{color:var(--color-text);}
+.theme-wonyoung .energy-label,.theme-wonyoung .energy-stats,.theme-wonyoung .energy-caption,.theme-wonyoung .macro-label,.theme-wonyoung .macro-value text,.theme-wonyoung .target-block,.theme-wonyoung .target-block view text,.theme-wonyoung .energy-number text{color:var(--color-text-2);}
+.theme-wonyoung .energy-tag,.theme-wonyoung .training-actions text,.theme-wonyoung .status-pill,.theme-wonyoung .streak-badges text{background:var(--color-card);color:var(--color-primary);}
+.theme-wonyoung .macro-row,.theme-wonyoung .macro-row>view{border-color:var(--color-border);}
+.theme-wonyoung .energy-track,.theme-wonyoung .training-progress{background:#e9ceda;}
+.theme-wonyoung .energy-fill,.theme-wonyoung .training-progress view{background:var(--color-primary);}
+.theme-wonyoung .quick-symbol{background:var(--color-primary-light);color:var(--color-primary);border-radius:22rpx;}
+.theme-wonyoung .quick-symbol::before,.theme-wonyoung .quick-symbol::after,.theme-wonyoung .paw-print{display:none;}
+.theme-wonyoung .training-card,.theme-wonyoung .streak-card,.theme-wonyoung .theme-button,.theme-wonyoung .profile-link{background:var(--color-card);border-color:var(--color-border);}
+.theme-wonyoung .habit-card{background:var(--color-primary-light);}
+.theme-wonyoung .habit-note,.theme-wonyoung .habit-top>text:last-child{color:var(--color-text-2);}
+.theme-wonyoung .streak-number{color:var(--color-primary);}
+.theme-credit{font-size:20rpx;line-height:1.7;color:var(--color-text-2);padding:12rpx 0 24rpx;}
+.theme-credit text{display:block;font-size:18rpx;}

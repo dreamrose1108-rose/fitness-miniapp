@@ -1,5 +1,6 @@
 // pages/index/index.js — 首页：今日概览
 const app = getApp();
+const themes = require('../../utils/theme');
 const nutritionPlan = require('../../utils/nutrition-plan');
 const { call } = require('../../utils/cloud.js');
 const { formatDate } = require('../../utils/date.js');
@@ -12,7 +13,7 @@ Page({
     todayLabel: '',
     theme: 'cat',
     themeIndex: 0,
-    themeNames: ['猫咪奶茶', '自然森林'],
+    themeNames: themes.themeNames,
     summary: { intake: 0, burned: 0, net: 0, latestWeight: null },
     target: 1800,
     targetLabel: '',
@@ -29,15 +30,16 @@ Page({
     this.setData({ todayLabel: `${d.getMonth() + 1}月${d.getDate()}日 星期${week}` });
   },
 
-  restoreTheme() {
-    try { const theme = wx.getStorageSync('homeTheme:v1') === 'forest' ? 'forest' : 'cat'; this.setData({theme, themeIndex: theme === 'forest' ? 1 : 0}); } catch (e) { this.setData({theme: 'cat', themeIndex: 0}); }
-  },
+  restoreTheme() { themes.apply(this); },
 
   changeTheme(e) {
-    const index = Number(e.detail.value);
-    if (index !== 0 && index !== 1) return;
-    const theme = index === 1 ? 'forest' : 'cat';
-    try { wx.setStorageSync('homeTheme:v1', theme); this.setData({theme, themeIndex:index}); if(app.applyTheme)app.applyTheme(this); } catch (e) { wx.showToast({title: '主题保存失败，请重试', icon: 'none'}); }
+    const index=Number(e.detail.value),theme=themes.themeIds[index];
+    if(!theme)return;
+    try { wx.setStorageSync('homeTheme:v1',theme);themes.apply(this); }
+    catch(e){wx.showToast({title:'主题保存失败，请重试',icon:'none'});}
+  },
+  showThemeCredit() {
+    wx.showActionSheet({itemList:['查看图片来源（复制链接）','查看 CC BY 3.0 许可（复制链接）'],success:r=>wx.setClipboardData({data:r.tapIndex===0?'https://commons.wikimedia.org/wiki/File:Jang_Won-young_of_Ive,_March_27,_2025.png':'https://creativecommons.org/licenses/by/3.0/'})});
   },
 
   async onShow() {if(getApp().applyTheme)getApp().applyTheme(this);
