@@ -6,8 +6,8 @@
  <view class="heading">{{stage === 0 ? '找到你的训练节奏' : stage === 1 ? '让计划适合你' : '按计划，练好每一次'}}</view>
  <view class="steps"><text class="{{stage === 0 ? 'current' : ''}}">01 选模板</text><text>—</text><text class="{{stage === 1 ? 'current' : ''}}">02 选部位与条件</text><text>—</text><text class="{{stage === 2 ? 'current' : ''}}">03 预览与排期</text></view>
  <block wx:if="{{stage === 0}}">
-  <navigator url="/pages/reference-plan/reference-plan" class="template"><view class="template-top"><text class="tag">公开课参考</text><text class="frequency">推 / 拉 / 腿</text></view><view class="template-title">凯圣王 × 谭成义</view><view class="description">按作者跟练简介整理动作顺序，附原视频出处。组次待核实，可保存你的个人设置。</view><view class="choose">查看动作清单与原视频 ›</view></navigator>
-  <view class="intro">常见训练结构，按经验与时间选择。具体动作由卡路喵结合训练原则整理。</view>
+  <view class="intro">按训练经验、时间和器械选择计划，确认动作与组次后安排训练日期。</view>
+  <navigator url="/pages/reference-plan/reference-plan" class="template"><view class="template-top"><text class="tag">公开课参考</text><text class="frequency">推 / 拉 / 腿</text></view><view class="template-title">凯圣王 × 谭成义</view><view class="description">含视频版与公众号版动作清单，附原文出处。核对个人组次后，可安排到训练日程。</view><view class="choose">选择计划，核对动作 ›</view></navigator>
   <view wx:for="{{templates}}" wx:key="id" class="template" data-id="{{item.id}}" bindtap="selectTemplate">
    <view class="template-top"><text class="tag">{{item.tag}}</text><text class="frequency">{{item.frequency}}</text></view>
    <view class="template-title">{{item.name}}<text class="arrow">↗</text></view><view class="description">{{item.description}}</view><view class="choose">选择这个模板 ›</view>
