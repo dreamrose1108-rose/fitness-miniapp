@@ -169,3 +169,6 @@
 .meal-edit-item{padding:24rpx 0;border-bottom:1rpx solid var(--color-border);}.meal-edit-name{font-size:28rpx;font-weight:600;line-height:1.6;margin-bottom:16rpx;}.meal-edit-unit{padding:16rpx 0;font-size:26rpx;color:var(--color-primary);}.meal-edit-kcal{margin-top:12rpx;font-size:26rpx;color:var(--color-primary);}
 
 .meal-edit-list{height:42vh;margin-top:16rpx;}
+
+.ai-search-error{padding:16rpx 20rpx;color:var(--color-danger);font-size:24rpx;line-height:1.6;}
+.ai-food-source{font-size:22rpx;line-height:1.6;color:var(--color-primary);padding:12rpx 0;word-break:break-all;}

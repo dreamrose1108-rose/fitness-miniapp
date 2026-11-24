@@ -115,6 +115,7 @@
         <button class="ai-search-btn" size="mini" bindtap="aiFoodSearch">🔍 AI 联网查热量</button>
         <text class="text-3" style="margin-top:8rpx">或切换关键词 / 添加自定义食物</text>
       </view>
+      <view wx:if="{{aiSearchError && !aiSearching}}" class="ai-search-error">{{aiSearchError}}</view>
       <view wx:if="{{aiSearching}}" class="empty">
         <text class="text-3">🐾 正在联网查询「{{keyword}}」的热量…</text>
       </view>
@@ -126,9 +127,10 @@
             <text class="ai-result-kcal">{{aiResult.kcal}} kcal</text>
             <text class="ai-result-unit">/ {{aiResult.unit || '100g'}}</text>
           </view>
-          <view class="ai-result-macros" wx:if="{{aiResult.protein}}">
-            <text>蛋白 {{aiResult.protein}}g · 碳水 {{aiResult.carb}}g · 脂肪 {{aiResult.fat}}g</text>
+          <view class="ai-result-macros">
+            <text>蛋白 {{aiResult.proteinLabel}} · 碳水 {{aiResult.carbLabel}} · 脂肪 {{aiResult.fatLabel}}</text>
           </view>
+          <view wx:for="{{aiResult.sources}}" wx:key="url" class="ai-food-source" data-url="{{item.url}}" bindtap="copyFoodSource">来源：{{item.title}} · 点击复制链接</view>
           <view class="ai-result-actions">
             <button class="save-ai-btn" size="mini" bindtap="saveAiFood" loading="{{aiSaving}}">保存到食物库</button>
             <button size="mini" bindtap="clearAiResult">忽略</button>

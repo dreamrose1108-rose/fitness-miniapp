@@ -253,6 +253,16 @@ exports.main = async (event) => {
   if(params.action==='getMemory'||params.action==='changeMemory'){
     try{if(params.action==='changeMemory'&&params.data&&params.data.operation==='save'&&!await msgSecCheck(String(params.data.value||''),openid))throw Error('记忆内容未通过检查');return {code:0,data:params.action==='getMemory'?await coachMemory.read(openid):await coachMemory.change(openid,params.data),msg:'ok'};}catch(e){return {code:-1,msg:/记忆|资料|确认|刷新/.test(e.message)?e.message:'记忆服务暂不可用，请重试'};}
   }
+  if(params.action==='searchFood'){
+    try{
+      const keyword=params.keyword;
+      if(typeof keyword!=='string'||!keyword.trim()||keyword.length>80)throw Error('请输入80字以内的食物名称');
+      if(!await msgSecCheck(keyword,openid))throw Error('食物名称未通过检查，请更换关键词');
+      const result=await require('./food-search').lookup(keyword,{search:webSearch.search,generate:callLLM});
+      if(!await msgSecCheck(result.name,openid))throw Error('查询结果未通过检查，请更换关键词');
+      return {code:0,data:result,msg:'ok'};
+    }catch(e){const message=String(e.message||'');return {code:-1,msg:/^(搜索|模型|网页|查询结果|未搜到|未找到|请输入|食物名称)/.test(message)?message:'食物联网查询暂不可用，请稍后重试'};}
+  }
   if(params.action==='analyzeMeal'){try{const result=await require('./meal-vision').analyze(params.fileID,openid);if(!await msgSecCheck(result.items.map(x=>x.name).join('、')+' '+result.notes,openid))throw Error('识别内容未通过检查，请重拍');return {code:0,data:result,msg:'ok'};}catch(e){const msg=String(e.message||'');return {code:-1,msg:/照片|识别|食物|分量|营养素/.test(msg)?msg:'照片识别失败，请重试'};}}
   const { question } = params;
 

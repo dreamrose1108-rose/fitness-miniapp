@@ -138,44 +138,26 @@ Page({
     if (!this._foods && !this.data.usingLocalDb) {
       this.setData({ usingLocalDb: true });
     }
-    this.setData({ showPicker: true, keyword: '', activeCat: '全部', aiResult: null, aiSearching: false }, this.filterFoods);
+    this.setData({ showPicker: true, keyword: '', activeCat: '全部', aiResult: null, aiSearchError: '', aiSearching: false }, this.filterFoods);
   },
 
   // AI 联网查询食物热量
   async aiFoodSearch() {
     const kw = this.data.keyword.trim();
-    if (!kw) return;
-    this.setData({ aiSearching: true, aiResult: null });
+    if (!kw || this.data.aiSearching) return;
+    this.setData({ aiSearching: true, aiResult: null, aiSearchError: '' });
     try {
-      const res = await call('aiCoach', {
-        question: `联网搜索：「${kw}」每100克（或100毫升）的热量是多少千卡？同时查蛋白质、碳水、脂肪（克）。只返回数据，格式：名称|热量kcal|蛋白质g|碳水g|脂肪g|单位（100g或100ml），用竖线分隔，不要解释。`
-      });
-      const answer = res && res.answer || '';
-      // 解析 AI 回答中的竖线分隔数据
-      const m = answer.match(/([^|\n]+)\|(\d+)[^0-9]*\|([\d.]+)[^0-9]*\|([\d.]+)[^0-9]*\|([\d.]+)[^0-9]*\|(100g|100ml)/);
-      if (m) {
-        this.setData({
-          aiSearching: false,
-          aiResult: { name: m[1].trim(), kcal: Number(m[2]), protein: Number(m[3]), carb: Number(m[4]), fat: Number(m[5]), unit: m[6] }
-        });
-      } else {
-        // 尝试从回答中提取数字
-        const kcal = answer.match(/(\d{2,4})\s*(?:千卡|kcal|大卡)/i);
-        if (kcal) {
-          this.setData({
-            aiSearching: false,
-            aiResult: { name: kw, kcal: Number(kcal[1]), protein: null, carb: null, fat: null, unit: '100g', raw: answer.slice(0, 200) }
-          });
-        } else {
-          wx.showToast({ title: 'AI 未能查到热量数据', icon: 'none' });
-          this.setData({ aiSearching: false });
-        }
-      }
+      const result = await call('aiCoach', { action: 'searchFood', keyword: kw });
+      if(this.data.keyword.trim() !== kw) return;
+      if(!result || !Number.isFinite(result.kcal) || !['100g','100ml'].includes(result.unit) || !result.sources || !result.sources.length) throw Error('查询结果不完整，请稍后重试');
+      this.setData({ aiResult: {...result, proteinLabel: result.protein == null ? '未提供' : result.protein+'g', carbLabel: result.carb == null ? '未提供' : result.carb+'g', fatLabel: result.fat == null ? '未提供' : result.fat+'g'} });
     } catch (e) {
+      if(this.data.keyword.trim() === kw) this.setData({ aiSearchError: e.message || '网络连接失败，请稍后重试' });
+    } finally {
       this.setData({ aiSearching: false });
-      wx.showToast({ title: '查询失败，请重试', icon: 'none' });
     }
   },
+  copyFoodSource(e) { wx.setClipboardData({data:e.currentTarget.dataset.url}); },
 
   async saveAiFood() {
     const r = this.data.aiResult;
@@ -188,9 +170,9 @@ Page({
         cat: '其他',
         kcal: r.kcal,
         unit: r.unit,
-        protein: r.protein || undefined,
-        carb: r.carb || undefined,
-        fat: r.fat || undefined
+        protein: r.protein == null ? undefined : r.protein,
+        carb: r.carb == null ? undefined : r.carb,
+        fat: r.fat == null ? undefined : r.fat
       });
       wx.showToast({ title: '已保存到食物库 🐾' });
       this.setData({ aiResult: null, aiSaving: false });
@@ -215,7 +197,7 @@ Page({
     this.setData({ activeCat: e.currentTarget.dataset.cat }, this.filterFoods);
   },
   onSearch(e) {
-    this.setData({ keyword: e.detail.value }, this.filterFoods);
+    this.setData({ keyword: e.detail.value, aiResult: null, aiSearchError: '' }, this.filterFoods);
   },
 
   // 云端模式：条件由云函数处理；本地模式：前端过滤
