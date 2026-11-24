@@ -87,3 +87,7 @@
 .exercise-result{display:flex;align-items:baseline;justify-content:space-between;gap:16rpx;flex-wrap:wrap;padding:4rpx 0 12rpx;}.result-completed{color:var(--color-primary);font-size:25rpx;font-weight:600;}.result-number{font-size:34rpx;font-weight:700;margin:0 4rpx;}.result-skipped{color:var(--color-text-2);font-size:23rpx;}
 
 .session-card.is-past{opacity:1;border-style:dashed;}.exercise-left{min-width:0;}.exercise-controls button{max-width:100%;white-space:normal;line-height:1.5;padding:12rpx 18rpx;display:flex;align-items:center;justify-content:center;}
+
+.has-save-bar{padding-bottom:calc(150rpx + env(safe-area-inset-bottom));}
+.schedule-save-bar{position:fixed;bottom:0;left:0;right:0;z-index:30;padding:16rpx 24rpx calc(16rpx + env(safe-area-inset-bottom));background:var(--color-card);border-top:1rpx solid var(--color-border);}
+.schedule-save-bar .save-btn{margin:0;width:100%;font-size:28rpx;line-height:1.5;padding:20rpx 10rpx;}

@@ -1,13 +1,13 @@
 <page-meta page-style="{{appThemeStyle}}" />
-<view class="page schedule-page">
- <view class="heading">{{todayOnly ? '今日训练' : draft ? '确认日期，再开始训练' : '我的训练安排'}}</view>
+<view class="page schedule-page {{draft ? 'has-save-bar' : ''}}">
+ <view class="heading">{{todayOnly ? '今日训练' : draft ? '最后一步：确认训练日期' : '我的训练安排'}}</view>
  <view class="hint">组数与完成进度保存在本机 · 打卡不自动计入热量</view>
  <view wx:if="{{error}}" class="notice error">{{error}}</view>
  <view wx:if="{{success}}" class="notice ok">{{success}}</view>
  <view wx:if="{{draft}}" class="card draft-card">
   <view class="card-title">{{draft.title}}</view><view class="hint">{{draft.notes}}</view>
   <picker mode="date" value="{{start}}" start="{{today}}" end="{{maxDate}}" bindchange="start"><view class="date-btn">开始日期 {{start}} · 修改</view></picker>
-  <view class="hint">可逐日调整，已有训练不会被覆盖。保存后才能开始训练。</view>
+  <view class="hint">选好开始日期后，下方会列出每次训练。需要改期可点击日期；确认后点击底部按钮保存。</view>
  </view>
  <view wx:if="{{!draft && !todayOnly}}" class="toolbar">
   <button size="mini" bindtap="past">{{showPast ? '仅看今后' : '查看历史'}}</button><button size="mini" bindtap="calendar">日历</button><button size="mini" bindtap="coach">AI 新计划</button><button size="mini" bindtap="templates">选模板</button>
@@ -49,7 +49,7 @@
   <button wx:if="{{item.active && !item.finishedAt}}" class="btn-primary session-start" data-key="{{item.sourceKey}}" bindtap="requestFinish">结束并核对组数</button>
   <view wx:if="{{!draft && !todayOnly}}" class="session-footer"><button size="mini" class="remove-btn" data-key="{{item.sourceKey}}" bindtap="remove">移除此日</button></view>
  </view>
- <button wx:if="{{draft}}" class="btn-primary save-btn" bindtap="save" loading="{{busy}}" disabled="{{busy}}">确认保存，进入训练安排</button>
+ <view wx:if="{{draft}}" class="schedule-save-bar"><button class="btn-primary save-btn" bindtap="save" loading="{{busy}}" disabled="{{busy}}">确认日期，加入我的训练安排</button></view>
  <view wx:if="{{restTimer.visible}}" class="rest-overlay"><view class="rest-card">
   <view class="rest-label">{{restTimer.label}}</view><view class="rest-count">{{restTimer.remain}}</view><view class="rest-unit">秒后开始下一组</view><button class="rest-skip-btn" bindtap="skipRest">跳过休息</button>
  </view></view>

@@ -3,3 +3,10 @@
 .load-note{font-size:23rpx;line-height:1.7;color:var(--color-text-2);background:var(--color-bg);padding:16rpx 18rpx;margin:0 0 20rpx;border-radius:10rpx}.week-volume{margin-top:14rpx;padding-top:14rpx;border-top:1rpx solid #2e7d5b26;font-weight:600}
 
 .plan-actions,.exercise-actions{flex-wrap:wrap;align-items:stretch;}.plan-actions button,.exercise-actions button{max-width:100%;white-space:normal;line-height:1.5;padding:12rpx 16rpx;display:flex;align-items:center;justify-content:center;}
+
+.has-next-step{padding-bottom:calc(190rpx + env(safe-area-inset-bottom));}
+.next-guide{background:var(--color-primary-light);border:1rpx solid var(--color-border);padding:20rpx 24rpx;border-radius:18rpx;margin-bottom:16rpx;}
+.next-guide .section-title{color:var(--color-primary-dark);}
+.plan-next-bar{position:fixed;bottom:0;left:0;right:0;z-index:30;padding:14rpx 24rpx calc(14rpx + env(safe-area-inset-bottom));background:var(--color-card);border-top:1rpx solid var(--color-border);}
+.next-caption{font-size:22rpx;color:var(--color-text-2);text-align:center;line-height:1.6;margin-bottom:10rpx;}
+.plan-next-bar .btn-primary{width:100%;margin:0;line-height:1.5;padding:20rpx 12rpx;}
