@@ -2,8 +2,8 @@
 page {
   --color-primary: #2e7d5b;
   --color-primary-light: #e8f3ed;
-  --color-danger: #e05a4f;
-  --color-warning: #f0a13c;
+  --color-danger: #b43d35;
+  --color-warning: #92591c;
   --color-text: #1f2329;
   --color-text-2: #646a73;
   --color-text-3: #9aa0a6;
@@ -87,4 +87,12 @@ view, text, input, textarea, button, image {
 @keyframes skeleton-loading {
   0% { background-position: 100% 50%; }
   100% { background-position: 0 50%; }
+}
+
+/* Keep placeholder and unavailable-action labels readable in both palettes. */
+.input-placeholder { color: var(--color-text-2); opacity: 1; }
+button[disabled] {
+  color: var(--color-text) !important;
+  background: var(--color-border) !important;
+  opacity: 1 !important;
 }

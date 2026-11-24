@@ -1,6 +1,6 @@
 const palettes={
- cat:{primary:'#8b613f',light:'#f5e5d0',text:'#674a38',secondary:'#846950',muted:'#967d68',bg:'#fff8f0',card:'#fffdf9',border:'#ecdcc9',dark:'#755039',radius:'24rpx'},
- forest:{primary:'#2e7d5b',light:'#e8f3ed',text:'#203c32',secondary:'#5f7065',muted:'#788579',bg:'#f5f5ef',card:'#ffffff',border:'#dfe6dc',dark:'#205b43',radius:'18rpx'}
+ cat:{primary:'#8b613f',light:'#f7ead9',text:'#674a38',secondary:'#795f49',muted:'#7b604a',bg:'#fff8f0',card:'#fffdf9',border:'#ecdcc9',dark:'#755039',radius:'24rpx'},
+ forest:{primary:'#2e7d5b',light:'#edf6f0',text:'#203c32',secondary:'#5f7065',muted:'#5f7065',bg:'#f5f5ef',card:'#ffffff',border:'#dfe6dc',dark:'#205b43',radius:'18rpx'}
 };
 function read(){try{return wx.getStorageSync('homeTheme:v1')==='forest'?'forest':'cat';}catch(e){return 'cat';}}
 function apply(page){

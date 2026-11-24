@@ -100,3 +100,17 @@ page { background: #fff8f0; }
 .theme-forest .theme-button { background:#fff; border-color:#dce2d8; }.theme-forest .theme-button text { color:#737f75; }
 .home-page .greeting { flex-wrap:wrap; gap:18rpx; }.home-page .hello { font-size:32rpx; }.home-page .profile-link { padding:18rpx 16rpx; }
 .theme-forest .energy-number { color:#fff; }
+
+/* Shared readable captions; the forest energy panel keeps its light labels. */
+.home-page .date,.home-page .section-note,.home-page .training-plan,
+.home-page .training-bottom,.home-page .empty-copy,.home-page .streak-note,
+.home-page .tip,.home-page .welcome-label,.home-page .welcome-note,
+.home-page .theme-button text { color:var(--color-text-2); }
+.home-page .habit-note { color:#58624e; }
+.home-page .training-cta { background:var(--color-primary-dark);color:#fff; }
+.theme-cat .energy-label,.theme-cat .energy-number text,.theme-cat .target-block,
+.theme-cat .target-block view text,.theme-cat .energy-stats,.theme-cat .energy-caption,
+.theme-cat .macro-label,.theme-cat .macro-value text { color:#715238; }
+.home-page .header-actions { align-items:stretch; }
+.home-page .theme-button { display:flex;flex-direction:column;justify-content:center; }
+.home-page .training-bottom { flex-wrap:wrap; }

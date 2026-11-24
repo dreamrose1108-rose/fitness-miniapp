@@ -85,3 +85,5 @@
 .exercise-prescription{display:flex;gap:12rpx;background:var(--color-bg);border-radius:12rpx;padding:18rpx 14rpx;margin:2rpx 0 18rpx;}
 .exercise-prescription>view{flex:1;min-width:0;}.prescription-label{display:block;font-size:21rpx;color:var(--color-text-2);margin-bottom:8rpx;}.prescription-value{display:block;font-size:25rpx;font-weight:600;color:var(--color-text);line-height:1.5;}
 .exercise-result{display:flex;align-items:baseline;justify-content:space-between;gap:16rpx;flex-wrap:wrap;padding:4rpx 0 12rpx;}.result-completed{color:var(--color-primary);font-size:25rpx;font-weight:600;}.result-number{font-size:34rpx;font-weight:700;margin:0 4rpx;}.result-skipped{color:var(--color-text-2);font-size:23rpx;}
+
+.session-card.is-past{opacity:1;border-style:dashed;}.exercise-left{min-width:0;}.exercise-controls button{max-width:100%;white-space:normal;line-height:1.5;padding:12rpx 18rpx;display:flex;align-items:center;justify-content:center;}

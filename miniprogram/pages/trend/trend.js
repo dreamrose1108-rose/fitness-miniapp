@@ -130,8 +130,9 @@ Page({
     const yAt = v => padT + chartH * (1 - (v - min) / (max - min));
 
     // 网格 + Y 轴刻度
-    ctx.strokeStyle = '#eceef1';
-    ctx.fillStyle = '#9aa0a6';
+    const palette = require('../../utils/theme').palettes[this.data.theme || 'cat'];
+    ctx.strokeStyle = palette.border;
+    ctx.fillStyle = palette.secondary;
     ctx.font = '11px sans-serif';
     ctx.textAlign = 'right';
     ctx.textBaseline = 'middle';

@@ -154,3 +154,7 @@
 .add-custom-btn{margin-left:0;height:76rpx;display:flex;align-items:center;justify-content:center;padding:0 24rpx;}
 .food-list{height:0;min-height:0;flex:1;}
 .picker{padding-bottom:calc(24rpx + env(safe-area-inset-bottom));}
+
+.add-row{align-items:stretch;flex-wrap:wrap;}.add-row .add-btn,.add-row .photo-btn{flex:1;min-width:0;margin:0;display:flex;align-items:center;justify-content:center;line-height:1.5;padding:18rpx 12rpx;font-size:28rpx;}
+
+.sum-right > text{display:block;line-height:1.6;}.sum-card .flex-between{gap:16rpx;flex-wrap:wrap;}
