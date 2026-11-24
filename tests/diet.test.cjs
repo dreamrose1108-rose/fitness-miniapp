@@ -11,8 +11,8 @@ function setup(call = async () => [], deletePhoto = async () => {}) {
   vm.runInNewContext(source, {
     getApp: () => ({ login: async () => 'user' }),
     Page: value => { page = value; },
-    require: name => name.includes('nutrition-plan') ? require('../miniprogram/utils/nutrition-plan') : name.includes('photos') ? {deletePhoto, readPhoto: async () => 'local-photo'} : name.includes('cloud') ? { call } : name.includes('date') ? { formatDate: () => '2026-11-19' } : {
-      FOOD_DB: [{ name: '米饭', cat: '主食' }], FOOD_CATEGORIES: [], MEAL_TYPES: []
+    require: name => name.includes('food-catalog') ? require('../shared/food-catalog') : name.includes('nutrition-plan') ? require('../miniprogram/utils/nutrition-plan') : name.includes('photos') ? {deletePhoto, readPhoto: async () => 'local-photo'} : name.includes('cloud') ? { call } : name.includes('date') ? { formatDate: () => '2026-11-19' } : {
+      FOOD_DB: require('../shared/food-catalog').foods, FOOD_CATEGORIES: [], MEAL_TYPES: []
     },
     wx: { showModal: value => { modal = value; }, showToast() {}, cloud: { deleteFile: async () => {} } },
     setTimeout: fn => { timers.set(++timerId, fn); return timerId; },
@@ -22,27 +22,23 @@ function setup(call = async () => [], deletePhoto = async () => {}) {
   return { page, modal: () => modal, runTimer: () => { const [id, fn] = timers.entries().next().value; timers.delete(id); return fn(); } };
 }
 const foodEvent = { currentTarget: { dataset: { food: { name: '米饭', kcal: 100, unit: '100g' } } } };
-test('旧搜索晚返回不会覆盖新搜索', async () => {
-  const pending = [];
-  const h = setup(() => new Promise(resolve => pending.push(resolve)));
-  h.page.data.keyword = '旧'; h.page.filterFoods(); const old = h.runTimer();
-  h.page.data.keyword = '新'; h.page.filterFoods(); const recent = h.runTimer();
-  pending[1]([{ name: '新结果' }]); await recent;
-  pending[0]([{ name: '旧结果' }]); await old;
-  assert.equal(h.page.data.filteredFoods[0].name, '新结果');
+test('离线完整库匹配简繁与别名，切换关键词不残留旧结果', () => {
+  const h=setup();h.page.data.usingLocalDb=true;
+  for(const keyword of ['橘子','桔子','雞胸','西红柿']){h.page.data.keyword=keyword;h.page.filterFoods();assert.ok(h.page.data.filteredFoods.length>0,keyword);}
+  h.page.data.keyword='不存在的食物123';h.page.filterFoods();assert.equal(h.page.data.filteredFoods.length,0);
 });
-test('切换本地库或卸载使在途搜索失效', async () => {
-  for (const unload of [false, true]) {
-    let resolve;
-    const h = setup(() => new Promise(r => { resolve = r; }));
-    h.page.filterFoods(); const running = h.runTimer();
-    if (unload) h.page.onUnload();
-    else { h.page.data.usingLocalDb = true; h.page.filterFoods(); }
-    resolve([{ name: '过期结果' }]); await running;
-    assert.equal(h.page.data.filteredFoods.length, unload ? 0 : 1);
-    if (!unload) assert.equal(h.page.data.filteredFoods[0].name, '米饭');
-  }
+test('空关键词分页可查看超过100条食物',()=>{
+  const h=setup();h.page.filterFoods();assert.equal(h.page.data.filteredFoods.length,100);
+  assert.ok(h.page.data.filteredTotal>2000);h.page.loadMoreFoods();assert.equal(h.page.data.filteredFoods.length,200);
 });
+test('迟到的云端目录不能覆盖后一次同步',async()=>{
+  const pending=[];const h=setup(()=>new Promise(r=>pending.push(r)));
+  const first=h.page.loadCloudFoods(),second=h.page.loadCloudFoods();
+  pending[1]({foods:[{_id:'new',name:'新的测试食物',kcal:10,source:'official'}],version:'new'});await second;
+  pending[0]({foods:[{_id:'old',name:'旧的测试食物',kcal:10,source:'official'}],version:'old'});await first;
+  assert.equal(h.page.data.foodVersion,'new');assert.ok(h.page.data.cloudFoods.some(f=>f._id==='new'));assert.ok(!h.page.data.cloudFoods.some(f=>f._id==='old'));
+});
+
 test('提交期间禁止重复选择和关闭，并保留最初餐次', async () => {
   let resolve; const calls = [];
   const h = setup((name, data) => { calls.push(data); return new Promise(r => { resolve = r; }); });

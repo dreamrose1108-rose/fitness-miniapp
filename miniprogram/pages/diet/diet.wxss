@@ -158,3 +158,5 @@
 .add-row{align-items:stretch;flex-wrap:wrap;}.add-row .add-btn,.add-row .photo-btn{flex:1;min-width:0;margin:0;display:flex;align-items:center;justify-content:center;line-height:1.5;padding:18rpx 12rpx;font-size:28rpx;}
 
 .sum-right > text{display:block;line-height:1.6;}.sum-card .flex-between{gap:16rpx;flex-wrap:wrap;}
+
+.food-catalog-info{display:flex;justify-content:space-between;gap:12rpx;flex-wrap:wrap;font-size:22rpx;color:var(--color-text-2);padding:12rpx 0;flex-shrink:0;}.pf-source{display:block;font-size:20rpx;line-height:1.5;color:var(--color-text-2);margin-top:6rpx;}.picker-food>view{flex:1;min-width:0;}.pf-kcal{flex-shrink:0;margin-left:16rpx;}

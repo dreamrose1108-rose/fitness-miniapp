@@ -18,6 +18,7 @@ const MAX_TOOL_ROUNDS = 4;
 const webSearch = require('./web-search');
 const trainingTools = require('./training-tools');
 const SYSTEM_PROMPT = [
+  '询问食物热量或营养时，必须先调用search_food查询当前食物库，不得沿用历史消息中的未收录结论。使用食物关键词而不是整句问题。说明每100g或100ml和生熟状态，不能将果汁、干果或菜品当作原食材；查不到明确说明并询问做法，不能编造库内记录。',
   '用户要训练计划时，确认其目标、经验、可用器械和每周训练天数；信息不足先询问。条件明确后先用search_exercises查真实动作，再调用propose_training_plan创建可保存草稿，不能只给聊天文字。',
   '计划最多28天、24次训练，每次1到8个动作，每组1到50次、1到6组、休息15到600秒；连续七天至少休息一天。不编造动作ID。未要求长期时先提供一周具体安排，草稿确认成功后再简短说明并提示点预览并保存按钮。',
   '不要声称已写入日程：propose_training_plan只生成草稿，用户必须在小程序选择日期并保存。不要将健身计划当医疗康复处方。',
@@ -133,12 +134,8 @@ async function execTool(name, args, openid) {
       return { weights: rows.map(r => ({ date: r[0], weight: Number(r[1]) })) };
     }
     case 'search_food': {
-      const kw = String(args.keyword || '').slice(0, 30).replace(/[\\%_]/g, m => '\\' + m);
-      const row = await one(
-        `SELECT COALESCE(jsonb_agg(jsonb_build_object('name', data->>'name', 'cat', data->>'cat', 'kcal', (data->>'kcal')::int, 'unit', data->>'unit')), '[]'::jsonb)::text
-         FROM (SELECT data FROM public.fit_foods WHERE data->>'source'='official' AND data->>'name' ILIKE ${str('%' + kw + '%')} LIMIT 8) t`
-      );
-      return { foods: row ? JSON.parse(row[0]) : [] };
+      const result = await require('./food-service').search(openid, String(args.keyword || '').slice(0, 80), '全部', 12);
+      return { foods: result.foods.map(f => ({ name:f.name, kcal:f.kcal, unit:f.unit, protein:f.protein, carb:f.carb, fat:f.fat, source:f.sourceLabel || (f.source==='custom'?'用户自定义':'原有云端参考值'), sourceUrl:f.origin==='tfda2015'?'https://data.gov.tw/dataset/8543':undefined })), total:result.total, version:result.version, note:'每100g或100ml，按条目单位；同名不同做法不可混用。' };
     }
     case 'get_user_profile': {
       const row = await one(`SELECT data::text FROM public.fit_users WHERE ${owner} LIMIT 1`);

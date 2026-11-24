@@ -1,5 +1,5 @@
 // 云函数 foodLib — 云端食物热量库（HTTP 版）
-// 官方库已在数据库预置（46 种）；本函数负责搜索/自定义/热度
+// 版本化公共食物库 + 数据库增量；本函数负责同步/搜索/自定义/热度
 // 热量为常见参考值（kcal/100g 或 kcal/100ml），仅供估算，非医疗建议
 const { one, str, jsonb, newId } = require('./fitdb');
 const { parseEvent, getOpenid, msgSecCheck } = require('./fitauth');
@@ -25,19 +25,12 @@ exports.main = async (event) => {
   try {
     switch (action) {
       // 搜索：官方 + 本人自定义
+      case 'catalog': {
+        return { code: 0, data: await require('./food-service').load(openid), msg: 'ok' };
+      }
       case 'search': {
-        const { keyword = '', cat = '全部', limit = 50 } = params;
-        const conds = [];
-        if (keyword) conds.push(`data->>'name' ILIKE ${str(likePattern(keyword))} ESCAPE '\\'`);
-        if (cat && cat !== '全部') conds.push(`data->>'cat'=${str(cat)}`);
-        const cond = conds.length ? ' AND ' + conds.join(' AND ') : '';
-
-        const [custom, official] = await Promise.all([
-          searchFoods(`data->>'source'='custom' AND data->>'ownerOpenid'=${str(openid)}${cond}`, `LIMIT 20`),
-          searchFoods(`data->>'source'='official'${cond}`, `LIMIT ${Math.min(limit, 100)}`)
-        ]);
-        // 自定义排前面（个人习惯优先）
-        return { code: 0, data: [...custom, ...official], msg: 'ok' };
+        const result = await require('./food-service').search(openid, params.keyword || '', params.cat || '全部', params.limit, params.offset);
+        return { code: 0, data: result.foods, total: result.total, version: result.version, msg: 'ok' };
       }
 
       // 添加自定义食物

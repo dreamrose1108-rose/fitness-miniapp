@@ -1,5 +1,6 @@
 // pages/diet/diet.js — 饮食记录（云端食物库 + 离线降级 + 自定义食物）
 const app = getApp();
+const foodCatalog = require('../../utils/food-catalog/index.js');
 const nutritionPlan = require('../../utils/nutrition-plan');
 const { uploadPhoto, readPhoto, deletePhoto } = require('../../utils/photos.js');
 const { call } = require('../../utils/cloud.js');
@@ -27,6 +28,10 @@ Page({
     activeCat: '全部',
     keyword: '',
     filteredFoods: [],
+    foodTotal: foodCatalog.foods.length,
+    filteredTotal: 0,
+    foodVisible: 100,
+    foodVersion: foodCatalog.meta.version,
     cloudFoods: [],        // 云端拉取的食物（官方+自定义）
     usingLocalDb: false,   // 云端不可用时降级内置库
     aiSearching: false,
@@ -77,18 +82,29 @@ Page({
 
   // 拉取云端食物库；失败则降级本地内置库
   async loadCloudFoods() {
+    const owner = (app.globalData || {}).openid || '';
+    const cacheKey = 'foodCatalog:v1:' + owner;
+    const request = this._catalogRequest = (this._catalogRequest || 0) + 1;
+    let cached = [];
+    if (owner) try { const saved = wx.getStorageSync(cacheKey); if (saved && Array.isArray(saved.foods)) cached = saved.foods; } catch (e) {}
+    this.setData({cloudFoods: foodCatalog.merge(cached), usingLocalDb: true}, this.filterFoods);
     try {
-      const foods = await call('foodLib', { action: 'search', keyword: '', cat: '全部', limit: 100 });
-      this.setData({ cloudFoods: foods || [], usingLocalDb: false }, this.filterFoods);
-    } catch (e) {
-      this.setData({ usingLocalDb: true }, this.filterFoods);
-    }
+      const snapshot = await call('foodLib', { action: 'catalog' });
+      if (this._unloaded || this._catalogRequest !== request || ((app.globalData || {}).openid || '') !== owner) return;
+      if (!snapshot || !Array.isArray(snapshot.foods)) throw Error('invalid food catalog');
+      const foods = foodCatalog.merge(snapshot.foods, snapshot.available === false ? foodCatalog.merge(cached) : FOOD_DB);
+      this.setData({cloudFoods: foods, usingLocalDb: snapshot.available === false, foodVersion: snapshot.version || foodCatalog.meta.version}, this.filterFoods);
+      if (owner && snapshot.available !== false) try { wx.setStorageSync(cacheKey, {version:snapshot.version,foods}); } catch (e) { /* 缓存满不影响当前查询 */ }
+    } catch (e) { /* 保留当前账号缓存与完整内置库 */ }
   },
 
-  // 当前生效的食物源
   activeFoodSource() {
-    return this.data.usingLocalDb ? FOOD_DB : this.data.cloudFoods;
+    return this.data.cloudFoods.length ? this.data.cloudFoods : FOOD_DB;
   },
+  showFoodSource() {
+    wx.showModal({title:'食物数据来源',content:'公共库含食药署2015版食品营养数据（历史版，非最新版）和原有云端参考值。数据按每100g可食部分整理，饮品以条目单位为准。实际品牌、品种和烹调方法可能不同。\n来源：卫生福利部食品药物管理署；政府资料开放授权条款第1版。',confirmText:'复制来源',success:r=>{if(r.confirm)wx.setClipboardData({data:'https://data.gov.tw/dataset/8543\nhttps://data.gov.tw/license'});}});
+  },
+  loadMoreFoods() { this.setData({foodVisible:this.data.foodVisible+100}); this.filterFoods(true); },
 
   updateSummary() {
     const total = this.data.allRecords.reduce((s, r) => s + (r.kcal || 0), 0);
@@ -200,36 +216,12 @@ Page({
     this._searchVersion = (this._searchVersion || 0) + 1;
   },
 
-  async filterFoods() {
+  filterFoods(keepPage) {
     this.cancelFoodSearch();
-    const searchVersion = this._searchVersion;
-    const { activeCat, keyword, usingLocalDb } = this.data;
-    if (usingLocalDb) {
-      const list = FOOD_DB.filter(f => {
-        const catOk = activeCat === '全部' || f.cat === activeCat;
-        const kwOk = !keyword || f.name.indexOf(keyword) >= 0;
-        return catOk && kwOk;
-      });
-      this.setData({ filteredFoods: list });
-      return;
-    }
-    // 云端模式：先用已加载列表本地过滤（即时反馈），再云端查询修正全库结果
-    const local = (this.data.cloudFoods || []).filter(f => {
-      const catOk = activeCat === '全部' || f.cat === activeCat;
-      const kwOk = !keyword || (f.name || '').indexOf(keyword) >= 0;
-      return catOk && kwOk;
-    });
-    this.setData({ filteredFoods: local.slice(0, 100) });
-    this._searchTimer = setTimeout(async () => {
-      try {
-        const list = await call('foodLib', { action: 'search', keyword, cat: activeCat, limit: 100 });
-        // 响应到达时关键词已变 → 丢弃（防串台）
-        if (this._unloaded || this._searchVersion !== searchVersion) return;
-        this.setData({ filteredFoods: list || [] });
-      } catch (e) {
-        // 云端失败：保留上面的本地过滤结果，不清空列表
-      }
-    }, 300);
+    const limit = keepPage === true ? this.data.foodVisible : 100;
+    const foods = this.activeFoodSource();
+    const result = foodCatalog.search(foods, this.data.keyword, this.data.activeCat, limit);
+    this.setData({filteredFoods:result.foods,filteredTotal:result.total,foodTotal:foods.length,foodVisible:limit});
   },
 
   // ===== 拍照记录 =====
