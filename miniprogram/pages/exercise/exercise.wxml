@@ -16,8 +16,16 @@
   </view>
 
   <!-- 运动类型网格 -->
-  <navigator url="/pages/plans/plans" class="card flex-between"><view><view class="card-title">训练计划</view><text class="text-2">选模板 · 定部位 · 按动作开始训练</text></view><text>›</text></navigator>
-  <navigator url="/pages/library/library" class="card flex-between"><view><view class="card-title">动作库</view><text class="text-2">1378 个动作 · 部位 / 肌群 / 器械筛选</text></view><text>›</text></navigator>
+  <view class="training-entry-row">
+    <navigator url="/pages/plans/plans" class="card training-entry">
+      <view class="entry-title"><text>训练计划</text><text class="entry-arrow">›</text></view>
+      <text class="entry-note">选模板 · 安排训练</text>
+    </navigator>
+    <navigator url="/pages/library/library" class="card training-entry">
+      <view class="entry-title"><text>动作库</text><text class="entry-arrow">›</text></view>
+      <text class="entry-note">查动作 · 看演示</text>
+    </navigator>
+  </view>
   <view class="card">
     <view class="card-title">选择运动</view>
     <view class="ex-grid">
