@@ -3,7 +3,7 @@ const schedule=require('./training-schedule');
 const labels=require('./training-labels');
 const {formatDate}=require('./date');
 module.exports=function createTrainingPage(todayOnly=false){return {
- data:{todayOnly,draft:null,rows:[],today:'',start:'',maxDate:'',overrides:{},error:'',busy:false,showPast:false,success:'',activeKey:'',restTimer:{visible:false,remain:0,total:0,label:''}},
+ data:{todayOnly,draft:null,expandedDraftKey:'',rows:[],today:'',start:'',maxDate:'',overrides:{},error:'',busy:false,showPast:false,success:'',activeKey:'',restTimer:{visible:false,remain:0,total:0,label:''}},
  onLoad(options={}){
   todayOnly=todayOnly||options.today==='1';this.setData({todayOnly});
   if(todayOnly&&wx.setNavigationBarTitle)wx.setNavigationBarTitle({title:'今日训练'});
@@ -30,6 +30,7 @@ module.exports=function createTrainingPage(todayOnly=false){return {
   if(todayOnly&&!rows.some(r=>r.sourceKey===this.data.activeKey)){this.clearTimer();this.setData({activeKey:'',restTimer:{visible:false}});}
   feedback.state(this,{rows,error:this._previewError||''});
  }catch(e){feedback.state(this,{error:e.message});}},
+ toggleDraft(e){if(!this.data.draft)return;const key=e.currentTarget.dataset.key;if(!this.data.rows.some(r=>r.sourceKey===key))return;this.setData({expandedDraftKey:this.data.expandedDraftKey===key?'':key});},
  begin(e){if(this.data.draft)return;try{const key=e.currentTarget.dataset.key;schedule.begin(key);this.setData({activeKey:key,success:'训练已开始，完成一组后点击下方按钮'});this.render();this.resumeTimer();}catch(e){feedback.state(this,{error:e.message});}},
  onSetTap(e){if(this.data.draft||this._setBusy)return;const {key,id,set}=e.currentTarget.dataset;if(key!==this.data.activeKey)return;this._setBusy=true;try{schedule.completeSet(key,id,Number(set));this.render();this.resumeTimer();}catch(e){feedback.state(this,{error:e.message});}finally{this._setBusy=false;}},
  toggle(e){if(this.data.draft)return;const {key,id}=e.currentTarget.dataset;if(key!==this.data.activeKey)return;try{schedule.skipExercise(key,id);this.render();this.resumeTimer();}catch(e){feedback.state(this,{error:e.message});}},

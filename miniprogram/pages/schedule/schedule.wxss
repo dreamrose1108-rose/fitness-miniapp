@@ -91,3 +91,10 @@
 .has-save-bar{padding-bottom:calc(150rpx + env(safe-area-inset-bottom));}
 .schedule-save-bar{position:fixed;bottom:0;left:0;right:0;z-index:30;padding:16rpx 24rpx calc(16rpx + env(safe-area-inset-bottom));background:var(--color-card);border-top:1rpx solid var(--color-border);}
 .schedule-save-bar .save-btn{margin:0;width:100%;font-size:28rpx;line-height:1.5;padding:20rpx 10rpx;}
+
+.draft-session .session-header{padding:14rpx 20rpx;}
+.draft-session .session-body{padding:16rpx 20rpx 8rpx;}
+.draft-session .session-title{font-size:29rpx;margin:0 0 6rpx;}
+.draft-session .session-overview{font-size:24rpx;}
+.draft-expand{margin:0 20rpx 14rpx;padding:8rpx 0;font-size:24rpx;line-height:1.5;text-align:left;color:var(--color-primary);background:transparent;}
+.draft-expand::after{border:none;}

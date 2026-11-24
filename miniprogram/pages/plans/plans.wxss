@@ -10,3 +10,9 @@
 .plan-next-bar{position:fixed;bottom:0;left:0;right:0;z-index:30;padding:14rpx 24rpx calc(14rpx + env(safe-area-inset-bottom));background:var(--color-card);border-top:1rpx solid var(--color-border);}
 .next-caption{font-size:22rpx;color:var(--color-text-2);text-align:center;line-height:1.6;margin-bottom:10rpx;}
 .plan-next-bar .btn-primary{width:100%;margin:0;line-height:1.5;padding:20rpx 12rpx;}
+
+.has-next-step .heading{margin-bottom:16rpx;}
+.has-next-step .plan-banner{padding:18rpx 22rpx;}
+.has-next-step .template-title{margin:8rpx 0;font-size:30rpx;}
+.has-next-step .week-note{padding:16rpx 20rpx;}
+.has-next-step .week-volume{margin-top:4rpx;}

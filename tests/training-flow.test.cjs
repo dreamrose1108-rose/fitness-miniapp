@@ -67,3 +67,12 @@ test('skip one advances the set without adding completion; 4 planned => 3 comple
 test('existing schedule route supports today-only entry and excludes future sessions',async()=>{
  const h=setup(false);schedule.save({...plan,days:[...plan.days,{...plan.days[0],offset:1}]},formatDate());const p=h.create();p.onLoad({today:'1'});await p.onShow();assert.equal(p.data.todayOnly,true);assert.equal(p.data.rows.length,1);p.past();assert.equal(p.data.rows.length,1);
 });
+
+test('draft actions collapse individually without changing dates or training data',async()=>{
+ const h=setup();h.app.globalData.pendingAITrainingPlan={...plan,days:[...plan.days,{...plan.days[0],offset:2,title:'第二次'}]};
+ const p=h.create();p.onLoad({preview:'1'});await p.onShow();const before=JSON.stringify(p.data.rows),keys=p.data.rows.map(r=>r.sourceKey);
+ assert.equal(p.data.expandedDraftKey,'');p.toggleDraft(e(keys[0]));assert.equal(p.data.expandedDraftKey,keys[0]);
+ p.toggleDraft(e(keys[1]));assert.equal(p.data.expandedDraftKey,keys[1]);p.toggleDraft(e(keys[1]));assert.equal(p.data.expandedDraftKey,'');
+ assert.equal(JSON.stringify(p.data.rows),before);assert.equal(schedule.read().length,0);
+ await p.save();p.toggleDraft(e(keys[0]));assert.equal(p.data.expandedDraftKey,'');
+});

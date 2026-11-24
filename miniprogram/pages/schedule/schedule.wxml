@@ -1,13 +1,13 @@
 <page-meta page-style="{{appThemeStyle}}" />
 <view class="page schedule-page {{draft ? 'has-save-bar' : ''}}">
  <view class="heading">{{todayOnly ? '今日训练' : draft ? '最后一步：确认训练日期' : '我的训练安排'}}</view>
- <view class="hint">组数与完成进度保存在本机 · 打卡不自动计入热量</view>
+ <view wx:if="{{!draft}}" class="hint">组数与完成进度保存在本机 · 打卡不自动计入热量</view>
  <view wx:if="{{error}}" class="notice error">{{error}}</view>
  <view wx:if="{{success}}" class="notice ok">{{success}}</view>
  <view wx:if="{{draft}}" class="card draft-card">
-  <view class="card-title">{{draft.title}}</view><view class="hint">{{draft.notes}}</view>
+  <view class="card-title">{{draft.title}}</view>
   <picker mode="date" value="{{start}}" start="{{today}}" end="{{maxDate}}" bindchange="start"><view class="date-btn">开始日期 {{start}} · 修改</view></picker>
-  <view class="hint">选好开始日期后，下方会列出每次训练。需要改期可点击日期；确认后点击底部按钮保存。</view>
+  <view class="hint">共 {{rows.length}} 个训练日 · 可单独改期，确认后点底部保存。</view>
  </view>
  <view wx:if="{{!draft && !todayOnly}}" class="toolbar">
   <button size="mini" bindtap="past">{{showPast ? '仅看今后' : '查看历史'}}</button><button size="mini" bindtap="calendar">日历</button><button size="mini" bindtap="coach">AI 新计划</button><button size="mini" bindtap="templates">选模板</button>
@@ -16,19 +16,20 @@
   <view class="empty-title">{{todayOnly ? '今天还没有训练安排' : '还没有训练安排'}}</view><view class="hint">可以让 AI 按你的条件生成，也可以直接选择训练模板。</view>
   <block wx:if="{{todayOnly}}"><button class="btn-primary empty-btn" bindtap="templates">选择计划</button><button bindtap="freeTraining">自由运动记录</button></block><block wx:else><button class="btn-primary empty-btn" bindtap="coach">让 AI 制定计划</button><button bindtap="templates">选择训练模板</button></block>
  </view>
- <view wx:for="{{rows}}" wx:key="sourceKey" class="session-card {{item.isToday ? 'is-today' : ''}}">
+ <view wx:for="{{rows}}" wx:key="sourceKey" class="session-card {{draft ? 'draft-session' : ''}} {{item.isToday ? 'is-today' : ''}}">
   <view class="session-header">
    <picker wx:if="{{draft}}" mode="date" value="{{item.date}}" start="{{today}}" end="{{maxDate}}" data-index="{{index}}" bindchange="day"><view class="date-label">{{item.dateLabel}} · 改期</view></picker>
    <view wx:else class="date-label">{{item.dateLabel}}</view>
-   <view class="session-badge">{{item.finishedAt ? '已结束' : item.startedAt ? '进行中' : '未开始'}}</view>
+   <view wx:if="{{!draft}}" class="session-badge">{{item.finishedAt ? '已结束' : item.startedAt ? '进行中' : '未开始'}}</view>
   </view>
-  <view class="session-body"><view class="session-eyebrow">{{item.isToday ? '今天练什么' : '本次训练内容'}}</view><view class="session-title">{{item.displayTitle}}</view><view class="session-overview">{{item.exercises.length}} 个动作 · 计划 {{item.plannedSets}} 组</view><view class="hint">计划：{{item.planTitle}}</view></view>
+  <view class="session-body"><view wx:if="{{!draft}}" class="session-eyebrow">{{item.isToday ? '今天练什么' : '本次训练内容'}}</view><view class="session-title">{{item.displayTitle}}</view><view class="session-overview">{{item.exercises.length}} 个动作 · 计划 {{item.plannedSets}} 组</view><view wx:if="{{!draft}}" class="hint">计划：{{item.planTitle}}</view></view>
   <block wx:if="{{!draft}}">
    <view class="progress-count">实际完成 {{item.actualSets}} 组 · 计划 {{item.plannedSets}} 组<text wx:if="{{item.skippedSets}}"> · 跳过 {{item.skippedSets}} 组</text></view>
    <button wx:if="{{item.isToday && !item.finishedAt && !item.active}}" class="btn-primary session-start" data-key="{{item.sourceKey}}" bindtap="begin">{{item.startedAt ? '继续训练' : '开始训练'}}</button>
    <view wx:if="{{!item.isToday && !item.finishedAt}}" class="hint session-start">{{item.isPast ? '历史安排，仅供查看' : '尚未到训练日期，可先查看动作演示'}}</view>
   </block>
-  <view class="exercise-list">
+  <button wx:if="{{draft}}" class="draft-expand" data-key="{{item.sourceKey}}" bindtap="toggleDraft">{{expandedDraftKey === item.sourceKey ? '收起动作 −' : '查看动作 +'}}</button>
+  <view wx:if="{{!draft || expandedDraftKey === item.sourceKey}}" class="exercise-list">
    <view wx:for="{{item.exercises}}" wx:for-item="exercise" wx:for-index="eidx" wx:key="id" class="exercise-item {{exercise.done ? 'is-done' : ''}}">
     <view class="exercise-info">
      <view class="exercise-heading"><text class="exercise-step">动作 {{eidx + 1}}</text><text wx:if="{{!draft && exercise.handled}}" class="exercise-status">{{exercise.done ? '已完成' : '本次已结束'}}</text></view><view class="exercise-name">{{exercise.plainName}}<text wx:if="{{exercise.warmup}}"> · 热身</text></view><view wx:if="{{exercise.plainName !== exercise.originalName}}" class="exercise-original">动作原名：{{exercise.originalName}}</view><view wx:if="{{exercise.explanation}}" class="exercise-explanation">{{exercise.explanation}}</view><view wx:if="{{exercise.bodyLabel}}" class="exercise-target">主要练{{exercise.bodyLabel}} · {{exercise.equipmentLabel}}</view>
