@@ -10,7 +10,7 @@ Page({
  templates(){this.setData({stage:0});},
  settings(){this.setData({stage:1});},
  upgrade(){if(!this.data.plan)return;this.setData({...this.data.plan.config});this.generate();},
- generate(){try{const plan=planner.generate(this.data);this.setData({plan,progress:{},saved:false,stage:2,week:0,day:0});this.render();wx.pageScrollTo({scrollTop:0,duration:0});}catch(e){feedback.error(e.message);}},
+ generate(){try{const plan=planner.generate(this.data);this.setData({plan,progress:{},saved:false,stage:2,week:0,day:0});this.render();wx.pageScrollTo({scrollTop:0,duration:0});}catch(e){feedback.error(e.message||'训练方案生成失败，请重试','暂时无法生成方案');}},
  save(){try{planner.save(this.data.plan,this.data.progress);this.setData({saved:true});this.schedule();}catch(e){feedback.error('保存失败，请检查存储空间');}},
  schedule(){try{getApp().globalData.pendingAITrainingPlan=schedule.fromTemplate(this.data.plan);wx.navigateTo({url:'/pages/schedule/schedule?preview=1'});}catch(e){feedback.error(e.message||'无法生成日程');}},
  pickWeek(e){const week=Number(e.currentTarget.dataset.index);if(week>=0&&week<4){this.setData({week});this.render();}},

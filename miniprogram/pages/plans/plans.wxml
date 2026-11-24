@@ -19,7 +19,7 @@
   <view class="card"><view class="section-title">你的训练经验</view><view class="choices"><button class="chip {{level === 'beginner' ? 'active' : ''}}" data-field="level" data-value="beginner" bindtap="select">新手 / 久未训练</button><button class="chip {{level === 'regular' ? 'active' : ''}}" data-field="level" data-value="regular" bindtap="select">已规律训练</button></view><view wx:if="{{level === 'beginner' && template !== 'full'}}" class="notice">新手请更换为全身训练，先建立每周 2～3 次的习惯。</view></view>
   <view class="card"><view class="section-title">可用器械</view><view class="choices"><button class="chip {{equipment === 'gym' ? 'active' : ''}}" data-field="equipment" data-value="gym" bindtap="select">健身房</button><button class="chip {{equipment === 'dumbbell' ? 'active' : ''}}" data-field="equipment" data-value="dumbbell" bindtap="select">哑铃＋地垫</button></view><view class="description">{{equipment === 'gym' ? '需要哑铃、腿举机、拉力器等基础器械；有经验者可能安排杠铃卧推。' : '需要一对合适重量的哑铃与地面空间，不安排需要训练凳的动作。'}}</view></view>
   <view class="card"><view class="section-title">每周练几天？</view><view class="chips"><button wx:for="{{dayOptions}}" wx:key="*this" class="chip {{days === item ? 'active' : ''}}" data-field="days" data-value="{{item}}" bindtap="select">{{item}} 天</button></view><view class="description">生成四周安排，训练日可按生活节奏整体平移，保留休息间隔。</view></view>
-  <button class="btn-primary" bindtap="generate" disabled="{{level === 'beginner' && template !== 'full'}}">生成我的训练方案</button>
+  <button class="btn-primary" bindtap="generate">生成我的训练方案</button>
   <view class="small-note">适用于一般健康成年人。存在伤病、术后恢复或运动限制时，应先取得个体化训练建议。</view>
  </block>
  <block wx:elif="{{plan}}">
