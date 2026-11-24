@@ -7,3 +7,30 @@
 .strategy-option{padding:22rpx;border:2rpx solid var(--color-border);border-radius:16rpx;margin-top:18rpx;}.strategy-option.selected{border-color:var(--color-primary);background:var(--color-primary-light);}.strategy-title{font-size:28rpx;font-weight:600;display:flex;justify-content:space-between;gap:12rpx;}.strategy-title text{font-size:22rpx;flex-shrink:0;color:var(--color-primary);}.strategy-tag{font-size:21rpx;color:var(--color-primary);margin:8rpx 0;}.strategy-note{font-size:24rpx;line-height:1.8;margin-top:20rpx;color:var(--color-text-2);}.five-two{padding-top:26rpx;}.five-two .note{white-space:pre-line;}.window-result{font-size:28rpx;font-weight:600;color:var(--color-primary);margin:15rpx 0;}
 
 .weekday-choice{display:inline-flex;align-items:center;width:46%;font-size:24rpx;margin:10rpx 0;}.week-day{padding:22rpx 14rpx;border-bottom:1rpx solid var(--color-border);}.low-day{background:var(--color-primary-light);border-radius:12rpx;}.week-calories{font-size:32rpx;font-weight:600;color:var(--color-primary);margin-top:12rpx;}
+
+/* Distinct surfaces identify each task; selected controls retain a border and label. */
+.nutrition-page{--section-blue:#e2edf6;--section-cream:#fff0d5;--section-green:#e1eee2;--section-rose:#f8e5dc;--section-purple:#eee5f4;--section-neutral:#eceae5;--section-result:#805432;}
+.nutrition-page.theme-forest{--section-blue:#e0eaf3;--section-cream:#f6ecd7;--section-green:#dceee1;--section-rose:#f5e4df;--section-purple:#e9e3f2;--section-neutral:#e7ece8;--section-result:#245b46;}
+.nutrition-page .card{border:1rpx solid rgba(53,61,58,.12);box-shadow:none;}
+.section-strategy,.section-profile,.section-activity,.section-screening,.section-meals,.section-basis{border-left-width:8rpx!important;}
+.nutrition-page .section-strategy{background:var(--section-blue);border-left-color:#547c9b;color:#29485f;}
+.nutrition-page .section-profile{background:var(--section-cream);border-left-color:#b27b30;color:#63471f;}
+.nutrition-page .section-activity{background:var(--section-green);border-left-color:#518062;color:#2c5039;}
+.nutrition-page .section-screening{background:var(--section-rose);border-left-color:#b27861;color:#704737;}
+.nutrition-page .section-meals{background:var(--section-purple);border-left-color:#8b70a3;color:#55416b;}
+.nutrition-page .section-basis{background:var(--section-neutral);border-left-color:#85887b;color:#454c45;}
+.nutrition-page .card .note,.nutrition-page .strategy-note{color:inherit;}
+.nutrition-page .field{border-bottom-color:rgba(53,61,58,.16);}
+.nutrition-page .field input{background:rgba(255,255,255,.88);color:#333b37;border:1rpx solid rgba(53,61,58,.18);}
+.nutrition-page .strategy-option{background:rgba(255,255,255,.85);border-color:#bbcddd;}
+.nutrition-page .strategy-option.selected{background:#c4dced;border-color:#426e90;box-shadow:inset 0 0 0 1rpx #426e90;}
+.nutrition-page .strategy-title text,.nutrition-page .strategy-tag{color:#315976;}
+.nutrition-page .result-card{background:var(--section-result);color:#fff;border-color:var(--section-result);padding:32rpx;}
+.nutrition-page .result-card .card-title,.nutrition-page .result-card .calories,.nutrition-page .result-card .window-result,.nutrition-page .result-card .note{color:#fff;}
+.nutrition-page .result-card .macros>view{background:rgba(255,255,255,.13);border:1rpx solid rgba(255,255,255,.25);padding:18rpx 10rpx;border-radius:16rpx;text-align:center;}
+.nutrition-page .result-card .macros text{color:#fff;}
+.nutrition-page .section-meals .meal,.nutrition-page .section-meals .week-day{border-bottom-color:rgba(85,65,107,.2);}
+.nutrition-page .section-meals .meal-title text,.nutrition-page .section-meals .week-calories{color:#65477c;}
+.nutrition-page .section-meals .low-day{background:#d9cae6;border-left:6rpx solid #806195;}
+.nutrition-page .section-basis button{background:#fff;color:#454c45;margin-top:20rpx;}
+.nutrition-page .card .card-title{color:inherit;}
