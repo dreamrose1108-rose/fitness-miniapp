@@ -70,3 +70,11 @@ test('editing a completed action clears its completion and does not write until 
  p.render();p.edit({currentTarget:{dataset:{key:'push:bench',field:'sets'}},detail:{value:'2'}});
  assert.equal(p.data.progress['push:bench'],undefined);assert.equal(p.data.dirty,true);assert.equal(writes,0);
 });
+test('reference personal plan persists entries and progress, updates existing plan and isolates accounts',()=>{
+ const storage=new Map();let owner='first';global.getApp=()=>({globalData:{openid:owner}});global.wx={getStorageSync:k=>storage.get(k),setStorageSync:(k,v)=>storage.set(k,JSON.parse(JSON.stringify(v)))};
+ try{model.savePersonal({'push:bench':{sets:'5',reps:'8',rest:'120'}},{'push:bench':true});assert.equal(model.personal().entries['push:bench'].sets,'5');assert.equal(model.restore().progress['push:bench'],true);const rows=model.restore();rows.entries['push:bench'].reps='10';model.save(rows.entries,{});assert.equal(model.personal().entries['push:bench'].reps,'10');owner='second';assert.equal(model.personal(),null);owner='first';assert.equal(model.personal().entries['push:bench'].sets,'5');global.wx.setStorageSync=()=>{throw Error('disk full');};assert.throws(()=>model.savePersonal(rows.entries),/disk full/);assert.equal(model.personal().entries['push:bench'].sets,'5');}finally{delete global.getApp;delete global.wx;}
+});
+test('save button enrolls reference plan and only reports success after storage succeeds',()=>{
+ const fs=require('node:fs'),vm=require('node:vm');let page,called=false,fail=false;const toasts=[];
+ vm.runInNewContext(fs.readFileSync('miniprogram/pages/reference-plan/reference-plan.js','utf8'),{Page:p=>page=p,require:()=>({...model,savePersonal:(entries,progress)=>{called=true;if(fail)throw Error('disk full');return {entries,progress};}}),wx:{showToast:x=>toasts.push(x)}});page.setData=function(x){Object.assign(this.data,x);};page.render=()=>{};page.save();assert.equal(called,true);assert.equal(page.data.personalSaved,true);assert.equal(toasts[0].title,'已保存到我的计划');page.data.dirty=true;fail=true;page.save();assert.equal(page.data.dirty,true);assert.equal(toasts[1].icon,'none');
+});
