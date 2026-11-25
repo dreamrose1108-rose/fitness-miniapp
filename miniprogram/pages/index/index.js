@@ -26,6 +26,10 @@ Page({
 
   async onLoad() {
     this.restoreTheme();
+    this.refreshDate();
+  },
+
+  refreshDate() {
     const d = new Date();
     const week = ['日', '一', '二', '三', '四', '五', '六'][d.getDay()];
     this.setData({ todayLabel: `${d.getMonth() + 1}月${d.getDate()}日 星期${week}` });
@@ -44,6 +48,7 @@ Page({
   },
 
   async onShow() {if(getApp().applyTheme)getApp().applyTheme(this);
+    this.refreshDate();
     if (!await app.login()) return;
     await Promise.all([this.loadProfile(), this.loadSummary(), this.loadStreak(), this.loadTodayTraining()]);
   },
